@@ -24,4 +24,4 @@ All nine milestones are complete.
 
 ## Known issues
 
-- None known.
+- `npm run test:e2e` takes about 1 minute when a dev server is already running on port 5199, and about 6 minutes when it starts its own. The cause has not been investigated. Start `npx vite --port 5199 --strictPort` first for a faster run.
