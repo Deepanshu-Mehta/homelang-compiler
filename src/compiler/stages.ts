@@ -2,6 +2,7 @@ import type { Diagnostic } from './diagnostics';
 import type { LexerOutput } from './lexer/lexer';
 import type { ParserOutput } from './parser/parser';
 import type { SemanticOutput } from './semantic/analyze';
+import type { ObjectFile } from './codegen/bytecode';
 import type { IrOutput } from './ir/cfg';
 import type { OptimizerOutput } from './opt/pipeline';
 
@@ -28,7 +29,7 @@ export interface StageOutputs {
   semantic: SemanticOutput;
   ir: IrOutput;
   optimizer: OptimizerOutput;
-  codegen: unknown;
+  codegen: ObjectFile;
   simulation: unknown;
 }
 

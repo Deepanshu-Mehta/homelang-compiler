@@ -108,3 +108,16 @@ test('the optimizer card lists nine passes with a diff', async ({ page }) => {
   await page.locator('[data-pass="O8"] summary').click();
   await expect(page.locator('[data-pass="O8"] [data-testid="diff"] .diff-removed').first()).toBeVisible();
 });
+
+test('the VM debugger steps through the brief', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('[data-stage="codegen"]')).toHaveAttribute('data-status', 'ok');
+  await page.getByTestId('tab-debugger').click();
+  await page.getByTestId('debug-TEMPERATURE').fill('31');
+  await page.getByTestId('debug-TEMPERATURE').dispatchEvent('change');
+  await page.getByTestId('vm-step').click();
+  await expect(page.getByTestId('vm-stack')).toContainText('31');
+  await expect(page.getByTestId('vm-status')).toContainText('pc = 1');
+  await page.getByRole('button', { name: 'Run to end' }).click();
+  await expect(page.getByTestId('vm-effects')).toContainText('TURN_ON AC');
+});

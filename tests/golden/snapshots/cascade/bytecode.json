@@ -1,0 +1,251 @@
+{
+  "version": 1,
+  "rooms": [
+    "LIVING_ROOM",
+    "BEDROOM",
+    "KITCHEN",
+    "ENTRANCE"
+  ],
+  "devices": [
+    {
+      "name": "AC",
+      "type": "AIR_CONDITIONER",
+      "initialState": "OFF",
+      "states": [
+        "ON",
+        "OFF"
+      ],
+      "attributes": {
+        "TEMPERATURE": 26,
+        "MODE": "COOL"
+      },
+      "ranges": {
+        "TEMPERATURE": [
+          16,
+          30
+        ]
+      },
+      "room": "LIVING_ROOM"
+    },
+    {
+      "name": "LIGHT",
+      "type": "LIGHT",
+      "initialState": "OFF",
+      "states": [
+        "ON",
+        "OFF"
+      ],
+      "attributes": {
+        "BRIGHTNESS": 100,
+        "COLOR_TEMP": 4000
+      },
+      "ranges": {
+        "BRIGHTNESS": [
+          0,
+          100
+        ],
+        "COLOR_TEMP": [
+          2000,
+          6500
+        ]
+      },
+      "room": "LIVING_ROOM",
+      "levelAttribute": "BRIGHTNESS"
+    },
+    {
+      "name": "FAN",
+      "type": "FAN",
+      "initialState": "OFF",
+      "states": [
+        "ON",
+        "OFF"
+      ],
+      "attributes": {
+        "SPEED": 3
+      },
+      "ranges": {
+        "SPEED": [
+          0,
+          5
+        ]
+      },
+      "room": "BEDROOM",
+      "levelAttribute": "SPEED"
+    },
+    {
+      "name": "DOOR",
+      "type": "DOOR_LOCK",
+      "initialState": "UNLOCKED",
+      "states": [
+        "LOCKED",
+        "UNLOCKED"
+      ],
+      "attributes": {},
+      "ranges": {},
+      "room": "ENTRANCE"
+    },
+    {
+      "name": "CURTAIN",
+      "type": "CURTAIN",
+      "initialState": "CLOSED",
+      "states": [
+        "OPEN",
+        "CLOSED"
+      ],
+      "attributes": {
+        "POSITION": 0
+      },
+      "ranges": {
+        "POSITION": [
+          0,
+          100
+        ]
+      },
+      "room": "BEDROOM",
+      "levelAttribute": "POSITION"
+    }
+  ],
+  "sensors": [
+    {
+      "name": "TEMPERATURE",
+      "type": "TEMP_SENSOR",
+      "initial": 28,
+      "unit": "°C",
+      "room": "LIVING_ROOM",
+      "plausible": [
+        -40,
+        60
+      ]
+    },
+    {
+      "name": "HUMIDITY",
+      "type": "HUMIDITY_SENSOR",
+      "initial": 50,
+      "unit": "%",
+      "room": "LIVING_ROOM",
+      "plausible": [
+        0,
+        100
+      ]
+    },
+    {
+      "name": "MOTION",
+      "type": "MOTION_SENSOR",
+      "initial": "CLEAR",
+      "unit": "",
+      "room": "LIVING_ROOM",
+      "states": [
+        "DETECTED",
+        "CLEAR"
+      ]
+    },
+    {
+      "name": "CONTACT",
+      "type": "CONTACT_SENSOR",
+      "initial": "CLOSED",
+      "unit": "",
+      "room": "ENTRANCE",
+      "states": [
+        "OPEN",
+        "CLOSED"
+      ]
+    },
+    {
+      "name": "PRESENCE",
+      "type": "PRESENCE_SENSOR",
+      "initial": "HOME",
+      "unit": "",
+      "room": "ENTRANCE",
+      "states": [
+        "HOME",
+        "AWAY"
+      ]
+    }
+  ],
+  "strings": [],
+  "rules": [
+    {
+      "id": "R1",
+      "priority": 1,
+      "entry": 0,
+      "writes": [
+        "LIGHT"
+      ],
+      "source": {
+        "line": 3
+      },
+      "kind": "EVENT",
+      "reads": [],
+      "event": {
+        "source": "MOTION",
+        "event": "DETECTED"
+      }
+    },
+    {
+      "id": "R2",
+      "priority": 1,
+      "entry": 2,
+      "writes": [
+        "LIGHT"
+      ],
+      "source": {
+        "line": 4
+      },
+      "kind": "EVENT",
+      "reads": [],
+      "event": {
+        "source": "LIGHT",
+        "event": "TURNS_ON"
+      }
+    },
+    {
+      "id": "R3",
+      "priority": 1,
+      "entry": 8,
+      "writes": [
+        "LIGHT"
+      ],
+      "source": {
+        "line": 5
+      },
+      "kind": "EVENT",
+      "reads": [],
+      "event": {
+        "source": "LIGHT",
+        "event": "TURNS_OFF"
+      }
+    }
+  ],
+  "scenario": {
+    "from": 480,
+    "to": 485,
+    "stepSeconds": 60,
+    "events": [
+      {
+        "minutes": 482,
+        "assigns": [
+          {
+            "name": "MOTION",
+            "value": "DETECTED"
+          }
+        ]
+      }
+    ]
+  },
+  "code": [
+    ["CMD","TURN_ON","LIGHT","R1"],
+    ["HALT"],
+    ["LOAD","TEMPERATURE"],
+    ["PUSH",0],
+    ["CMP_GT"],
+    ["JMP_IF_FALSE",7],
+    ["CMD","TURN_OFF","LIGHT","R2"],
+    ["HALT"],
+    ["LOAD","TEMPERATURE"],
+    ["PUSH",0],
+    ["CMP_GT"],
+    ["JMP_IF_FALSE",13],
+    ["CMD","TURN_ON","LIGHT","R3"],
+    ["HALT"]
+  ]
+}

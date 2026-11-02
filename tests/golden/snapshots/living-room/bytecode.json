@@ -1,0 +1,231 @@
+{
+  "version": 1,
+  "rooms": [
+    "LIVING_ROOM"
+  ],
+  "devices": [
+    {
+      "name": "LAMP",
+      "type": "LIGHT",
+      "initialState": "OFF",
+      "states": [
+        "ON",
+        "OFF"
+      ],
+      "attributes": {
+        "BRIGHTNESS": 100,
+        "COLOR_TEMP": 4000
+      },
+      "ranges": {
+        "BRIGHTNESS": [
+          0,
+          100
+        ],
+        "COLOR_TEMP": [
+          2000,
+          6500
+        ]
+      },
+      "room": "LIVING_ROOM",
+      "levelAttribute": "BRIGHTNESS"
+    },
+    {
+      "name": "CEILING_FAN",
+      "type": "FAN",
+      "initialState": "OFF",
+      "states": [
+        "ON",
+        "OFF"
+      ],
+      "attributes": {
+        "SPEED": 3
+      },
+      "ranges": {
+        "SPEED": [
+          0,
+          5
+        ]
+      },
+      "room": "LIVING_ROOM",
+      "levelAttribute": "SPEED"
+    }
+  ],
+  "sensors": [
+    {
+      "name": "LUX",
+      "type": "LIGHT_SENSOR",
+      "initial": 300,
+      "unit": "lux",
+      "room": "LIVING_ROOM",
+      "plausible": [
+        0,
+        100000
+      ]
+    },
+    {
+      "name": "HUM",
+      "type": "HUMIDITY_SENSOR",
+      "initial": 50,
+      "unit": "%",
+      "room": "LIVING_ROOM",
+      "plausible": [
+        0,
+        100
+      ]
+    },
+    {
+      "name": "PIR",
+      "type": "MOTION_SENSOR",
+      "initial": "CLEAR",
+      "unit": "",
+      "room": "LIVING_ROOM",
+      "states": [
+        "DETECTED",
+        "CLEAR"
+      ]
+    }
+  ],
+  "strings": [],
+  "rules": [
+    {
+      "id": "R1",
+      "priority": 1,
+      "entry": 0,
+      "writes": [
+        "LAMP.BRIGHTNESS",
+        "LAMP"
+      ],
+      "source": {
+        "line": 9
+      },
+      "kind": "STATE",
+      "reads": [
+        "PIR",
+        "LUX",
+        "TIME"
+      ]
+    },
+    {
+      "id": "R2",
+      "priority": 1,
+      "entry": 18,
+      "writes": [
+        "CEILING_FAN.SPEED",
+        "CEILING_FAN"
+      ],
+      "source": {
+        "line": 15
+      },
+      "kind": "STATE",
+      "reads": [
+        "HUM",
+        "PIR"
+      ]
+    }
+  ],
+  "scenario": {
+    "from": 1080,
+    "to": 1140,
+    "stepSeconds": 60,
+    "events": [
+      {
+        "minutes": 1080,
+        "assigns": [
+          {
+            "name": "LUX",
+            "value": 200
+          },
+          {
+            "name": "PIR",
+            "value": "CLEAR"
+          },
+          {
+            "name": "HUM",
+            "value": 55
+          }
+        ]
+      },
+      {
+        "minutes": 1090,
+        "assigns": [
+          {
+            "name": "PIR",
+            "value": "DETECTED"
+          }
+        ]
+      },
+      {
+        "minutes": 1100,
+        "assigns": [
+          {
+            "name": "LUX",
+            "value": 30
+          }
+        ]
+      },
+      {
+        "minutes": 1110,
+        "assigns": [
+          {
+            "name": "HUM",
+            "value": 72
+          }
+        ]
+      },
+      {
+        "minutes": 1125,
+        "assigns": [
+          {
+            "name": "PIR",
+            "value": "CLEAR"
+          },
+          {
+            "name": "HUM",
+            "value": 58
+          }
+        ]
+      }
+    ]
+  },
+  "code": [
+    ["LOAD","PIR"],
+    ["PUSH","DETECTED"],
+    ["CMP_EQ"],
+    ["JMP_IF_FALSE",15],
+    ["LOAD","LUX"],
+    ["PUSH",50],
+    ["CMP_LT"],
+    ["JMP_IF_FALSE",15],
+    ["LOAD","TIME"],
+    ["IN_WINDOW",60,300],
+    ["JMP_IF_TRUE",15],
+    ["EDGE_TRUE","R1",0],
+    ["PUSH",70],
+    ["SETA","LAMP","BRIGHTNESS","R1"],
+    ["HALT"],
+    ["EDGE_FALSE","R1"],
+    ["CMD","TURN_OFF","LAMP","R1"],
+    ["HALT"],
+    ["LOAD","HUM"],
+    ["STORE",0],
+    ["LOCAL",0],
+    ["PUSH",70],
+    ["CMP_GE"],
+    ["JMP_IF_TRUE",32],
+    ["LOAD","PIR"],
+    ["PUSH","DETECTED"],
+    ["CMP_EQ"],
+    ["JMP_IF_FALSE",36],
+    ["LOCAL",0],
+    ["PUSH",60],
+    ["CMP_GT"],
+    ["JMP_IF_FALSE",36],
+    ["EDGE_TRUE","R2",0],
+    ["PUSH",3],
+    ["SETA","CEILING_FAN","SPEED","R2"],
+    ["HALT"],
+    ["EDGE_FALSE","R2"],
+    ["CMD","TURN_OFF","CEILING_FAN","R2"],
+    ["HALT"]
+  ]
+}

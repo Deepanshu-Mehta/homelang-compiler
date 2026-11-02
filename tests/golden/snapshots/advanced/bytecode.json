@@ -1,0 +1,327 @@
+{
+  "version": 1,
+  "rooms": [
+    "BEDROOM",
+    "LIVING_ROOM",
+    "ENTRANCE"
+  ],
+  "devices": [
+    {
+      "name": "AC",
+      "type": "AIR_CONDITIONER",
+      "initialState": "OFF",
+      "states": [
+        "ON",
+        "OFF"
+      ],
+      "attributes": {
+        "TEMPERATURE": 26,
+        "MODE": "COOL"
+      },
+      "ranges": {
+        "TEMPERATURE": [
+          16,
+          30
+        ]
+      },
+      "room": "BEDROOM"
+    },
+    {
+      "name": "BED_LIGHT",
+      "type": "LIGHT",
+      "initialState": "OFF",
+      "states": [
+        "ON",
+        "OFF"
+      ],
+      "attributes": {
+        "BRIGHTNESS": 100,
+        "COLOR_TEMP": 4000
+      },
+      "ranges": {
+        "BRIGHTNESS": [
+          0,
+          100
+        ],
+        "COLOR_TEMP": [
+          2000,
+          6500
+        ]
+      },
+      "room": "BEDROOM",
+      "levelAttribute": "BRIGHTNESS"
+    },
+    {
+      "name": "FAN",
+      "type": "FAN",
+      "initialState": "OFF",
+      "states": [
+        "ON",
+        "OFF"
+      ],
+      "attributes": {
+        "SPEED": 3
+      },
+      "ranges": {
+        "SPEED": [
+          0,
+          5
+        ]
+      },
+      "room": "LIVING_ROOM",
+      "levelAttribute": "SPEED"
+    },
+    {
+      "name": "FRONT_DOOR",
+      "type": "DOOR_LOCK",
+      "initialState": "UNLOCKED",
+      "states": [
+        "LOCKED",
+        "UNLOCKED"
+      ],
+      "attributes": {},
+      "ranges": {},
+      "room": "ENTRANCE"
+    },
+    {
+      "name": "CURTAIN",
+      "type": "CURTAIN",
+      "initialState": "CLOSED",
+      "states": [
+        "OPEN",
+        "CLOSED"
+      ],
+      "attributes": {
+        "POSITION": 0
+      },
+      "ranges": {
+        "POSITION": [
+          0,
+          100
+        ]
+      },
+      "room": "BEDROOM",
+      "levelAttribute": "POSITION"
+    }
+  ],
+  "sensors": [
+    {
+      "name": "TEMP",
+      "type": "TEMP_SENSOR",
+      "initial": 28,
+      "unit": "°C",
+      "room": "BEDROOM",
+      "plausible": [
+        -40,
+        60
+      ]
+    },
+    {
+      "name": "MOTION",
+      "type": "MOTION_SENSOR",
+      "initial": "CLEAR",
+      "unit": "",
+      "room": "BEDROOM",
+      "states": [
+        "DETECTED",
+        "CLEAR"
+      ]
+    },
+    {
+      "name": "OWNER",
+      "type": "PRESENCE_SENSOR",
+      "initial": "HOME",
+      "unit": "",
+      "room": "ENTRANCE",
+      "states": [
+        "HOME",
+        "AWAY"
+      ]
+    }
+  ],
+  "strings": [
+    "Good morning!",
+    "Home secured"
+  ],
+  "rules": [
+    {
+      "id": "R1",
+      "priority": 2,
+      "entry": 0,
+      "writes": [
+        "AC",
+        "AC.TEMPERATURE"
+      ],
+      "source": {
+        "line": 14
+      },
+      "name": "Cool bedroom",
+      "kind": "STATE",
+      "reads": [
+        "TEMP",
+        "MOTION",
+        "TIME"
+      ]
+    },
+    {
+      "id": "R2",
+      "priority": 1,
+      "entry": 19,
+      "writes": [
+        "BED_LIGHT.BRIGHTNESS",
+        "BED_LIGHT"
+      ],
+      "source": {
+        "line": 21
+      },
+      "name": "Night light",
+      "kind": "EVENT",
+      "reads": [],
+      "event": {
+        "source": "MOTION",
+        "event": "DETECTED"
+      }
+    },
+    {
+      "id": "R3",
+      "priority": 1,
+      "entry": 27,
+      "writes": [
+        "CURTAIN"
+      ],
+      "source": {
+        "line": 26
+      },
+      "name": "Morning",
+      "kind": "TIME",
+      "reads": [],
+      "time": {
+        "minutes": 420,
+        "days": [
+          "WEEKDAYS"
+        ]
+      }
+    },
+    {
+      "id": "R4",
+      "priority": 5,
+      "entry": 30,
+      "writes": [
+        "FRONT_DOOR",
+        "AC",
+        "FAN"
+      ],
+      "source": {
+        "line": 29
+      },
+      "name": "Leaving home",
+      "kind": "EVENT",
+      "reads": [],
+      "event": {
+        "source": "OWNER",
+        "event": "CHANGES"
+      }
+    }
+  ],
+  "scenario": {
+    "from": 1290,
+    "to": 450,
+    "stepSeconds": 60,
+    "events": [
+      {
+        "minutes": 1290,
+        "assigns": [
+          {
+            "name": "TEMP",
+            "value": 29
+          },
+          {
+            "name": "MOTION",
+            "value": "CLEAR"
+          },
+          {
+            "name": "OWNER",
+            "value": "HOME"
+          }
+        ]
+      },
+      {
+        "minutes": 1330,
+        "assigns": [
+          {
+            "name": "MOTION",
+            "value": "DETECTED"
+          }
+        ]
+      },
+      {
+        "minutes": 1335,
+        "assigns": [
+          {
+            "name": "TEMP",
+            "value": 31
+          }
+        ]
+      },
+      {
+        "minutes": 1380,
+        "assigns": [
+          {
+            "name": "MOTION",
+            "value": "CLEAR"
+          }
+        ]
+      },
+      {
+        "minutes": 435,
+        "assigns": [
+          {
+            "name": "OWNER",
+            "value": "AWAY"
+          }
+        ]
+      }
+    ]
+  },
+  "code": [
+    ["LOAD","TEMP"],
+    ["PUSH",30],
+    ["CMP_GT"],
+    ["JMP_IF_FALSE",16],
+    ["LOAD","MOTION"],
+    ["PUSH","DETECTED"],
+    ["CMP_EQ"],
+    ["JMP_IF_TRUE",11],
+    ["LOAD","TIME"],
+    ["IN_WINDOW",1320,360],
+    ["JMP_IF_FALSE",16],
+    ["EDGE_TRUE","R1",120],
+    ["CMD","TURN_ON","AC","R1"],
+    ["PUSH",24],
+    ["SETA","AC","TEMPERATURE","R1"],
+    ["HALT"],
+    ["EDGE_FALSE","R1"],
+    ["CMD","TURN_OFF","AC","R1"],
+    ["HALT"],
+    ["LOAD","TIME"],
+    ["IN_WINDOW",1320,360],
+    ["JMP_IF_FALSE",26],
+    ["PUSH",20],
+    ["SETA","BED_LIGHT","BRIGHTNESS","R2"],
+    ["WAIT",300],
+    ["CMD","TURN_OFF","BED_LIGHT","R2"],
+    ["HALT"],
+    ["CMD","OPEN","CURTAIN","R3"],
+    ["NOTIFY",0,"R3"],
+    ["HALT"],
+    ["LOAD","OWNER"],
+    ["PUSH","AWAY"],
+    ["CMP_EQ"],
+    ["JMP_IF_FALSE",38],
+    ["CMD","LOCK","FRONT_DOOR","R4"],
+    ["CMD","TURN_OFF","AC","R4"],
+    ["CMD","TURN_OFF","FAN","R4"],
+    ["NOTIFY",1,"R4"],
+    ["HALT"]
+  ]
+}

@@ -7,6 +7,8 @@ import { lex, type LexerOutput } from './lexer/lexer';
 import { parse } from './parser/parser';
 import { buildCfg, type IrOutput } from './ir/cfg';
 import { generateIr } from './ir/irgen';
+import { generateObject } from './codegen/emit';
+import type { ObjectFile } from './codegen/bytecode';
 import { optimize, skipOptimizer, type OptimizerOutput } from './opt/pipeline';
 import { analyze } from './semantic/analyze';
 import {
@@ -37,6 +39,9 @@ export { TOKEN_TABLE } from './lexer/tokens';
 export { CATALOG, DEVICE_TYPES, SENSOR_TYPES, PRELUDE } from './semantic/catalog';
 export type { DeviceType, SensorType } from './semantic/catalog';
 export { formatMinutes } from './numeric';
+export type { Instr, ObjectFile, ObjectRule, Value } from './codegen/bytecode';
+export { VmDebugger } from './runtime/debugger';
+export type { Frame } from './runtime/vm';
 export type { OptimizerOutput } from './opt/pipeline';
 export type { Change, PassReport } from './opt/types';
 export type { Quad, QuadColumns } from './ir/quads';
@@ -125,6 +130,11 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
       diagnostics: [],
     }));
     if (!optimized) return;
+    const object = step<ObjectFile>('codegen', () => ({
+      output: generateObject(optimized.ast, optimized.program, semantic.symbols),
+      diagnostics: [],
+    }));
+    if (!object) return;
   }
 
   pipeline();

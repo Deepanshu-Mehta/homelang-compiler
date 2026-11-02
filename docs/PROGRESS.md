@@ -8,10 +8,11 @@
 - **M4:** DNF and interval boxes, conflicts with concrete witnesses, rule-dependency graph with Tarjan SCC, S317 and all W4xx checks, Semantic card with number lines, conflict matrix and graph. Error table covers all 27 §14.3 programs and the §10 rows.
 - **M5:** quadruples with Dragon Book backpatching (jump targets match §6.2 exactly), basic blocks and CFG (the eight blocks of §6.3), Intermediate code card with a step-by-step backpatch replay and a CFG view.
 - **M6:** nine optimizer passes (AST: O3, O4, O5, O9; quadruples: O2, O1, O6, O7, O8), available-expressions CSE, dense renumbering, Optimizer card with per-pass diffs and safety reasons.
+- **M7:** bytecode emitter, JSON object file, stack VM, step-through debugger, Code generation card, all CLI `--emit` kinds except `sim`.
 
 ## Next
 
-- **M7:** bytecode, object file, stack VM, step-through debugger, Code generation card.
+- **M8:** scheduler, AST interpreter (the test oracle), simulator, floor plan, scenarios, Output and Simulation cards, differential test.
 
 ## Fixed along the way
 
@@ -19,5 +20,5 @@
 
 ## Known issues
 
-- Stages 6–7 are not built yet and report `skipped`.
+- Stage 7 is not built yet and reports `skipped`.
 - "Load witness" stores the witness, but the sliders arrive in M8, so it has no visible effect until then.

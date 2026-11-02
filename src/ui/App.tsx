@@ -3,6 +3,7 @@ import {
   compile, stageResult, type CompileOptions, type LexerOutput, type StageResult, type WitnessValue,
 } from '../compiler/index';
 import { Card, SkippedNote } from './Card';
+import { CodegenCard } from './cards/CodegenCard';
 import { DomainCard } from './cards/DomainCard';
 import { IrCard } from './cards/IrCard';
 import { LexerCard } from './cards/LexerCard';
@@ -17,7 +18,6 @@ import { PRESETS } from './presets';
 const DEBOUNCE_MS = 200;
 
 const CARD_INTROS: Record<string, string> = {
-  codegen: 'Turns the instructions into bytecode for a small stack machine.',
   simulation: 'Runs the bytecode against a simulated home.',
 };
 
@@ -103,7 +103,8 @@ export function App() {
             <SemanticCard stage={stageResult(result, 'semantic')} source={result.source} onLoadWitness={setWitness} />
             <IrCard stage={stageResult(result, 'ir')} />
             <OptimizerCard stage={stageResult(result, 'optimizer')} />
-            {result.stages.slice(5).map((stage) => <PendingCard key={stage.stage} stage={stage} />)}
+            <CodegenCard stage={stageResult(result, 'codegen')} />
+            {result.stages.slice(6).map((stage) => <PendingCard key={stage.stage} stage={stage} />)}
           </div>
         </div>
       </main>
