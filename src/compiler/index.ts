@@ -5,6 +5,8 @@
 import { hasErrors, makeDiagnostic, type Diagnostic } from './diagnostics';
 import { lex, type LexerOutput } from './lexer/lexer';
 import { parse } from './parser/parser';
+import { buildCfg, type IrOutput } from './ir/cfg';
+import { generateIr } from './ir/irgen';
 import { analyze } from './semantic/analyze';
 import {
   STAGE_ORDER, type StageName, type StageOutputs, type StageResult, type StageStatus,
@@ -34,6 +36,10 @@ export { TOKEN_TABLE } from './lexer/tokens';
 export { CATALOG, DEVICE_TYPES, SENSOR_TYPES, PRELUDE } from './semantic/catalog';
 export type { DeviceType, SensorType } from './semantic/catalog';
 export { formatMinutes } from './numeric';
+export type { Quad, QuadColumns } from './ir/quads';
+export { quadColumns, quadText } from './ir/quads';
+export type { IrProgram, IrStep, Routine } from './ir/irgen';
+export type { BasicBlock, Cfg, CfgEdge, IrOutput } from './ir/cfg';
 export { emit, EMIT_KINDS, EMIT_STAGE, type EmitKind } from './emit';
 
 export interface CompileOptions {
@@ -102,6 +108,11 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
     if (!parsed) return;
     const semantic = step('semantic', () => analyze(parsed.ast));
     if (!semantic) return;
+    const ir = step<IrOutput>('ir', () => {
+      const { program, steps } = generateIr(semantic.annotated);
+      return { output: { program, steps, cfg: buildCfg(program) }, diagnostics: [] };
+    });
+    if (!ir) return;
   }
 
   pipeline();

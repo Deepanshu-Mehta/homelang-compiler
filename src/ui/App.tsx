@@ -4,6 +4,7 @@ import {
 } from '../compiler/index';
 import { Card, SkippedNote } from './Card';
 import { DomainCard } from './cards/DomainCard';
+import { IrCard } from './cards/IrCard';
 import { LexerCard } from './cards/LexerCard';
 import { ParserCard } from './cards/ParserCard';
 import { SemanticCard } from './cards/SemanticCard';
@@ -15,7 +16,6 @@ import { PRESETS } from './presets';
 const DEBOUNCE_MS = 200;
 
 const CARD_INTROS: Record<string, string> = {
-  ir: 'Lowers each rule to simple three-address instructions, with AND and OR turned into jumps.',
   optimizer: 'Rewrites the instructions into fewer, faster ones without changing what the program does.',
   codegen: 'Turns the instructions into bytecode for a small stack machine.',
   simulation: 'Runs the bytecode against a simulated home.',
@@ -61,6 +61,8 @@ export function App() {
     if (!preset) return;
     setSource(preset.source);
     setLoaded({ text: preset.source });
+    // Debouncing is for typing; a preset can show its result straight away.
+    setResult(compile(preset.source, options));
   }
 
   return (
@@ -99,7 +101,8 @@ export function App() {
             <ParserCard stage={stageResult(result, 'parser')} source={result.source} tokens={tokens}
               collectAll={collectAllErrors} onCollectAll={setCollectAllErrors} />
             <SemanticCard stage={stageResult(result, 'semantic')} source={result.source} onLoadWitness={setWitness} />
-            {result.stages.slice(3).map((stage) => <PendingCard key={stage.stage} stage={stage} />)}
+            <IrCard stage={stageResult(result, 'ir')} />
+            {result.stages.slice(4).map((stage) => <PendingCard key={stage.stage} stage={stage} />)}
           </div>
         </div>
       </main>

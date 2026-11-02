@@ -86,3 +86,16 @@ test('the semantic card shows number lines, a witness and a red cycle', async ({
   await expect(page.locator('[data-stage="semantic"]')).toHaveAttribute('data-status', 'warn');
   await expect(page.getByTestId('graph').first()).toBeVisible();
 });
+
+test('the IR card replays backpatching and draws the CFG', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('preset-select').selectOption('advanced');
+  await expect(page.locator('[data-stage="ir"]')).toHaveAttribute('data-status', 'ok');
+  await page.getByRole('button', { name: 'Restart' }).click();
+  await expect(page.getByTestId('ir-note')).toContainText('emit t1 := LOAD TEMP');
+  // After t1, t2, `if t1 > t2 goto _` and `goto _`, two jumps are open.
+  for (let i = 0; i < 3; i++) await page.getByTestId('ir-step').click();
+  await expect(page.getByTestId('quad-table').locator('td.is-open')).toHaveCount(2);
+  await page.getByTestId('cfg-toggle').click();
+  await expect(page.locator('[data-card="ir"] [data-testid="graph"]')).toBeVisible();
+});
