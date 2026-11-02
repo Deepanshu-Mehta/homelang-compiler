@@ -1,0 +1,21 @@
+08:00 Initial sync at 08:00
+08:02 MOTION = DETECTED
+08:02 Rule R1 fired: TURN_ON LIGHT
+08:02 Rule R2 fired: TURN_OFF LIGHT
+08:02 Rule R3 fired: TURN_ON LIGHT
+08:02 Rule R2 fired: TURN_OFF LIGHT
+08:02 R504: LIGHT changed 4 times in 5 minutes.
+08:02 Rule R3 fired: TURN_ON LIGHT
+08:02 Rule R2 fired: TURN_OFF LIGHT
+08:02 Rule R3 fired: TURN_ON LIGHT
+08:02 Rule R2 fired: TURN_OFF LIGHT
+08:02 Rule R3 fired: TURN_ON LIGHT
+08:02 Rule R2 fired: TURN_OFF LIGHT
+08:02 Rule R3 fired: TURN_ON LIGHT
+08:02 Rule R2 fired: TURN_OFF LIGHT
+08:02 Rule R3 fired: TURN_ON LIGHT
+08:02 Rule R2 fired: TURN_OFF LIGHT
+08:02 Rule R3 fired: TURN_ON LIGHT
+08:02 Rule R2 fired: TURN_OFF LIGHT
+08:02 Rule R3 fired: TURN_ON LIGHT
+08:02 R501: Possible infinite loop: stopped at cascade depth 16.

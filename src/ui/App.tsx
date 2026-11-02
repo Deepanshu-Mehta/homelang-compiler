@@ -1,41 +1,29 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import {
-  compile, stageResult, type CompileOptions, type LexerOutput, type StageResult, type WitnessValue,
+  compile, stageOutput, stageResult, type CompileOptions, type LexerOutput,
 } from '../compiler/index';
-import { Card, SkippedNote } from './Card';
 import { CodegenCard } from './cards/CodegenCard';
 import { DomainCard } from './cards/DomainCard';
 import { IrCard } from './cards/IrCard';
 import { LexerCard } from './cards/LexerCard';
 import { OptimizerCard } from './cards/OptimizerCard';
 import { ParserCard } from './cards/ParserCard';
+import { SimulationCard } from './cards/SimulationCard';
 import { SemanticCard } from './cards/SemanticCard';
 import { Editor, type LoadedText } from './Editor';
 import { OutputPane } from './OutputPane';
 import { PipelineBar } from './PipelineBar';
 import { PRESETS } from './presets';
+import { useSimulation } from './useSimulation';
 
 const DEBOUNCE_MS = 200;
-
-const CARD_INTROS: Record<string, string> = {
-  simulation: 'Runs the bytecode against a simulated home.',
-};
-
-function PendingCard({ stage }: { stage: StageResult }) {
-  return (
-    <Card id={stage.stage} badge={String(stage.number)} title={stage.title}
-      intro={CARD_INTROS[stage.stage] ?? ''} status={stage.status}>
-      <SkippedNote stage={stage} />
-    </Card>
-  );
-}
 
 export function App() {
   const [source, setSource] = useState(PRESETS[0]!.source);
   const [loaded, setLoaded] = useState<LoadedText>({ text: source });
   const [presetId, setPresetId] = useState('');
   const [collectAllErrors, setCollectAllErrors] = useState(false);
-  const [, setWitness] = useState<readonly WitnessValue[]>([]);
+  const [highlightLine, setHighlightLine] = useState<number | null>(null);
   const options: CompileOptions = useMemo(() => ({ collectAllErrors }), [collectAllErrors]);
   const [result, setResult] = useState(() => compile(source, options));
   const compiledWith = useRef(options);
@@ -50,6 +38,10 @@ export function App() {
     // result.source only tells us whether a compile is needed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source, options]);
+
+  // The simulation runs the last program that compiled through code generation.
+  const object = stageOutput(result, 'codegen');
+  const sim = useSimulation(object);
 
   const lexerStage = stageResult(result, 'lexer');
   const tokens = (lexerStage.output as LexerOutput | null)?.tokens ?? [];
@@ -86,12 +78,12 @@ export function App() {
             </select>
           </header>
           <Editor loaded={loaded} onChange={setSource} compiledSource={result.source}
-            tokens={tokens} diagnostics={diagnostics} highlightLine={null} />
+            tokens={tokens} diagnostics={diagnostics} highlightLine={highlightLine} />
           <div class="editor-foot">
             <span data-testid="char-count">{source.length} characters</span>
             <span>Compiles as you type</span>
           </div>
-          <OutputPane result={result} />
+          <OutputPane result={result} sim={sim} object={object} onLine={setHighlightLine} />
         </aside>
         <div class="right-pane">
           <PipelineBar stages={result.stages} />
@@ -100,11 +92,11 @@ export function App() {
             <LexerCard stage={lexerStage} source={result.source} />
             <ParserCard stage={stageResult(result, 'parser')} source={result.source} tokens={tokens}
               collectAll={collectAllErrors} onCollectAll={setCollectAllErrors} />
-            <SemanticCard stage={stageResult(result, 'semantic')} source={result.source} onLoadWitness={setWitness} />
+            <SemanticCard stage={stageResult(result, 'semantic')} source={result.source} onLoadWitness={(witness) => sim?.loadWitness(witness)} />
             <IrCard stage={stageResult(result, 'ir')} />
             <OptimizerCard stage={stageResult(result, 'optimizer')} />
             <CodegenCard stage={stageResult(result, 'codegen')} />
-            {result.stages.slice(6).map((stage) => <PendingCard key={stage.stage} stage={stage} />)}
+            <SimulationCard stage={stageResult(result, 'simulation')} sim={sim} object={object} onLine={setHighlightLine} />
           </div>
         </div>
       </main>

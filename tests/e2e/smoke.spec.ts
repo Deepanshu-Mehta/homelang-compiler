@@ -121,3 +121,53 @@ test('the VM debugger steps through the brief', async ({ page }) => {
   await page.getByRole('button', { name: 'Run to end' }).click();
   await expect(page.getByTestId('vm-effects')).toContainText('TURN_ON AC');
 });
+
+test('the deliverable: dragging temperature past 30 turns the AC on', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByTestId('device-AC')).toHaveAttribute('data-state', 'OFF');
+  await page.getByTestId('sensor-slider-TEMPERATURE').fill('31');
+  await expect(page.getByTestId('device-AC')).toHaveAttribute('data-state', 'ON');
+  await expect(page.getByTestId('output-event-log')).toContainText('Rule R1 fired: TURN_ON AC');
+  for (const stage of ['lexer', 'parser', 'semantic', 'ir', 'optimizer', 'codegen', 'simulation']) {
+    await expect(page.locator(`[data-stage="${stage}"]`)).not.toHaveAttribute('data-status', 'error');
+    await expect(page.locator(`[data-stage="${stage}"]`)).not.toHaveAttribute('data-status', 'skipped');
+  }
+});
+
+test('a scenario plays, and a log line finds its rule in the editor', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('preset-select').selectOption('advanced');
+  const output = page.getByTestId('output');
+  await expect(output.getByTestId('clock')).toContainText('21:30');
+  for (let i = 0; i < 40; i++) await output.getByTestId('step').click();
+  await expect(output.getByTestId('clock')).toContainText('22:10');
+  await expect(page.getByTestId('device-BED_LIGHT')).toHaveAttribute('data-state', 'ON');
+  await output.getByTestId('play').click();
+  await expect(page.getByTestId('device-AC')).toHaveAttribute('data-state', 'ON', { timeout: 15000 });
+  await output.getByTestId('play').click();
+  await page.getByTestId('output-event-log').getByText('Night light').first().click();
+  await expect(page.locator('.cm-flash-line')).toContainText('RULE "Night light"');
+});
+
+test('Load witness moves the sliders to the conflicting moment', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('preset-select').selectOption('conflict');
+  await page.getByTestId('load-witness').click();
+  await expect(page.getByTestId('sensor-slider-TEMPERATURE')).toHaveValue('29');
+  await expect(page.getByTestId('time-value')).toHaveText('23:00');
+});
+
+test('a runtime loop stops at stage 7 with R501', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('preset-select').selectOption('cascade');
+  await expect(page.locator('[data-stage="simulation"]')).toHaveAttribute('data-status', 'error');
+  await expect(page.getByTestId('stopped-box')).toContainText('Stopped at stage 7: Simulation');
+});
+
+test('an empty program says there is nothing to simulate', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('.cm-content').click();
+  await page.keyboard.press('ControlOrMeta+a');
+  await page.keyboard.press('Backspace');
+  await expect(page.getByTestId('no-rules')).toBeVisible();
+});

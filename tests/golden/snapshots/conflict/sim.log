@@ -1,0 +1,5 @@
+21:50 Initial sync at 21:50
+21:55 TEMPERATURE = 29 °C
+21:55 Rule R1 "Cool down" fired: TURN_ON AC
+22:00 Rule R2 "Quiet hours" fired: TURN_OFF AC
+22:10 TEMPERATURE = 30 °C

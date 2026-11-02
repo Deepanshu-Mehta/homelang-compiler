@@ -190,10 +190,13 @@ function operandsOf(q: Quad): Operand[] {
 function objectRule(rule: Rule, entry: number, table: SymbolTable): ObjectRule {
   const { trigger } = rule;
   const writes = [...new Set(ruleWrites(rule, table).map(writeKey))];
+  const { line, col, start, end } = rule.span;
   const base = {
-    id: rule.id, priority: rule.priority, entry, writes, source: { line: rule.span.line },
+    id: rule.id, priority: rule.priority, entry, writes, source: { line, col, start, end },
+    noElse: rule.noElse ?? (rule.elseActs ? [] : [rule.id]),
     ...(rule.name !== undefined && { name: rule.name }),
     ...(rule.mergedFrom && { mergedFrom: rule.mergedFrom }),
+    ...(rule.aliases && { aliases: rule.aliases }),
   };
   if (trigger.kind === 'State') return { ...base, kind: 'STATE', reads: [...triggerReads(rule)] };
   if (trigger.kind === 'Time') {

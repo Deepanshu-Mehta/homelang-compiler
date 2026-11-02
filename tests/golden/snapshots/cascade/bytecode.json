@@ -172,8 +172,14 @@
         "LIGHT"
       ],
       "source": {
-        "line": 3
+        "line": 3,
+        "col": 1,
+        "start": 138,
+        "end": 177
       },
+      "noElse": [
+        "R1"
+      ],
       "kind": "EVENT",
       "reads": [],
       "event": {
@@ -189,8 +195,14 @@
         "LIGHT"
       ],
       "source": {
-        "line": 4
+        "line": 4,
+        "col": 1,
+        "start": 179,
+        "end": 237
       },
+      "noElse": [
+        "R2"
+      ],
       "kind": "EVENT",
       "reads": [],
       "event": {
@@ -206,8 +218,14 @@
         "LIGHT"
       ],
       "source": {
-        "line": 5
+        "line": 5,
+        "col": 1,
+        "start": 239,
+        "end": 297
       },
+      "noElse": [
+        "R3"
+      ],
       "kind": "EVENT",
       "reads": [],
       "event": {

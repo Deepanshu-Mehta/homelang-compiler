@@ -56,11 +56,14 @@ export interface ObjectRule {
   reads: string[];
   writes: string[];
   entry: number;
-  source: { line: number };
+  source: { line: number; col: number; start: number; end: number };
   event?: { source: string; event: string; threshold?: number };
   time?: { minutes: number; days?: string[] };
   /** Original rules folded into this one by O9. */
   mergedFrom?: string[];
+  aliases?: Record<string, { name?: string; line: number }>;
+  /** Rule ids here that log "no ELSE" when their condition falls. */
+  noElse: string[];
 }
 
 export interface ObjectScenario {

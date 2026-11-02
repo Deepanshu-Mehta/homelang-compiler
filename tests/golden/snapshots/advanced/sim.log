@@ -1,0 +1,13 @@
+21:30 Initial sync at 21:30
+22:10 MOTION = DETECTED
+22:10 Rule R2 "Night light" fired: SET BED_LIGHT BRIGHTNESS 20
+22:15 Rule R2 "Night light" fired: TURN_OFF BED_LIGHT
+22:15 TEMP = 31 °C
+22:17 Rule R1 "Cool bedroom" fired: TURN_ON AC, SET AC TEMPERATURE 24
+23:00 MOTION = CLEAR
+06:00 Rule R1 "Cool bedroom" fired: TURN_OFF AC
+07:00 Rule R3 "Morning" fired: OPEN CURTAIN, NOTIFY "Good morning!"
+07:15 OWNER = AWAY
+07:15 Rule R4 "Leaving home" fired: LOCK FRONT_DOOR, TURN_OFF AC, TURN_OFF FAN, NOTIFY "Home secured"
+07:15 AC: no change (already OFF)
+07:15 FAN: no change (already OFF)

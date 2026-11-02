@@ -106,7 +106,7 @@ export const DIAGNOSTIC_CODES = {
   W416: info('Split the condition into smaller rules to enable the analysis.'),
 
   R501: error('Add a guard that breaks the cycle between the rules.'),
-  R502: error('Check the divisor; it reached zero or overflowed.'),
+  R502: error('Reduce the arithmetic; a computed value stopped being a finite number.'),
   R503: warning('Keep the computed value inside the attribute range.'),
   R504: warning('Add FOR or a dead-band so the device stops switching rapidly.'),
 

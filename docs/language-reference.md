@@ -83,3 +83,23 @@ A value alone is not a condition unless it is TRUE or FALSE (P216).
 **Names:** with no declarations, the standard home is loaded: rooms LIVING_ROOM, BEDROOM, KITCHEN and ENTRANCE; devices AC, LIGHT, FAN, DOOR and CURTAIN; sensors TEMPERATURE, HUMIDITY, MOTION, CONTACT and PRESENCE. With any declaration, only declared names exist. TIME and DAY always exist.
 
 **Enum attributes:** `SET AC MODE TO FAN` reads FAN from the attribute's own value set, so it does not mean the device FAN.
+
+## 4. Runtime model
+
+**Rule kinds.** `IF` rules are state rules: they run whenever something they read changes, and fire on the change. THEN runs on false→true, ELSE on true→false. `WHEN` rules fire on an event, and an optional `IF` guard is checked at that instant. `AT` rules fire on the clock.
+
+**Initial sync.** At the start, values from the first scenario minute are applied with no events, then every state rule runs once. Rules that are true fire THEN. ELSE does not run at the initial sync.
+
+**FOR.** The condition must stay true for the whole duration. If it drops first, the hold is cancelled and neither branch runs. When a hold expires, the scheduler re-runs the rule against current values. ELSE runs only on a true→false change of the committed state, meaning after THEN really fired.
+
+**One round.** Triggered rules run in source order against the current values, and their commands are queued. Per target, the highest PRIORITY wins, then the later rule in source order, and each override is logged. Commands are then committed. Each device change is an event for the next round, up to depth 16, after which R501 stops the simulation.
+
+**WAIT.** A rule in WAIT ignores new triggers and logs "busy", like Home Assistant's `single` mode. Resuming takes fresh values. A state rule re-evaluates once when it finishes, so an edge missed while busy is not lost.
+
+**Devices.** No automatic reversion: a device stays as set. SET on BRIGHTNESS, SPEED or POSITION also switches the device, and setting 0 switches it off. SET on a setpoint is stored without switching the device on. TURN_ON restores a level left at zero.
+
+**Time.** A time window `BETWEEN a AND b` includes `a` and excludes `b`, and wraps midnight when `b` is earlier than `a`. An equal start and end is always false. Numeric BETWEEN includes both ends and never wraps. `FROM == TO` means a full 24 hours. The default window is 00:00–23:59, the default STEP is 1MIN, and the start day is MON. STEP sets how far one press of Step moves; the engine always stops at every minute, WAIT end and hold end, so AT rules and FOR holds stay exact.
+
+**Live mode.** Each slider movement is one tick. Scrubbing time forward runs everything crossed on the way, including AT rules. Scrubbing backward re-evaluates rules but fires no AT rule, because the past is not replayed.
+
+**The log.** It records effects, not how code ran. Within one segment of a rule, each target lists its final command once.

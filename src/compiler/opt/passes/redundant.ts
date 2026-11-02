@@ -36,12 +36,12 @@ export function redundantActions(program: IrProgram): IrPassResult {
     } else if (q.kind === 'call') {
       const key = `${originOf(q)}/${q.device}`;
       const earlier = power.get(key);
+      // The last copy stays, as with SET, so the order of effects cannot change.
       if (q.op !== 'TOGGLE' && earlier?.kind === 'call' && earlier.op === q.op) {
-        removed.add(q.index);
-        changes.push({ before: `${quadText(earlier)}; ${quadText(q)}`, after: quadText(earlier) });
-      } else {
-        power.set(key, q);
+        removed.add(earlier.index);
+        changes.push({ before: `${quadText(earlier)}; ${quadText(q)}`, after: quadText(q) });
       }
+      power.set(key, q);
       // A power command may reset a level, so earlier SETs on this device must stay.
       for (const k of [...attributes.keys()]) if (k.startsWith(`${key}/`)) attributes.delete(k);
     } else if (q.kind === 'set') {

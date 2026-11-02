@@ -96,8 +96,12 @@
         "LAMP"
       ],
       "source": {
-        "line": 9
+        "line": 9,
+        "col": 1,
+        "start": 284,
+        "end": 418
       },
+      "noElse": [],
       "kind": "STATE",
       "reads": [
         "PIR",
@@ -114,8 +118,12 @@
         "CEILING_FAN"
       ],
       "source": {
-        "line": 15
+        "line": 15,
+        "col": 1,
+        "start": 421,
+        "end": 531
       },
+      "noElse": [],
       "kind": "STATE",
       "reads": [
         "HUM",

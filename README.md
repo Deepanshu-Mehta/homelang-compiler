@@ -42,9 +42,10 @@ npm run homelang -- compile examples/brief.home --emit=tokens
 
 ## Team
 
-- Course: _(course name)_
-- _(member 1)_
-- _(member 2)_
-- _(member 3)_
-- _(member 4)_
-- _(member 5)_
+Course: Compiler Design
+
+1. Deepanshu Mehta
+2. Vishesh
+3. Pranay Vishwakarma
+4. Ankush
+5. Manu Vahan

@@ -113,8 +113,12 @@
         "FRONT_DOOR"
       ],
       "source": {
-        "line": 13
+        "line": 13,
+        "col": 1,
+        "start": 361,
+        "end": 526
       },
+      "noElse": [],
       "name": "Lock up at night",
       "kind": "STATE",
       "reads": [
@@ -131,8 +135,12 @@
         "PORCH_LIGHT"
       ],
       "source": {
-        "line": 20
+        "line": 20,
+        "col": 1,
+        "start": 529,
+        "end": 668
       },
+      "noElse": [],
       "name": "Porch light after dark",
       "kind": "STATE",
       "reads": [
@@ -148,8 +156,14 @@
         "HALL_LIGHT"
       ],
       "source": {
-        "line": 27
+        "line": 27,
+        "col": 1,
+        "start": 671,
+        "end": 839
       },
+      "noElse": [
+        "R3"
+      ],
       "name": "Hall night light",
       "kind": "EVENT",
       "reads": [],

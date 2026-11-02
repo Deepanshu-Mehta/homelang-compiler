@@ -1,4 +1,4 @@
-import type { Action, Program, Rule } from '../../parser/ast';
+import type { Action, Program, Rule, RuleAlias } from '../../parser/ast';
 import { triggerText } from '../../parser/print';
 import type { AstPassResult, Change } from '../types';
 
@@ -16,6 +16,15 @@ function credit(actions: readonly Action[], origin: string): Action[] {
       ...(a.elseActs && { elseActs: credit(a.elseActs, origin) }),
     };
   });
+}
+
+function aliasesOf(rule: Rule): Record<string, RuleAlias> {
+  if (rule.aliases) return rule.aliases;
+  return { [rule.id]: { line: rule.span.line, ...(rule.name !== undefined && { name: rule.name }) } };
+}
+
+function noElseOf(rule: Rule): string[] {
+  return rule.noElse ?? (rule.elseActs ? [] : [rule.id]);
 }
 
 function canMerge(a: Rule, b: Rule): boolean {
@@ -48,6 +57,8 @@ export function ruleMerge(ast: Program): AstPassResult {
     const merged: Rule = {
       ...previous,
       mergedFrom: [...firstIds, rule.id],
+      aliases: { ...aliasesOf(previous), ...aliasesOf(rule) },
+      noElse: [...noElseOf(previous), ...noElseOf(rule)],
       thenActs: [...credit(previous.thenActs, previous.id), ...credit(rule.thenActs, rule.id)],
     };
     if (elseActs.length) merged.elseActs = elseActs;

@@ -200,6 +200,11 @@ export interface TimeTrigger {
 
 export type Trigger = StateTrigger | EventTrigger | TimeTrigger;
 
+export interface RuleAlias {
+  name?: string;
+  line: number;
+}
+
 export interface Rule {
   kind: 'Rule';
   /** R1, R2, … in source order. */
@@ -212,6 +217,10 @@ export interface Rule {
   elseActs?: Action[];
   /** Rule ids folded into this one by O9, including its own. */
   mergedFrom?: string[];
+  /** After O9: names and lines of the merged rules, for the log. */
+  aliases?: Record<string, RuleAlias>;
+  /** After O9: merged rules that had no ELSE of their own. */
+  noElse?: string[];
   span: Span;
 }
 

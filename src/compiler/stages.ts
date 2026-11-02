@@ -5,6 +5,7 @@ import type { SemanticOutput } from './semantic/analyze';
 import type { ObjectFile } from './codegen/bytecode';
 import type { IrOutput } from './ir/cfg';
 import type { OptimizerOutput } from './opt/pipeline';
+import type { SimulationOutput } from './runtime/simulator';
 
 export type StageName =
   | 'lexer' | 'parser' | 'semantic' | 'ir' | 'optimizer' | 'codegen' | 'simulation';
@@ -30,7 +31,7 @@ export interface StageOutputs {
   ir: IrOutput;
   optimizer: OptimizerOutput;
   codegen: ObjectFile;
-  simulation: unknown;
+  simulation: SimulationOutput;
 }
 
 export const STAGE_ORDER: readonly { stage: StageName; title: string }[] = [

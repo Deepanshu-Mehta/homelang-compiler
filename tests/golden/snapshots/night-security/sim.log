@@ -1,0 +1,13 @@
+22:00 Initial sync at 22:00
+22:00 Rule R2 "Porch light after dark" fired: SET PORCH_LIGHT BRIGHTNESS 40
+22:30 HALL_PIR = DETECTED
+22:30 Rule R3 "Hall night light" fired: SET HALL_LIGHT BRIGHTNESS 15
+22:32 HALL_PIR = CLEAR
+22:33 Rule R3 "Hall night light" fired: TURN_OFF HALL_LIGHT
+23:00 Rule R1 "Lock up at night" fired: LOCK FRONT_DOOR
+02:15 HALL_PIR = DETECTED
+02:15 Rule R3 "Hall night light" fired: SET HALL_LIGHT BRIGHTNESS 15
+02:16 HALL_PIR = CLEAR
+02:18 Rule R3 "Hall night light" fired: TURN_OFF HALL_LIGHT
+05:30 Rule R2 "Porch light after dark" fired: TURN_OFF PORCH_LIGHT
+06:00 Rule R1 "Lock up at night" fired: UNLOCK FRONT_DOOR

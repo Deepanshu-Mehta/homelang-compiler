@@ -1,0 +1,16 @@
+12:00 Initial sync at 12:00
+12:02 TEMPERATURE = 30.5 °C
+12:02 Rule R1 "Flapping fan" fired: TURN_ON FAN
+12:03 TEMPERATURE = 29.5 °C
+12:03 Rule R1 "Flapping fan" fired: TURN_OFF FAN
+12:04 TEMPERATURE = 30.5 °C
+12:04 Rule R1 "Flapping fan" fired: TURN_ON FAN
+12:05 TEMPERATURE = 29.5 °C
+12:05 Rule R1 "Flapping fan" fired: TURN_OFF FAN
+12:05 R504: FAN changed 4 times in 5 minutes.
+12:06 TEMPERATURE = 30.5 °C
+12:06 Rule R1 "Flapping fan" fired: TURN_ON FAN
+12:09 Rule R2 "Steady AC" fired: TURN_ON AC
+12:15 TEMPERATURE = 29 °C
+12:15 Rule R1 "Flapping fan" fired: TURN_OFF FAN
+12:15 Rule R2 "Steady AC" fired: TURN_OFF AC

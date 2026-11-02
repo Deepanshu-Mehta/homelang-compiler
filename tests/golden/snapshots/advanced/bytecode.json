@@ -153,8 +153,12 @@
         "AC.TEMPERATURE"
       ],
       "source": {
-        "line": 14
+        "line": 14,
+        "col": 1,
+        "start": 475,
+        "end": 658
       },
+      "noElse": [],
       "name": "Cool bedroom",
       "kind": "STATE",
       "reads": [
@@ -172,8 +176,14 @@
         "BED_LIGHT"
       ],
       "source": {
-        "line": 21
+        "line": 21,
+        "col": 1,
+        "start": 661,
+        "end": 809
       },
+      "noElse": [
+        "R2"
+      ],
       "name": "Night light",
       "kind": "EVENT",
       "reads": [],
@@ -190,8 +200,14 @@
         "CURTAIN"
       ],
       "source": {
-        "line": 26
+        "line": 26,
+        "col": 1,
+        "start": 812,
+        "end": 894
       },
+      "noElse": [
+        "R3"
+      ],
       "name": "Morning",
       "kind": "TIME",
       "reads": [],
@@ -212,8 +228,14 @@
         "FAN"
       ],
       "source": {
-        "line": 29
+        "line": 29,
+        "col": 1,
+        "start": 897,
+        "end": 1043
       },
+      "noElse": [
+        "R4"
+      ],
       "name": "Leaving home",
       "kind": "EVENT",
       "reads": [],

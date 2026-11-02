@@ -172,8 +172,12 @@
         "FAN"
       ],
       "source": {
-        "line": 3
+        "line": 3,
+        "col": 1,
+        "start": 147,
+        "end": 226
       },
+      "noElse": [],
       "name": "Flapping fan",
       "kind": "STATE",
       "reads": [
@@ -188,8 +192,12 @@
         "AC"
       ],
       "source": {
-        "line": 6
+        "line": 6,
+        "col": 1,
+        "start": 229,
+        "end": 312
       },
+      "noElse": [],
       "name": "Steady AC",
       "kind": "STATE",
       "reads": [

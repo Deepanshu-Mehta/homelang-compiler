@@ -9,6 +9,7 @@ import { buildCfg, type IrOutput } from './ir/cfg';
 import { generateIr } from './ir/irgen';
 import { generateObject } from './codegen/emit';
 import type { ObjectFile } from './codegen/bytecode';
+import { Session, simulate, type SimulationOutput } from './runtime/simulator';
 import { optimize, skipOptimizer, type OptimizerOutput } from './opt/pipeline';
 import { analyze } from './semantic/analyze';
 import {
@@ -41,6 +42,8 @@ export type { DeviceType, SensorType } from './semantic/catalog';
 export { formatMinutes } from './numeric';
 export type { Instr, ObjectFile, ObjectRule, Value } from './codegen/bytecode';
 export { VmDebugger } from './runtime/debugger';
+export { Session, type SimulationOutput } from './runtime/simulator';
+export type { DeviceState, LogEntry, LogKind, SensorState, SimulatorState } from './runtime/scheduler';
 export type { Frame } from './runtime/vm';
 export type { OptimizerOutput } from './opt/pipeline';
 export type { Change, PassReport } from './opt/types';
@@ -135,12 +138,18 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
       diagnostics: [],
     }));
     if (!object) return;
+    step<SimulationOutput>('simulation', () => simulate(object));
   }
 
   pipeline();
   // Every stage after a failure is reported as skipped.
   for (const { stage } of STAGE_ORDER.slice(stages.length)) stages.push(skipped(stage));
   return { source, stages };
+}
+
+/** A live simulation of a compiled program, for the Output panel. */
+export function createSession(object: ObjectFile): Session {
+  return new Session(object);
 }
 
 /** Typed access to one stage's output. */

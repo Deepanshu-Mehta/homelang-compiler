@@ -172,8 +172,14 @@
         "AC"
       ],
       "source": {
-        "line": 1
+        "line": 1,
+        "col": 1,
+        "start": 0,
+        "end": 35
       },
+      "noElse": [
+        "R1"
+      ],
       "kind": "STATE",
       "reads": [
         "TEMPERATURE"
