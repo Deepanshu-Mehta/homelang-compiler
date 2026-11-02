@@ -1,0 +1,2 @@
+// P201: THEN is missing
+IF TEMPERATURE > 30 TURN_ON AC

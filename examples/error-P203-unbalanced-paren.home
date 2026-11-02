@@ -1,0 +1,2 @@
+// P203: the ( is never closed
+IF (TEMPERATURE > 30 THEN TURN_ON AC

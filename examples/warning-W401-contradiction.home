@@ -1,0 +1,2 @@
+// W401: nothing is above 30 and below 20 at once
+IF TEMPERATURE > 30 AND TEMPERATURE < 20 THEN TURN_ON AC

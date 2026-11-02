@@ -1,0 +1,2 @@
+// S313: on and off in the same breath
+IF TEMPERATURE > 30 THEN TURN_ON AC, TURN_OFF AC

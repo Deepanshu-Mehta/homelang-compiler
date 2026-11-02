@@ -1,0 +1,2 @@
+// S308: a temperature cannot be compared with a power state
+IF TEMPERATURE > ON THEN TURN_ON AC

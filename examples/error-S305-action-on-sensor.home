@@ -1,0 +1,2 @@
+// S305: sensors are read-only
+IF TEMPERATURE > 30 THEN TURN_ON TEMPERATURE

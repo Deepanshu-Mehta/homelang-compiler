@@ -1,0 +1,9 @@
+// Cascade loop demo: W407 at compile time, then R501 at run time.
+// Each rule undoes the other, so one motion event would never settle.
+WHEN MOTION DETECTED THEN TURN_ON LIGHT;
+WHEN LIGHT TURNS ON IF TEMPERATURE > 0 THEN TURN_OFF LIGHT;
+WHEN LIGHT TURNS OFF IF TEMPERATURE > 0 THEN TURN_ON LIGHT;
+
+SIMULATE FROM 08:00 TO 08:05 STEP 1MIN {
+    AT 08:02: MOTION = DETECTED;
+}

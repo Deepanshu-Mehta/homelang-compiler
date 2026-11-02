@@ -1,0 +1,17 @@
+// Hysteresis demo: the same threshold with and without FOR.
+// TEMPERATURE hovers around 30 °C. The fan flaps; the AC waits for a steady reading.
+RULE "Flapping fan":
+IF TEMPERATURE > 30 THEN TURN_ON FAN ELSE TURN_OFF FAN END;
+
+RULE "Steady AC":
+IF TEMPERATURE > 30 FOR 3MIN THEN TURN_ON AC ELSE TURN_OFF AC END;
+
+SIMULATE FROM 12:00 TO 12:20 STEP 1MIN {
+    AT 12:00: TEMPERATURE = 29.5C;
+    AT 12:02: TEMPERATURE = 30.5C;
+    AT 12:03: TEMPERATURE = 29.5C;
+    AT 12:04: TEMPERATURE = 30.5C;
+    AT 12:05: TEMPERATURE = 29.5C;
+    AT 12:06: TEMPERATURE = 30.5C;
+    AT 12:15: TEMPERATURE = 29C;
+}

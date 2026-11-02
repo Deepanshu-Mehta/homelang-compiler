@@ -1,0 +1,13 @@
+// Conflict demo: both rules can be active together, so they fight over the AC.
+// Open the Semantic card and press "Load witness" to see one such moment.
+RULE "Cool down":
+IF TEMPERATURE > 28 THEN TURN_ON AC ELSE TURN_OFF AC END;
+
+RULE "Quiet hours":
+IF TIME BETWEEN 22:00 AND 06:00 THEN TURN_OFF AC ELSE TURN_ON AC END;
+
+SIMULATE FROM 21:50 TO 22:20 STEP 1MIN {
+    AT 21:50: TEMPERATURE = 27C;
+    AT 21:55: TEMPERATURE = 29C;
+    AT 22:10: TEMPERATURE = 30C;
+}

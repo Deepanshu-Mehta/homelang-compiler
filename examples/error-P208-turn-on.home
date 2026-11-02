@@ -1,0 +1,2 @@
+// P208: TURN ON must be one word
+IF TEMPERATURE > 30 THEN TURN ON AC

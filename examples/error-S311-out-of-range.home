@@ -1,0 +1,2 @@
+// S311: the AC range is 16-30 degrees
+IF TEMPERATURE > 30 THEN SET AC TEMPERATURE TO 35C

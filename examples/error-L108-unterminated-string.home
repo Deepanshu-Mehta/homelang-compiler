@@ -1,0 +1,2 @@
+// L108: the string never closes
+IF MOTION IS DETECTED THEN NOTIFY "Hello

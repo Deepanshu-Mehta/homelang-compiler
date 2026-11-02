@@ -1,0 +1,3 @@
+// S317: each rule triggers the other, with no guard
+WHEN LIGHT TURNS ON THEN TURN_OFF LIGHT;
+WHEN LIGHT TURNS OFF THEN TURN_ON LIGHT;

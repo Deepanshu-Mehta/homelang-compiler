@@ -1,0 +1,2 @@
+// S309: a door lock is LOCKED or UNLOCKED, never ON
+IF DOOR IS ON THEN TURN_ON LIGHT

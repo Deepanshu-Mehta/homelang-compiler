@@ -1,0 +1,2 @@
+// L107: 25:70 is shaped like a time, but no clock shows it
+AT 25:70 THEN TURN_ON LIGHT
