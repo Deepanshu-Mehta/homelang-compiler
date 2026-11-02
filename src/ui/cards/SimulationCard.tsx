@@ -1,9 +1,10 @@
-import { useState } from 'preact/hooks';
+import { useMemo, useState } from 'preact/hooks';
 import { formatMinutes, type LogEntry, type ObjectFile, type StageResult } from '../../compiler/index';
 import { Card, SkippedNote } from '../Card';
 import { DiagnosticRow } from '../DiagnosticBox';
 import { EventLog } from '../EventLog';
-import { PlayControls } from '../OutputPane';
+import { Controls } from '../Controls';
+import { devicesIn, PlayControls } from '../OutputPane';
 import type { Simulation } from '../useSimulation';
 import { FloorPlan } from '../viz/FloorPlan';
 
@@ -39,7 +40,8 @@ interface SimulationCardProps {
 }
 
 export function SimulationCard({ stage, sim, object, onLine }: SimulationCardProps) {
-  const [, setHovered] = useState<LogEntry | null>(null);
+  const [hovered, setHovered] = useState<LogEntry | null>(null);
+  const flashing = useMemo(() => (sim ? devicesIn(hovered, sim) : new Set<string>()), [hovered, sim]);
   return (
     <Card stage={stage}
       intro="The bytecode runs against a simulated home. Each change is one tick: the affected rules run, their commands are resolved, and every device change can trigger more rules.">
@@ -49,17 +51,26 @@ export function SimulationCard({ stage, sim, object, onLine }: SimulationCardPro
       )}
       {sim && object && (
         <>
-          <p class="stat-line">
+          <p class="prose">
             {sim.session.hasScenario
-              ? 'This program has a SIMULATE block. Press Play to run its timeline, or move a slider on the left at any time.'
-              : 'This program has no SIMULATE block, so the home is live: move a slider on the left and watch what happens.'}
+              ? 'This program has a SIMULATE block. Press Play to run its timeline, or move a slider at any time.'
+              : 'This program has no SIMULATE block, so the home is live: move a slider and watch what happens.'}
           </p>
           <PlayControls sim={sim} />
-          <FloorPlan state={sim.state} rooms={object.rooms} id="large" />
-          <Timeline sim={sim} />
-          <h3>Event log</h3>
-          <p class="muted small">Click a line to find its rule in the editor.</p>
-          <EventLog entries={sim.session.log} onLine={onLine} onHover={setHovered} id="large" />
+          <div class="sim-layout">
+            <div class="sim-main">
+              <FloorPlan state={sim.state} rooms={object.rooms} flashing={flashing} id="large" />
+              <Timeline sim={sim} />
+            </div>
+            <div class="sim-side">
+              <Controls sim={sim} object={object} id="large" />
+              <div class="log-block">
+                <h3>Event log</h3>
+                <p class="muted small">Click a line to find its rule in the editor.</p>
+                <EventLog entries={sim.session.log} onLine={onLine} onHover={setHovered} id="large" />
+              </div>
+            </div>
+          </div>
         </>
       )}
     </Card>
