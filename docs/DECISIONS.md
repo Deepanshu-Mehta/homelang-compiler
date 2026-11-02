@@ -89,4 +89,7 @@
 | ID | Problem | Decision |
 |---|---|---|
 | D47 | Text must stay readable from the back of a classroom. | Atkinson Hyperlegible Next and Mono replace Inter, Space Grotesk and JetBrains Mono, because they keep similar characters distinct. They are bundled through `@fontsource-variable`, so the page stays offline. |
+| D49 | Half-typed code is usually broken, and showing each failure at once makes the page flicker. | A new failure waits an extra 500ms, and the last working home stays on screen, dimmed, until the code compiles. Going from one failure to another, or back to success, shows at once. |
+| D50 | Rules sit side by side, so a program of several rules opens as a tree far wider than the view. | Only the first rule starts open. A very large tree also folds level by level past 240 nodes, so a 200-term condition opens quickly. |
+| D51 | Dark theme was optional. | Left out: a projector shouldn't use it, and it would double the contrast checking. |
 | D48 | Trees need source spans, but the compiler's view nodes have none, and the compiler must not change. | `src/ui/trees.ts` builds trees from the public AST, whose nodes carry spans. Parse-tree leaves are matched to tokens by order. |

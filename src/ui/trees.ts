@@ -149,7 +149,9 @@ export function astTree(program: Program): TreeNode {
   if (program.decls.length) {
     children.push(group(`Declarations (${program.decls.length})`, 'structure', program.decls.map(declNode), { startCollapsed: true }));
   }
-  children.push(...program.rules.map(ruleNode));
+  // Rules sit side by side, so only the first starts open. Otherwise a program
+  // of several rules opens as a tree far wider than the view.
+  children.push(...program.rules.map((rule, i) => ({ ...ruleNode(rule), ...(i > 0 && { startCollapsed: true }) })));
   if (program.sim) {
     children.push({ label: `Simulation (${program.sim.stmts.length} steps)`, kind: 'structure', span: spanOf(program.sim.span) });
   }

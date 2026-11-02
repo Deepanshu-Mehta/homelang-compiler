@@ -16,23 +16,15 @@
 
 All nine milestones are complete.
 
-## UI redesign (in progress)
+## UI redesign
 
-Direction: `docs/ui/DIRECTION.md`, approved. Audit: `docs/ui/AUDIT.md`.
+Finished. The direction and measured results are in `docs/ui/DIRECTION.md`, and the audit it answers is in `docs/ui/AUDIT.md`.
 
-Done:
-
-- Design tokens in one file, Atkinson type, two-pane frame, stage stepper, stage headers, focus mode, one-line primer, scroll to the failing stage on example load, slower failure display while typing.
-- Vertical tree for parse tree, AST and annotated AST, with fold, zoom, fit, reset, pan, parse tree and AST morph, and editor linking both ways. True-size top-to-bottom graphs.
-
-Next, in this order:
-
-1. Stage cards. Lexer: chips grouped by source line, compact and expanded toggle, sticky automaton panel, token-class legend. DFA, number-line and floor-plan SVGs drawn at true size, with no text under 14px. Move remaining reference material into `Reference` sections.
-2. Floor plan. Rebuild `src/ui/viz/FloorPlan.tsx` as one building with solid walls, door swings, windows, plan-view icons and every state in words. Add live motion, and controls grouped by room. **It is a plain temporary drawing until then.**
-3. Walkthrough. Prev, Next and Play in the top bar, running each stage's animation. Pass `current` through `FocusContext`, which is `null` for now.
-4. First-run hint, then the empty, loading and error states.
-5. Measure and report: smallest rendered text, AA contrast, and whether the slider, plan and newest log line fit at 1280×720.
-6. Update `docs/ui/DIRECTION.md` and the README, with about 10 compressed before and after screenshots.
+- One tokens file, Atkinson type, a two-pane frame, a stage stepper, focus mode, and a one-line primer.
+- Vertical trees with fold, zoom, fit, reset, pan and two-way editor linking. True-size top-to-bottom graphs.
+- Token lines with compact and expanded views, and a sticky automaton panel.
+- An architectural floor plan with live motion, controls grouped by room, and a timestamped log.
+- A walkthrough with an animation for each stage.
 
 ## Fixed along the way
 
@@ -42,4 +34,5 @@ Next, in this order:
 
 ## Known issues
 
+- In the CFG, a `false` edge label can sit close to a block, because dagre routes edges without regard for label size.
 - `npm run test:e2e` takes about 1 minute when a dev server is already running on port 5199, and about 6 minutes when it starts its own. The cause has not been investigated. Start `npx vite --port 5199 --strictPort` first for a faster run.

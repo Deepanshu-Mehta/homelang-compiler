@@ -23,14 +23,16 @@ const token = (name: string): string => getComputedStyle(document.documentElemen
 function graphStyle(fontPx: number) {
   const [ink, sheet, graphite, film] = [token('--ink'), token('--sheet'), token('--edge-plain'), token('--film')];
   const [green, red, error] = [token('--edge-true'), token('--edge-false'), token('--error')];
-  const font = token('--font-code');
+  // Cytoscape rejects single quotes in a font list and silently falls back.
+  const font = token('--font-code').replace(/'/g, '"');
   return [
     {
       selector: 'node',
       style: {
         shape: 'round-rectangle', 'background-color': sheet, 'border-color': ink, 'border-width': 1.5,
         label: 'data(label)', 'text-valign': 'center', 'text-halign': 'center', 'text-wrap': 'wrap',
-        'font-family': font, 'font-size': fontPx, color: ink, width: 'label', height: 'label', padding: '10px',
+        'font-family': font, 'font-size': fontPx, 'line-height': 1.35, 'text-justification': 'left',
+        color: ink, width: 'label', height: 'label', padding: '10px',
       },
     },
     { selector: 'node.bad', style: { 'border-color': error, 'border-width': 3 } },
@@ -78,16 +80,32 @@ export function GraphView({ nodes, edges }: { nodes: readonly GraphNode[]; edges
       boxSelectionEnabled: false,
       autoungrabify: true,
     });
-    const box = graph.elements().boundingBox();
-    element.style.height = `${box.h + 2 * PADDING}px`;
-    element.style.minWidth = `${box.w + 2 * PADDING}px`;
-    graph.resize();
-    graph.zoom(1);
-    graph.pan({
-      x: Math.max(PADDING, (element.clientWidth - box.w) / 2) - box.x1,
-      y: PADDING - box.y1,
+    const place = () => {
+      const box = graph.elements().boundingBox();
+      element.style.height = `${box.h + 2 * PADDING}px`;
+      element.style.minWidth = `${box.w + 2 * PADDING}px`;
+      graph.resize();
+      graph.zoom(1);
+      graph.pan({
+        x: Math.max(PADDING, (element.clientWidth - box.w) / 2) - box.x1,
+        y: PADDING - box.y1,
+      });
+    };
+    place();
+
+    // Canvas text ignores a web font that hasn't finished loading, so a graph
+    // drawn on first paint is measured and drawn again once the fonts are ready.
+    let alive = true;
+    void document.fonts.ready.then(() => {
+      if (!alive) return;
+      graph.style().update();
+      graph.layout({ name: 'dagre', rankDir: 'TB', nodeSep: 40, rankSep: 56, fit: false } as cytoscape.LayoutOptions).run();
+      place();
     });
-    return () => graph.destroy();
+    return () => {
+      alive = false;
+      graph.destroy();
+    };
   }, [nodes, edges]);
 
   return (

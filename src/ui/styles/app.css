@@ -46,7 +46,7 @@ input[type='number'] { min-height: var(--control-height); padding: 0 var(--sp-2)
 
 /* The top bar and stage stepper */
 .topbar { display: flex; align-items: center; gap: var(--sp-3); padding: 0 var(--sp-4); background: var(--sheet); border-bottom: var(--line-heavy) solid var(--ink); }
-.brand { flex: none; width: 6.25rem; line-height: var(--lh-tight); font-size: var(--t-base); font-weight: 700; }
+.brand { flex: none; width: 6.5rem; line-height: var(--lh-tight); font-size: var(--t-sm); font-weight: 700; }
 .stepper { list-style: none; flex: 1; min-width: 0; display: flex; justify-content: space-between; margin: 0; padding: 0; }
 .walk { flex: none; display: flex; gap: var(--sp-1); }
 .walk .button { padding: 0 var(--sp-2); }
@@ -71,7 +71,7 @@ input[type='number'] { min-height: var(--control-height); padding: 0 var(--sp-2)
 .pane-note { font-size: var(--t-sm); color: var(--graphite); }
 .preset-select { max-width: 13rem; }
 .editor { flex: none; border: var(--line) solid var(--rule-strong); border-radius: var(--r-view); background: var(--sheet); overflow: hidden; }
-.editor .cm-editor { max-height: 28vh; min-height: 3.25rem; }
+.editor .cm-editor { max-height: 28vh; min-height: 3.125rem; }
 .editor .cm-editor.cm-focused { outline: none; }
 .editor .cm-scroller { font-family: var(--font-code); font-size: var(--t-sm); line-height: var(--lh-code); }
 .editor .cm-gutters { background: var(--sheet); border-right: var(--line) solid var(--rule); color: var(--graphite); }
@@ -328,8 +328,9 @@ table.quads tr.rule-row td { background: var(--wash); font-weight: 700; }
 
 /* Simulation */
 .output-live { display: flex; flex-direction: column; gap: var(--sp-1); flex: 1 0 auto; min-height: 0; }
-.play-controls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
-.clock { margin-left: auto; font: 700 var(--t-sm) var(--font-code); }
+.play-controls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1); }
+.play-controls .button, .play-controls .segmented button { padding: 0 var(--sp-2); }
+.clock { margin-left: auto; font: 700 var(--t-sm) var(--font-code); white-space: nowrap; }
 .sim-layout { display: flex; flex-direction: column; gap: var(--sp-4); }
 .sim-main { min-width: 0; display: flex; flex-direction: column; gap: var(--sp-3); }
 .sim-side { min-width: 0; display: flex; flex-direction: column; gap: var(--sp-3); }
@@ -401,7 +402,7 @@ table.quads tr.rule-row td { background: var(--wash); font-weight: 700; }
 .control-label { display: flex; justify-content: space-between; gap: var(--sp-2); line-height: var(--lh-tight); }
 .control-name { font-family: var(--font-code); overflow: hidden; text-overflow: ellipsis; }
 .control-value { font-family: var(--font-code); font-weight: 700; white-space: nowrap; }
-.control input[type='range'] { width: 100%; margin: 0; height: 1.25rem; }
+.control input[type='range'] { width: 100%; margin: 0; height: 1.5rem; }
 .control.is-enum { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; column-gap: var(--sp-2); }
 .control .segmented button { min-height: 1.75rem; padding: 0 var(--sp-2); }
 .control-day { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); font-size: var(--t-sm); }

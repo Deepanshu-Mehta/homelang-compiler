@@ -1,5 +1,9 @@
 # Design direction: the drawing set
 
+This is the final design as built. The measured results are at the end.
+
+![The walkthrough at 1280×720, after the temperature passes 30](shots/after-overview.jpg)
+
 ## The idea
 
 A house is built from a set of drawings. Each sheet shows one aspect, numbered in order, and the set ends with the plan you can walk through.
@@ -84,9 +88,9 @@ All SVG text is drawn at true size, so no label can shrink below 14px. Diagrams 
 
 - **Spacing:** 4, 8, 12, 16, 24, 32, 48, 72px, and nothing in between.
 - **Radius:** 2px for chips and controls, 4px for views, and pills only for tree leaves, so the shape carries meaning.
-- **Shadow:** only for things that float above the page: the focus overlay and diagnostic hovers.
+- **Shadow:** only for things that float above the page: the sticky automaton panel and diagnostic hovers.
 - **Borders:** sheets aren't boxed. A sheet opens with a heavy 2px ink rule and its title strip. Only instruments, such as the editor, tables and views, have an outline.
-- **Controls:** at least 32px tall.
+- **Controls:** buttons and selects are 32px tall. In the tight left pane, sensor toggles are 28px and sliders have a 24px hit area, so that the slider, plan and newest log line all fit at 1280×720.
 
 ## Motion
 
@@ -122,7 +126,7 @@ All SVG text is drawn at true size, so no label can shrink below 14px. Diagrams 
 
 **Why two fixed panes:** the left pane is the program and its result, and the right is the explanation. Keeping the left pane still means that dragging a slider while reading any stage shows the home respond, and an example never scrolls away from its own explanation.
 
-**The tight case is 1280×720.** The brief's slider, floor plan and newest log line must all be visible without scrolling. The bar merges the title and stepper into one row, controls sit in two columns under the plan, and the newest log line stays pinned in view. I'll measure this rather than assume it.
+**The tight case is 1280×720.** With the brief loaded, the slider, floor plan and newest log line are all visible without scrolling. The bar holds the title, stepper and walkthrough controls in one row, controls sit in two columns under the plan, and the log stays scrolled to its newest line. Longer programs scroll the left pane.
 
 **Primer:** it becomes one line above Stage 1 with "Open the primer", so it stops taking the top of the page.
 
@@ -133,10 +137,10 @@ All SVG text is drawn at true size, so no label can shrink below 14px. Diagrams 
 ## The floor plan
 
 - One building, with rooms sharing walls and filling a single footprint, so no holes.
-- Solid black walls, door openings with swing arcs, and windows breaking the wall line.
+- Solid black walls, door openings with swing arcs, and windows breaking the top wall line.
 - One icon style: everything in plan view, as seen from above. Lights are the standard circled cross and glow when on. The fan is a three-blade plan symbol. The AC is a wall unit with airflow. Curtains slide along the window. The lock sits on the door.
 - Each device prints its state in words beside it, such as `ON 24°` or `LOCKED`.
-- Sensor readings sit inside their room. Sliders and toggles are grouped under room names.
+- Sliders and toggles are grouped under room names. The large plan also prints sensor readings inside each room; the side-pane plan leaves them to the controls below it, to stay readable at 14px.
 - The event log is timestamped and clickable, with firing rules in bold, and the newest line stays in view.
 
 ## Trees and graphs
@@ -144,7 +148,8 @@ All SVG text is drawn at true size, so no label can shrink below 14px. Diagrams 
 - All trees run top-down, using d3-hierarchy `tree()` with x as position and y as depth.
 - Nodes are compact boxes coloured by kind. Tokens and leaves are pills, so shape separates them as well as colour.
 - Pan, zoom, fit to view, reset and collapse. Labels stay at true size, and wide trees scroll or zoom, so they never squash.
-- CFG and dependency graph stay `rankDir: "TB"`, with green and red edges, each also labelled true or false.
+- Only the first rule starts open. Later rules start folded, because rules sit side by side and would otherwise open as a tree far wider than the view.
+- CFG and dependency graph stay `rankDir: "TB"`, with green and red edges, each CFG edge also labelled true or false, and they always draw at true size.
 - DFA diagrams stay left to right, as in the demo.
 
 **No compiler changes are needed for source highlighting.** Parse-tree leaves appear in token order, so each one can be matched to its token, and a node's span is the union of its leaves. AST nodes already carry spans. Both can be mapped in `src/ui/`.
@@ -153,4 +158,33 @@ All SVG text is drawn at true size, so no label can shrink below 14px. Diagrams 
 
 - **Dark theme.** Decided against: a projector shouldn't use it.
 - **Page-load animation,** since it serves nothing in a classroom.
-- **Heavy dependencies.** The only additions are the two font packages, which replace three. Pan and zoom will be hand-written, about 40 lines, so the team can explain it.
+- **Heavy dependencies.** The only additions are the two font packages, which replace three. Pan and zoom are hand-written, so the team can explain them.
+
+## Walkthrough
+
+Prev, Play and Next sit in the top bar. Each step scrolls to a stage, marks it in yellow and runs that stage's animation: DFA trace, parser steps, a pause on semantic analysis, backpatching, optimizer passes, VM steps, then the simulation. Play ends at a failed stage, because nothing after it ran. On a program with no scenario, Stage 7 raises the first numeric sensor until a rule fires. The brief takes about 22 seconds.
+
+## Measured results
+
+Checked with Playwright on the brief, advanced, P203 and conflict examples, with every collapsible section open.
+
+| Check | Before | After |
+|---|---|---|
+| Smallest text at 1280×720 | 9.5px, and 4.4px inside diagrams | 14px, inside diagrams too |
+| Smallest text at 1920×1080 | 9.5px, and 4.4px inside diagrams | 17.1px |
+| Text failing AA contrast | 21 kinds of element, worst 3.16:1 | None |
+| Controls under 24px tall | 20 | None |
+| Sideways page scroll | None | None, including the top bar |
+| Slider, plan and newest log line at 1280×720 (brief) | Log below the fold on longer programs | All visible, with the left pane at exactly 656 of 656px |
+
+The advanced program has more rooms and rules, so its left pane scrolls at 1280×720.
+
+## Before and after
+
+| | Before | After |
+|---|---|---|
+| Failure | ![Before](shots/before-failure.jpg) | ![After](shots/after-failure.jpg) |
+| Lexer | ![Before](shots/before-lexer.jpg) | ![After](shots/after-lexer.jpg) |
+| Parser | ![Before](shots/before-parser.jpg) | ![After](shots/after-parser.jpg) |
+| Intermediate code | ![Before](shots/before-ir.jpg) | ![After](shots/after-ir.jpg) |
+| Output | ![Before](shots/before-output.jpg) | ![After](shots/after-output.jpg) |

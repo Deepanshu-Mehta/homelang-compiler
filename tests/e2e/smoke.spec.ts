@@ -286,3 +286,16 @@ test('the page never scrolls sideways at 1280×720', async ({ page }) => {
     expect(sizes).toEqual({ bar: 1280, layout: 1280, page: 1280 });
   }
 });
+
+test('reduced motion stops the live motion, and the state is still in words', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await page.getByTestId('sensor-slider-TEMPERATURE').fill('31');
+  await expect(page.getByTestId('device-state-AC')).toHaveText('ON 26 °C');
+  const motion = await page.evaluate(() => ({
+    fan: getComputedStyle(document.querySelector('.fan-blades')!).animationName,
+    air: getComputedStyle(document.querySelector('.airflow')!).animationName,
+    transition: getComputedStyle(document.querySelector('.light-glow')!).transitionDuration,
+  }));
+  expect(motion).toEqual({ fan: 'none', air: 'none', transition: '0s, 0s' });
+});

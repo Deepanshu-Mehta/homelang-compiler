@@ -64,10 +64,14 @@ function Arrow({ edge, curved }: { edge: DrawnEdge; curved: boolean }) {
   const bend = curved ? 26 : 0;
   const cx = (x1 + x2) / 2 - uy * bend;
   const cy = (y1 + y2) / 2 + ux * bend;
+  // A sloped arrow keeps its label nearer the start, clear of the loop at its end.
+  const along = curved || Math.abs(dy) < 1 ? 0.5 : 0.36;
+  const labelX = x1 + (x2 - x1) * along;
+  const labelY = curved ? cy : y1 + (y2 - y1) * along;
   return (
     <g class="dfa-edge">
       <path d={`M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`} marker-end="url(#arrowhead)" />
-      <text x={cx} y={cy - 5} text-anchor="middle">{label}</text>
+      <text x={labelX} y={labelY - 5} text-anchor="middle">{label}</text>
     </g>
   );
 }

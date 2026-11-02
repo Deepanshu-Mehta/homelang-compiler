@@ -2,6 +2,8 @@
 
 A complete compiler for a smart-home automation language (`IF TEMPERATURE > 30 THEN TURN_ON AC`), with a live, phase-by-phase visual walkthrough from lexer to simulated home.
 
+![The walkthrough: source and a live floor plan on the left, the compiler stages on the right](docs/ui/shots/after-overview.jpg)
+
 ## Run it
 
 ```sh
@@ -77,6 +79,14 @@ flowchart TB
 | 5 | Optimizer | `src/compiler/opt/` | Nine passes, each with a safety argument |
 | 6 | Code generation | `src/compiler/codegen/` | Stack-VM bytecode, plus an approximate Home Assistant export |
 | 7 | Simulation | `src/compiler/runtime/` | VM, scheduler and floor-plan simulator |
+
+### The walkthrough
+
+Seven stages run from a single program, each with its own explanation and animation. Press Play in the top bar to go through them in order, or Focus to enlarge one for a projector.
+
+| Trees run top-down, and link to the editor | The home is drawn as an architect's plan |
+|---|---|
+| ![Parser stage](docs/ui/shots/after-parser.jpg) | ![Simulation in focus mode](docs/ui/shots/after-focus.jpg) |
 
 ### How the project fits together
 
@@ -180,6 +190,7 @@ flowchart LR
 - [Language reference](docs/language-reference.md)
 - [Design decisions](docs/DECISIONS.md)
 - [Progress](docs/PROGRESS.md)
+- [UI design direction](docs/ui/DIRECTION.md) and [audit](docs/ui/AUDIT.md)
 
 ## Team
 

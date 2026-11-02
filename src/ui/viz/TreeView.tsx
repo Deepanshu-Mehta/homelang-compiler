@@ -133,10 +133,20 @@ export function TreeView({ root, legend }: TreeViewProps) {
 
   const rootCentre = layout.nodes[0]!.x + layout.offsetX;
 
+  /** Opens on the root, moved along if needed to show the start of its first open branch. */
+  function homeScroll(viewWidth: number): number {
+    const centred = rootCentre - viewWidth / 2;
+    const branch = layout.nodes.find((n) => n.depth === 1 && n.data.children.length > 0);
+    if (!branch) return centred;
+    const branchLeft = branch.x + layout.offsetX - layout.boxWidth(branch.data) / 2 - SIBLING_GAP;
+    const leftmostShowingRoot = rootCentre - viewWidth + SIBLING_GAP * 6;
+    return Math.max(leftmostShowingRoot, Math.min(centred, branchLeft));
+  }
+
   function reset() {
     setZoom(1);
     const element = scroller.current;
-    if (element) element.scrollTo({ left: rootCentre - element.clientWidth / 2, top: 0 });
+    if (element) element.scrollTo({ left: homeScroll(element.clientWidth), top: 0 });
   }
 
   function fit() {
@@ -168,7 +178,7 @@ export function TreeView({ root, legend }: TreeViewProps) {
     setAnimate(false);
     setZoom(1);
     const element = scroller.current;
-    if (element) element.scrollTo({ left: rootCentre - element.clientWidth / 2, top: 0 });
+    if (element) element.scrollTo({ left: homeScroll(element.clientWidth), top: 0 });
     const frame = requestAnimationFrame(() => setAnimate(true));
     return () => cancelAnimationFrame(frame);
     // Only a new tree should recentre; folding must leave the view where it is.
