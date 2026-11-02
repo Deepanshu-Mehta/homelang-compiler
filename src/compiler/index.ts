@@ -8,7 +8,8 @@ import { parse } from './parser/parser';
 import { buildCfg, type IrOutput } from './ir/cfg';
 import { generateIr } from './ir/irgen';
 import { generateObject } from './codegen/emit';
-import type { ObjectFile } from './codegen/bytecode';
+import type { CodegenOutput, ObjectFile } from './codegen/bytecode';
+import { toHomeAssistantYaml } from './codegen/haYaml';
 import { Session, simulate, type SimulationOutput } from './runtime/simulator';
 import { optimize, skipOptimizer, type OptimizerOutput } from './opt/pipeline';
 import { analyze } from './semantic/analyze';
@@ -40,7 +41,7 @@ export { TOKEN_TABLE } from './lexer/tokens';
 export { CATALOG, DEVICE_TYPES, SENSOR_TYPES, PRELUDE } from './semantic/catalog';
 export type { DeviceType, SensorType } from './semantic/catalog';
 export { formatMinutes } from './numeric';
-export type { Instr, ObjectFile, ObjectRule, Value } from './codegen/bytecode';
+export type { CodegenOutput, Instr, ObjectFile, ObjectRule, Value } from './codegen/bytecode';
 export { VmDebugger } from './runtime/debugger';
 export { Session, type SimulationOutput } from './runtime/simulator';
 export type { DeviceState, LogEntry, LogKind, SensorState, SimulatorState } from './runtime/scheduler';
@@ -133,8 +134,11 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
       diagnostics: [],
     }));
     if (!optimized) return;
-    const object = step<ObjectFile>('codegen', () => ({
-      output: generateObject(optimized.ast, optimized.program, semantic.symbols),
+    const object = step<CodegenOutput>('codegen', () => ({
+      output: {
+        ...generateObject(optimized.ast, optimized.program, semantic.symbols),
+        haYaml: toHomeAssistantYaml(semantic.annotated, semantic.symbols),
+      },
       diagnostics: [],
     }));
     if (!object) return;

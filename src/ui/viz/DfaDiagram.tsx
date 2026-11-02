@@ -74,7 +74,7 @@ export function DfaDiagram({ dfa, visited, active }: DfaDiagramProps) {
   const stateById = new Map(dfa.states.map((s) => [s.id, s]));
 
   return (
-    <svg class="dfa" viewBox={`0 0 ${dfa.width} ${dfa.height}`} role="img"
+    <svg class="dfa" viewBox={`0 0 ${dfa.width} ${dfa.height}`} style={{ maxWidth: `${dfa.width}px` }} role="img"
       aria-label={`State diagram: ${dfa.title}`} data-dfa={dfa.name}>
       <defs>
         <marker id="dfa-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">

@@ -103,3 +103,88 @@ A value alone is not a condition unless it is TRUE or FALSE (P216).
 **Live mode.** Each slider movement is one tick. Scrubbing time forward runs everything crossed on the way, including AT rules. Scrubbing backward re-evaluates rules but fires no AT rule, because the past is not replayed.
 
 **The log.** It records effects, not how code ran. Within one segment of a rule, each target lists its final command once.
+
+## 5. Diagnostics
+
+Every diagnostic has a code, a severity, a message, a hint and a position. Errors stop the pipeline at that stage; warnings and notes do not. L is lexical, P syntax, S semantic error, W semantic warning or note, R run time, I internal.
+
+"New" marks a code that `plan.txt` does not define. `docs/DECISIONS.md` explains why each exists.
+
+`tests/unit/diagnostics.test.ts` reads this table and compiles every example, so each row is checked against the compiler. Where a program would be very long, `«X×N»` means X repeated N times.
+
+| Code | Severity | Meaning | Example program | Added |
+|---|---|---|---|---|
+| L101 | error | Illegal character | `IF TEMPERATURE > 30 THEN TURN_ON AC @` |  |
+| L102 | error | Lone `!` | `IF ! TRUE THEN TURN_ON AC` |  |
+| L103 | error | No digit after the decimal point | `IF TEMPERATURE > 30. THEN TURN_ON AC` |  |
+| L104 | error | Two decimal points | `IF TEMPERATURE > 3.4.5 THEN TURN_ON AC` |  |
+| L105 | error | Malformed time | `AT 10:3 THEN TURN_ON AC` |  |
+| L106 | error | Unknown unit suffix | `IF TEMPERATURE > 30X THEN TURN_ON AC` |  |
+| L107 | error | Time out of range | `AT 25:70 THEN TURN_ON AC` |  |
+| L108 | error | Unterminated string | `IF MOTION IS DETECTED THEN NOTIFY "Hello` |  |
+| L109 | error | Unterminated comment | `/* turn on AC` |  |
+| L110 | error | Number too large | `IF TEMPERATURE > 99999999999 THEN TURN_ON AC` |  |
+| P201 | error | THEN is missing | `IF TEMPERATURE > 30 TURN_ON AC` |  |
+| P202 | error | No action after THEN, ELSE or a comma | `IF TEMPERATURE > 30 THEN` |  |
+| P203 | error | Unclosed parenthesis | `IF (TEMPERATURE > 30 THEN TURN_ON AC` |  |
+| P204 | error | No condition where one is needed | `IF TEMPERATURE > 30 AND THEN TURN_ON AC` |  |
+| P205 | error | No value where one is needed | `IF TEMPERATURE > > 30 THEN TURN_ON AC` |  |
+| P206 | error | ELSE with no matching IF | `ELSE TURN_OFF AC` |  |
+| P207 | error | Second ELSE in one rule | `IF TRUE THEN TURN_ON AC ELSE TURN_OFF AC ELSE TOGGLE AC` |  |
+| P208 | error | Unknown action | `IF TEMPERATURE > 30 THEN TURN ON AC` |  |
+| P209 | error | Chained comparison | `IF 20 < TEMPERATURE < 30 THEN TURN_ON FAN` |  |
+| P210 | error | Empty parentheses | `IF () THEN TURN_ON AC` |  |
+| P211 | error | Declaration missing its semicolon | `DEVICE AC : AIR_CONDITIONER IN BEDROOM` |  |
+| P212 | error | Space between a number and its unit | `IF TEMPERATURE > 30 C THEN TURN_ON AC` |  |
+| P213 | error | Nested IF with no END | `IF TRUE THEN IF FALSE THEN TURN_ON AC` |  |
+| P214 | error | Reserved word used as a name | `DEVICE IF : LIGHT;` | new |
+| P215 | error | Any other syntax error: expected one thing, found another | `TURN_ON AC` | new |
+| P216 | error | A bare value used as a condition | `IF MOTION THEN TURN_ON AC` | new |
+| P217 | error | Declaration after the first rule | `IF TRUE THEN TURN_ON AC ROOM A;` | new |
+| P218 | error | Nesting too deep, or a chain too long | `IF «(×500»` | new |
+| S301 | error | Undeclared name | `IF TEMPERATURE > 30 THEN TURN_ON HEATPUMP` |  |
+| S302 | error | Duplicate declaration | `ROOM A; DEVICE L : LIGHT IN A; DEVICE l : FAN IN A;` |  |
+| S303 | error | Unknown device or sensor type | `DEVICE X : TOASTER;` |  |
+| S304 | error | Unknown room | `ROOM A; DEVICE L : LIGHT IN GARAGE;` |  |
+| S305 | error | Action on a read-only sensor | `IF TEMPERATURE > 30 THEN TURN_ON TEMPERATURE` |  |
+| S306 | error | Action the device type does not support | `IF TRUE THEN LOCK LIGHT` |  |
+| S307 | error | Attribute the device type does not have | `IF MOTION IS DETECTED THEN SET DOOR BRIGHTNESS TO 50%` |  |
+| S308 | error | Comparison type mismatch | `IF TEMPERATURE > ON THEN TURN_ON AC` |  |
+| S309 | error | State not valid for this device | `IF DOOR IS ON THEN TURN_ON LIGHT` |  |
+| S310 | error | Unit or dimension mismatch | `IF TEMPERATURE > 50% THEN TURN_ON FAN` |  |
+| S311 | error | Value out of range | `IF TEMPERATURE > 30 THEN SET AC TEMPERATURE TO 35C` |  |
+| S312 | error | Duration not above zero | `WHEN MOTION DETECTED THEN TURN_ON LIGHT, WAIT 0MIN, TURN_OFF LIGHT` |  |
+| S313 | error | Contradictory actions in one branch | `IF TEMPERATURE > 30 THEN TURN_ON AC, TURN_OFF AC` |  |
+| S314 | error | Event the source does not have | `WHEN TEMPERATURE DETECTED THEN TURN_ON AC` |  |
+| S315 | error | Comparing two devices, or sensors of different dimensions | `IF AC > FAN THEN TURN_ON LIGHT` |  |
+| S316 | error | Ordering on states | `IF DOOR > LOCKED THEN TURN_ON AC` |  |
+| S317 | error | Infinite loop with no guard | `WHEN LIGHT TURNS ON THEN TURN_OFF LIGHT; WHEN LIGHT TURNS OFF THEN TURN_ON LIGHT;` |  |
+| S318 | error | IS after something that is not a name | `IF TEMPERATURE + 2 IS ON THEN TURN_ON AC` |  |
+| S319 | error | TIME with a non-time, or bad time arithmetic | `IF TIME > 30C THEN TURN_ON AC` |  |
+| S320 | error | PRIORITY is not a whole number of 1 or more | `RULE "A" PRIORITY 0: IF TRUE THEN TURN_ON AC` | new |
+| S321 | error | UNIT is unknown, or does not fit the sensor | `SENSOR H : HUMIDITY_SENSOR UNIT C;` | new |
+| S322 | error | Scenario time outside FROM … TO | `SIMULATE FROM 08:00 TO 09:00 { AT 10:00: TEMPERATURE = 3C; }` | new |
+| S323 | error | Scenario assigns something other than a sensor or DAY | `SIMULATE { AT 08:00: AC = ON; }` | new |
+| S324 | error | Literal division by zero, or a constant too large | `IF TEMPERATURE > 5 / 0 THEN TURN_ON AC` | new |
+| S325 | error | Threshold or scenario value is not constant | `WHEN TEMPERATURE RISES ABOVE HUMIDITY THEN TURN_ON AC` | new |
+| W401 | warning | Condition can never be true | `IF TEMPERATURE > 30 AND TEMPERATURE < 20 THEN TURN_ON AC` |  |
+| W402 | warning | Condition is always true | `IF TEMPERATURE > 20 OR TEMPERATURE <= 20 THEN TURN_ON AC` |  |
+| W403 | warning | Physically implausible value | `IF TEMPERATURE > 200C THEN NOTIFY "Fire?"` |  |
+| W404 | warning | Two rules can fight over one device | `IF TEMPERATURE > 28 THEN TURN_ON AC END; IF TIME BETWEEN 22:00 AND 06:00 THEN TURN_OFF AC END;` |  |
+| W405 | warning | Duplicate rule | `IF TEMPERATURE > 1 THEN TURN_ON AC END; IF TEMPERATURE > 1 THEN TURN_ON AC END;` |  |
+| W406 | warning | Nothing ever reverses this action | `IF TEMPERATURE > 30 THEN TURN_ON AC` |  |
+| W407 | warning | Loop with a guard | `WHEN LIGHT TURNS ON IF TEMPERATURE > 0 THEN TURN_OFF LIGHT; WHEN LIGHT TURNS OFF IF TEMPERATURE > 0 THEN TURN_ON LIGHT;` |  |
+| W408 | warning | Declared but unused | `ROOM A; DEVICE F : FAN IN A;` |  |
+| W409 | warning | Empty time window, or numeric range with its limits reversed | `IF TEMPERATURE BETWEEN 30 AND 20 THEN TURN_ON AC` |  |
+| W410 | info | °F value converted to °C | `IF TEMPERATURE > 86F THEN TURN_ON AC` |  |
+| W411 | warning | Heater and AC act around one threshold | `ROOM A; DEVICE H : HEATER IN A; DEVICE C : AIR_CONDITIONER IN A; SENSOR T : TEMP_SENSOR IN A; IF T < 20 THEN TURN_ON H ELSE TURN_OFF H END; IF T > 20 THEN TURN_ON C ELSE TURN_OFF C END;` |  |
+| W412 | warning | UNLOCK with no presence check | `AT 07:00 THEN UNLOCK DOOR` |  |
+| W413 | warning | Flapping risk: numeric sensor, ELSE, no FOR | `IF TEMPERATURE > 30 THEN TURN_ON AC ELSE TURN_OFF AC` |  |
+| W414 | info | Setpoint on a device that may be off | `IF TRUE THEN SET AC TEMPERATURE TO 24C` |  |
+| W415 | info | A bare number took on a unit | `IF TEMPERATURE > 30 THEN TURN_ON AC` | new |
+| W416 | info | Condition too large for interval analysis | `IF «(TEMPERATURE > 1 OR HUMIDITY > 1) AND ×7»TRUE THEN NOTIFY "x"` | new |
+| R501 | error | Cascade passed depth 16 | `WHEN MOTION DETECTED THEN TURN_ON LIGHT; WHEN LIGHT TURNS ON IF TEMPERATURE > 0 THEN TURN_OFF LIGHT; WHEN LIGHT TURNS OFF IF TEMPERATURE > 0 THEN TURN_ON LIGHT; SIMULATE { AT 08:00: MOTION = DETECTED; }` |  |
+| R502 | error | A computed value stopped being finite | `WHEN MOTION DETECTED IF TEMPERATURE «* 1000000000 ×40»> 0 THEN NOTIFY "x" SIMULATE { AT 08:00: MOTION = DETECTED; }` | new |
+| R503 | warning | Computed SET value clamped to its range | `WHEN MOTION DETECTED THEN SET AC TEMPERATURE TO TEMPERATURE + 50 SIMULATE { AT 08:00: MOTION = DETECTED; }` | new |
+| R504 | warning | A device is switching back and forth quickly | `IF TEMPERATURE > 30 THEN TURN_ON FAN ELSE TURN_OFF FAN END; SIMULATE { AT 08:00: TEMPERATURE = 31C; AT 08:01: TEMPERATURE = 29C; AT 08:02: TEMPERATURE = 31C; AT 08:03: TEMPERATURE = 29C; }` | new |
+| I001 | error | Internal compiler error, caught and reported instead of thrown | None: it means the compiler itself has a bug. | new |

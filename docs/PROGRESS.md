@@ -10,10 +10,11 @@
 - **M6:** nine optimizer passes (AST: O3, O4, O5, O9; quadruples: O2, O1, O6, O7, O8), available-expressions CSE, dense renumbering, Optimizer card with per-pass diffs and safety reasons.
 - **M7:** bytecode emitter, JSON object file, stack VM, step-through debugger, Code generation card, all CLI `--emit` kinds except `sim`.
 - **M8:** discrete-event scheduler, AST interpreter as the test oracle, simulator, animated floor plan, sensor controls and time scrubber, scenario playback at 1×/10×/60×, event log linked to the editor, Load witness, Simulation card. Three-way differential test over the examples, 40 targeted programs and 400 random programs.
+- **M9:** Home Assistant YAML export, browser checks for all 20 presets with a screenshot of every card, a diagnostics table whose examples are compiled by a test, README architecture diagrams, local viva notes.
 
 ## Next
 
-- **M9:** Home Assistant YAML export, per-preset browser checks with screenshots, final documentation.
+All nine milestones are complete.
 
 ## Fixed along the way
 

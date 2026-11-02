@@ -81,5 +81,5 @@
 
 | ID | Problem | Decision |
 |---|---|---|
-| D38 | `plan.txt` and `reference/` are working material, and the photos show classmates. | Both are gitignored and stay on disk only. |
+| D38 | `plan.txt`, `reference/` and the viva notes are working material, and the photos show classmates. | All are gitignored and stay on disk only. |
 | D39 | The Playwright browser cache holds no binary on the development machine. | E2E tests use the installed Google Chrome via `channel: "chrome"`. |

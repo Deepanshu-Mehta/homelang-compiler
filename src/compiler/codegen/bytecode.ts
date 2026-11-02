@@ -85,3 +85,9 @@ export interface ObjectFile {
   scenario?: ObjectScenario;
 }
 
+/** What the Code generation stage produces. */
+export interface CodegenOutput extends ObjectFile {
+  /** The approximate Home Assistant export. */
+  haYaml: string;
+}
+

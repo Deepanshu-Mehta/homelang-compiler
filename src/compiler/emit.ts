@@ -1,4 +1,4 @@
-import type { ObjectFile } from './codegen/bytecode';
+import type { CodegenOutput } from './codegen/bytecode';
 import type { Span } from './diagnostics';
 import type { IrOutput } from './ir/cfg';
 import { quadText } from './ir/quads';
@@ -48,8 +48,8 @@ function emitQuads(output: Pick<IrOutput, 'program'>): string {
 }
 
 /** The object file, with one instruction per line. */
-function emitObject(object: ObjectFile): string {
-  const { code, ...rest } = object;
+function emitObject(object: CodegenOutput): string {
+  const { code, haYaml: _haYaml, ...rest } = object;
   const head = JSON.stringify(rest, null, 2).replace(/\n}$/, '');
   const lines = code.map((instr, pc) => `    ${JSON.stringify(instr)}${pc < code.length - 1 ? ',' : ''}`);
   return `${head},\n  "code": [\n${lines.join('\n')}\n  ]\n}\n`;
@@ -64,7 +64,7 @@ export function emit(kind: EmitKind, stage: StageResult): string {
   if (stage.output === null) return '';
   if (kind === 'tokens') return emitTokens(stage.output as LexerOutput);
   if (kind === 'sim') return emitLog(stage.output as SimulationOutput);
-  if (kind === 'bytecode') return emitObject(stage.output as ObjectFile);
+  if (kind === 'bytecode') return emitObject(stage.output as CodegenOutput);
   if (kind === 'ir') return emitQuads(stage.output as IrOutput);
   if (kind === 'opt') return emitQuads(stage.output as OptimizerOutput);
   if (kind === 'symbols') return emitSymbols(stage.output as SemanticOutput);

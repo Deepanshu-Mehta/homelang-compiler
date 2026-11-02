@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { emit, VmDebugger, type Instr, type ObjectFile, type StageResult, type Value } from '../../compiler/index';
+import { emit, VmDebugger, type CodegenOutput, type Instr, type ObjectFile, type StageResult, type Value } from '../../compiler/index';
 import { Card, SkippedNote } from '../Card';
 
 const NO_VALUES: Record<string, Value> = {};
@@ -102,15 +102,16 @@ function VmDebuggerPanel({ object }: { object: ObjectFile }) {
   );
 }
 
-type Tab = 'bytecode' | 'debugger' | 'json';
+type Tab = 'bytecode' | 'debugger' | 'json' | 'yaml';
 
 export function CodegenCard({ stage }: { stage: StageResult }) {
-  const object = stage.output as ObjectFile | null;
+  const object = stage.output as CodegenOutput | null;
   const [tab, setTab] = useState<Tab>('bytecode');
   const tabs: readonly { id: Tab; label: string }[] = [
     { id: 'bytecode', label: 'Bytecode' },
     { id: 'debugger', label: 'VM debugger' },
     { id: 'json', label: 'Object file (JSON)' },
+    { id: 'yaml', label: 'Home Assistant YAML' },
   ];
   return (
     <Card id="codegen" badge="6" title="Code generation" status={stage.status}
@@ -127,6 +128,12 @@ export function CodegenCard({ stage }: { stage: StageResult }) {
           {tab === 'bytecode' && <Listing code={object.code} entries={new Map(object.rules.map((r) => [r.entry, r.id]))} />}
           {tab === 'debugger' && <VmDebuggerPanel object={object} />}
           {tab === 'json' && <pre class="code-block tall">{emit('bytecode', stage)}</pre>}
+          {tab === 'yaml' && (
+            <>
+              <p class="approximate" data-testid="yaml-note"><strong>Approximate.</strong> This shows how the rules could look in a real platform, but the meaning differs. Home Assistant triggers fire on their own entity only, so each value a rule reads becomes a trigger, and ELSE becomes a second automation.</p>
+              <pre class="code-block tall" data-testid="ha-yaml">{object.haYaml}</pre>
+            </>
+          )}
         </>
       )}
     </Card>
