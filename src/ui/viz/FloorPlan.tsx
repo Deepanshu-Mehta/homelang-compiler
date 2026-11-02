@@ -243,7 +243,7 @@ export function FloorPlan({ state, rooms, flashing = NONE, id }: FloorPlanProps)
   const prefix = id === 'output' ? '' : `${id}-`;
   const glowId = `glow-${id}`;
   const metrics: PlanMetrics = {
-    wall: 4, outer: 6, cellW: (large ? 124 : 88) * u, cellH: (large ? 108 : 74) * u, head: (large ? 34 : 24) * u,
+    wall: 4, outer: 6, cellW: (large ? 124 : 88) * u, cellH: (large ? 108 : 72) * u, head: (large ? 34 : 24) * u,
     symbolScale: large ? 1.3 * u : 0.8 * u, sensorRow: 28 * u, charW: 8.8 * u,
   };
 

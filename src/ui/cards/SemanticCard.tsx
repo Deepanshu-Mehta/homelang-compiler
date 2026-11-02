@@ -2,7 +2,7 @@ import { useMemo, useState } from 'preact/hooks';
 import type {
   Conflict, DepGraph, Diagnostic, SemanticOutput, StageResult, SymbolEntry, WitnessValue,
 } from '../../compiler/index';
-import { Card, SkippedNote } from '../Card';
+import { Card, SkippedNote, useWalkStep } from '../Card';
 import { DiagnosticRow, ErrorBox } from '../DiagnosticBox';
 import { GraphView, type GraphEdge, type GraphNode } from '../viz/GraphView';
 import { NumberLine } from '../viz/NumberLine';
@@ -151,6 +151,12 @@ interface SemanticCardProps {
 export function SemanticCard({ stage, source, onLoadWitness }: SemanticCardProps) {
   const output = stage.output as SemanticOutput | null;
   const firstError = stage.diagnostics.find((d) => d.severity === 'error');
+
+  // This stage has nothing to animate, so the class simply gets time to read it.
+  useWalkStep('semantic', (done) => {
+    const timer = setTimeout(done, 1500);
+    return () => clearTimeout(timer);
+  });
   const annotatedRoot = useMemo(() => (output ? astTree(output.annotated) : null), [output]);
 
   return (

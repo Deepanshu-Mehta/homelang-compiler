@@ -1,15 +1,19 @@
+import { useState } from 'preact/hooks';
 import type { OptimizerOutput, PassReport, StageResult } from '../../compiler/index';
-import { Card, SkippedNote } from '../Card';
+import { Card, SkippedNote, useWalkStep } from '../Card';
 import { DiffView } from '../viz/DiffView';
+
+/** How long the walkthrough shows each pass. */
+const PASS_MS = 1600;
 
 function byId(a: PassReport, b: PassReport): number {
   return a.id.localeCompare(b.id);
 }
 
-function PassPanel({ pass }: { pass: PassReport }) {
+function PassPanel({ pass, open }: { pass: PassReport; open: boolean }) {
   const count = pass.changes.length;
   return (
-    <details class={`pass ${count ? 'is-active' : ''}`} data-testid="pass" data-pass={pass.id}>
+    <details class={`pass ${count ? 'is-active' : ''} ${open ? 'is-walking' : ''}`} open={open} data-testid="pass" data-pass={pass.id}>
       <summary>
         <code>{pass.id}</code> {pass.title}
         <span class="pass-count">{count ? `${count} change${count === 1 ? '' : 's'}` : 'nothing to do'}</span>
@@ -34,6 +38,29 @@ function ordinal(n: number): string {
 
 export function OptimizerCard({ stage }: { stage: StageResult }) {
   const output = stage.output as OptimizerOutput | null;
+  const [walkingPass, setWalkingPass] = useState<string | null>(null);
+
+  // Opens each pass that changed something, in the order the passes really ran.
+  useWalkStep('optimizer', (done) => {
+    const active = output?.passes.filter((p) => p.changes.length > 0) ?? [];
+    if (active.length === 0) {
+      done();
+      return undefined;
+    }
+    let at = 0;
+    setWalkingPass(active[0]!.id);
+    const timer = setInterval(() => {
+      at++;
+      if (at >= active.length) {
+        clearInterval(timer);
+        done();
+      } else {
+        setWalkingPass(active[at]!.id);
+      }
+    }, PASS_MS);
+    return () => clearInterval(timer);
+  });
+
   return (
     <Card stage={stage}
       intro="Rewrites the code into fewer instructions without changing what the home does. Each pass has a reason it is safe, and a test runs the original and optimized programs side by side to check.">
@@ -44,7 +71,7 @@ export function OptimizerCard({ stage }: { stage: StageResult }) {
             {output.totals.quadsBefore} → {output.totals.quadsAfter} instructions, {output.totals.jumpsBefore - output.totals.jumpsAfter} jump{output.totals.jumpsBefore - output.totals.jumpsAfter === 1 ? '' : 's'} removed.
           </p>
           <div class="passes">
-            {[...output.passes].sort(byId).map((pass) => <PassPanel key={pass.id} pass={pass} />)}
+            {[...output.passes].sort(byId).map((pass) => <PassPanel key={pass.id} pass={pass} open={walkingPass === pass.id} />)}
           </div>
           <details class="reference">
             <summary>The final code</summary>

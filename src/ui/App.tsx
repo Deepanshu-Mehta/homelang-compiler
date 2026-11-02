@@ -20,6 +20,7 @@ import { scrollToCard, scrollToTop } from './scroll';
 import { SpanLink } from './SpanLink';
 import type { SourceSpan } from './trees';
 import { useSimulation } from './useSimulation';
+import { useWalkthrough } from './useWalkthrough';
 
 const DEBOUNCE_MS = 200;
 /** Half-typed code is usually broken, so a new failure waits a little longer. */
@@ -92,7 +93,24 @@ export function App() {
     setResult(compile(preset.source, options));
   }
 
-  const focusState = useMemo(() => ({ focused, setFocused, current: null }), [focused]);
+  // In focus mode the focused stage follows the walkthrough.
+  const focusedRef = useRef(focused);
+  focusedRef.current = focused;
+  const walk = useWalkthrough(result, (stage) => {
+    if (focusedRef.current) setFocused(stage);
+  });
+  const { current, run, finish, stop } = walk;
+
+  // Editing changes what the stages show, so the walkthrough ends there.
+  const walkedSource = useRef(source);
+  useEffect(() => {
+    if (walkedSource.current !== source) {
+      walkedSource.current = source;
+      stop();
+    }
+  }, [source, stop]);
+
+  const focusState = useMemo(() => ({ focused, setFocused, current, run, finish }), [focused, current, run, finish]);
   // A position only means something for the text it was picked in.
   const pickedPosition = picked?.source === result.source ? picked.position : null;
   const spanLink = useMemo(() => ({ setHoverSpan, pickedPosition }), [pickedPosition]);
@@ -101,7 +119,7 @@ export function App() {
     <FocusContext.Provider value={focusState}>
       <SpanLink.Provider value={spanLink}>
       <div class="app">
-        <PipelineBar stages={result.stages} current={null} />
+        <PipelineBar stages={result.stages} walk={walk} />
         <main class="layout">
           <aside class="left-pane">
             <header class="pane-head">

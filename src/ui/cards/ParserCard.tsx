@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import {
   analyzeGrammar, GRAMMAR, programText, renderProduction, type ParserOutput, type StageResult, type Token,
 } from '../../compiler/index';
-import { Card, Reference, SkippedNote } from '../Card';
+import { Card, Reference, SkippedNote, useWalkStep } from '../Card';
 import { DiagnosticRow, ErrorBox } from '../DiagnosticBox';
 import { astTree, parseTree } from '../trees';
 import { TreeView } from '../viz/TreeView';
@@ -10,6 +10,9 @@ import { TreeView } from '../viz/TreeView';
 const ANALYSIS = analyzeGrammar();
 const PRODUCTIONS = GRAMMAR.map(renderProduction);
 const PLAY_MS = 450;
+const WALK_MS = 160;
+/** The walkthrough shows the parser's opening moves, not all of them. */
+const WALK_STEPS = 24;
 
 function GrammarView({ active }: { active: string | undefined }) {
   return (
@@ -30,7 +33,13 @@ function GrammarView({ active }: { active: string | undefined }) {
 }
 
 /** Steps through the rules in the order the parser entered them. */
-function GrammarStepper({ output, tokens }: { output: ParserOutput; tokens: readonly Token[] }) {
+function GrammarStepper({ output, tokens, autoplay, onAutoplayEnd }: {
+  output: ParserOutput;
+  tokens: readonly Token[];
+  /** Goes up by one to play from the start, as the walkthrough does. */
+  autoplay: number;
+  onAutoplayEnd: () => void;
+}) {
   const { steps } = output;
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -51,6 +60,24 @@ function GrammarStepper({ output, tokens }: { output: ParserOutput; tokens: read
     const timer = setTimeout(() => setIndex(index + 1), PLAY_MS);
     return () => clearTimeout(timer);
   }, [playing, index, steps.length]);
+
+  useEffect(() => {
+    if (autoplay === 0) return undefined;
+    let at = 0;
+    const end = Math.min(steps.length - 1, WALK_STEPS);
+    setIndex(0);
+    const timer = setInterval(() => {
+      at++;
+      setIndex(at);
+      if (at >= end) {
+        clearInterval(timer);
+        onAutoplayEnd();
+      }
+    }, WALK_MS);
+    return () => clearInterval(timer);
+    // Only a new request should restart it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoplay]);
 
   return (
     <>
@@ -133,6 +160,20 @@ export function ParserCard({ stage, source, tokens, collectAll, onCollectAll }: 
   const astRoot = useMemo(() => (output ? astTree(output.ast) : null), [output]);
   const parseRoot = useMemo(() => (output ? parseTree(output, tokens) : null), [output, tokens]);
   const root = view === 'ast' ? astRoot : parseRoot;
+  const [grammarOpen, setGrammarOpen] = useState(false);
+  const [autoplay, setAutoplay] = useState(0);
+  const walkDone = useRef<() => void>(() => {});
+
+  useWalkStep('parser', (done) => {
+    if (!output || !clean) {
+      const timer = setTimeout(done, 1200);
+      return () => clearTimeout(timer);
+    }
+    walkDone.current = done;
+    setGrammarOpen(true);
+    setAutoplay((n) => n + 1);
+    return undefined;
+  });
 
   return (
     <Card stage={stage}
@@ -174,9 +215,9 @@ export function ParserCard({ stage, source, tokens, collectAll, onCollectAll }: 
         </>
       )}
 
-      <Reference title="The grammar the parser follows" open={stage.status === 'error'}>
+      <Reference title="The grammar the parser follows" open={stage.status === 'error' || grammarOpen}>
         {output && clean && output.steps.length > 1
-          ? <GrammarStepper output={output} tokens={tokens} />
+          ? <GrammarStepper output={output} tokens={tokens} autoplay={autoplay} onAutoplayEnd={() => walkDone.current()} />
           : <GrammarView active={undefined} />}
       </Reference>
 

@@ -1,9 +1,13 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { quadColumns, type IrOutput, type Quad, type StageResult } from '../../compiler/index';
-import { Card, SkippedNote } from '../Card';
+import { Card, SkippedNote, useWalkStep } from '../Card';
 import { GraphView, type GraphEdge, type GraphNode } from '../viz/GraphView';
 
 const PLAY_MS = 650;
+/** The walkthrough replays any program in about this long. */
+const WALK_TOTAL_MS = 9000;
+const WALK_MIN_STEP_MS = 90;
+const WALK_MAX_STEP_MS = 420;
 
 /** Which quads exist, and which jumps are filled, after a given animation step. */
 function stateAt(output: IrOutput, step: number) {
@@ -111,6 +115,26 @@ export function IrCard({ stage }: { stage: StageResult }) {
   useEffect(() => setStep(Number.MAX_SAFE_INTEGER), [output]);
   const last = (output?.steps.length ?? 1) - 1;
   const current = Math.min(step, last);
+
+  useWalkStep('ir', (done) => {
+    if (!output || last < 1) {
+      done();
+      return undefined;
+    }
+    setView('table');
+    setStep(0);
+    const pace = Math.min(WALK_MAX_STEP_MS, Math.max(WALK_MIN_STEP_MS, WALK_TOTAL_MS / last));
+    let at = 0;
+    const timer = setInterval(() => {
+      at++;
+      setStep(at);
+      if (at >= last) {
+        clearInterval(timer);
+        done();
+      }
+    }, pace);
+    return () => clearInterval(timer);
+  });
 
   return (
     <Card stage={stage}

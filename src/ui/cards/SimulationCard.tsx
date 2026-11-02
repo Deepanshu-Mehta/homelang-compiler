@@ -1,12 +1,17 @@
-import { useMemo, useState } from 'preact/hooks';
+import { useMemo, useRef, useState } from 'preact/hooks';
 import { formatMinutes, type LogEntry, type ObjectFile, type StageResult } from '../../compiler/index';
-import { Card, SkippedNote } from '../Card';
+import { Card, SkippedNote, useWalkStep } from '../Card';
 import { DiagnosticRow } from '../DiagnosticBox';
 import { EventLog } from '../EventLog';
 import { Controls } from '../Controls';
 import { devicesIn, PlayControls } from '../OutputPane';
 import type { Simulation } from '../useSimulation';
 import { FloorPlan } from '../viz/FloorPlan';
+
+/** Steps per second when the walkthrough plays a scenario. */
+const WALK_RATE = 60;
+const SWEEP_MS = 320;
+const SWEEP_STEPS = 12;
 
 function Timeline({ sim }: { sim: Simulation }) {
   const { session, state } = sim;
@@ -42,6 +47,52 @@ interface SimulationCardProps {
 export function SimulationCard({ stage, sim, object, onLine }: SimulationCardProps) {
   const [hovered, setHovered] = useState<LogEntry | null>(null);
   const flashing = useMemo(() => (sim ? devicesIn(hovered, sim) : new Set<string>()), [hovered, sim]);
+  const simRef = useRef(sim);
+  simRef.current = sim;
+
+  // Plays the scenario. A live program has none, so the first numeric sensor
+  // rises until a rule fires, which is the payoff the class is waiting for.
+  useWalkStep('simulation', (done) => {
+    const first = simRef.current;
+    if (!first) {
+      done();
+      return undefined;
+    }
+    if (first.session.hasScenario) {
+      first.reset();
+      const timer = setInterval(() => {
+        const live = simRef.current;
+        if (!live || live.session.finished) {
+          clearInterval(timer);
+          done();
+        } else {
+          live.step();
+        }
+      }, 1000 / WALK_RATE);
+      return () => clearInterval(timer);
+    }
+
+    const sensor = first.state.sensors.find((s) => typeof s.value === 'number');
+    if (!sensor) {
+      done();
+      return undefined;
+    }
+    const firedBefore = first.session.log.filter((e) => e.kind === 'fired').length;
+    let value = sensor.value as number;
+    let count = 0;
+    const timer = setInterval(() => {
+      const live = simRef.current;
+      value++;
+      count++;
+      live?.setSensor(sensor.name, value);
+      const fired = live?.session.log.filter((e) => e.kind === 'fired').length ?? 0;
+      if (fired > firedBefore || count >= SWEEP_STEPS) {
+        clearInterval(timer);
+        done();
+      }
+    }, SWEEP_MS);
+    return () => clearInterval(timer);
+  });
   return (
     <Card stage={stage}
       intro="The bytecode runs against a simulated home. Each change is one tick: the affected rules run, their commands are resolved, and every device change can trigger more rules.">

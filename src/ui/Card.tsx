@@ -1,6 +1,6 @@
 import type { ComponentChildren } from 'preact';
 import { createContext } from 'preact';
-import { useContext, useEffect } from 'preact/hooks';
+import { useContext, useEffect, useRef } from 'preact/hooks';
 import type { StageResult, StageStatus } from '../compiler/index';
 import { CheckIcon, CrossIcon, DashIcon, FocusIcon, WarnIcon } from './icons';
 
@@ -9,9 +9,29 @@ export interface FocusState {
   setFocused: (id: string | null) => void;
   /** The stage the walkthrough is on. */
   current: string | null;
+  /** Changes each time the current stage should run its animation. */
+  run: number;
+  /** Tells the walkthrough that the animation has ended. */
+  finish: () => void;
 }
 
-export const FocusContext = createContext<FocusState>({ focused: null, setFocused: () => {}, current: null });
+export const FocusContext = createContext<FocusState>({
+  focused: null, setFocused: () => {}, current: null, run: 0, finish: () => {},
+});
+
+/**
+ * Runs `start` when the walkthrough reaches this stage. `start` gets a function
+ * to call when its animation ends, and may return a cleanup.
+ */
+export function useWalkStep(stage: string, start: (done: () => void) => (() => void) | void): void {
+  const { current, run, finish } = useContext(FocusContext);
+  const latest = useRef(start);
+  latest.current = start;
+  useEffect(() => {
+    if (current !== stage) return undefined;
+    return latest.current(finish) ?? undefined;
+  }, [current, run, stage, finish]);
+}
 
 export const STATUS_WORD: Record<StageStatus, string> = {
   ok: 'Passed', warn: 'Passed with warnings', error: 'Failed', skipped: 'Skipped',

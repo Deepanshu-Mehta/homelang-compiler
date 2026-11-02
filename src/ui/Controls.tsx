@@ -15,8 +15,8 @@ function SensorControl({ sensor, sim, prefix }: { sensor: SensorState; sim: Simu
   const { name, value, states, unit } = sensor;
   if (states) {
     return (
-      <div class="control">
-        <span class="control-label"><span class="control-name">{name}</span></span>
+      <div class="control is-enum">
+        <span class="control-name">{name}</span>
         <div class="segmented" role="group" aria-label={name}>
           {states.map((state) => (
             <button key={state} class={value === state ? 'is-on' : ''} aria-pressed={value === state}

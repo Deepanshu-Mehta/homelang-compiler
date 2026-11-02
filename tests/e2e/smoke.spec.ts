@@ -172,3 +172,117 @@ test('an empty program says there is nothing to simulate', async ({ page }) => {
   await page.keyboard.press('Backspace');
   await expect(page.getByTestId('no-rules')).toBeVisible();
 });
+
+test('trees run top-down, and link to the editor both ways', async ({ page }) => {
+  await page.goto('/');
+  const card = page.locator('#card-parser');
+  const root = await card.locator('.tree-node[data-label="Program"]').boundingBox();
+  const rule = await card.locator('.tree-node[data-label^="Rule R1"]').boundingBox();
+  expect(rule!.y).toBeGreaterThan(root!.y + root!.height);
+
+  await card.locator('.tree-node[data-label="Compare(>)"]').hover();
+  await expect(page.locator('.cm-span-highlight').first()).toContainText('TEMPERATURE');
+
+  await page.locator('.cm-line').first().click({ position: { x: 60, y: 8 } });
+  await expect(card.locator('.tree-node.is-picked')).toHaveAttribute('data-label', 'Ref TEMPERATURE');
+});
+
+test('a tree fits, resets, and keeps labels at true size until asked', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('preset-select').selectOption('advanced');
+  const card = page.locator('#card-parser');
+  await card.getByTestId('parse-tree-toggle').click();
+  await expect(card.getByTestId('tree-zoom')).toHaveText('100%');
+  await card.getByTestId('tree-fit').click();
+  await expect(card.getByTestId('tree-zoom')).not.toHaveText('100%');
+  await card.getByTestId('tree-reset').click();
+  await expect(card.getByTestId('tree-zoom')).toHaveText('100%');
+});
+
+test('tokens group by source line, and the automaton stays in view', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('preset-select').selectOption('advanced');
+  await expect(page.locator('.token-lines')).toHaveClass(/is-compact/);
+  await page.getByTestId('tokens-expanded').click();
+  await expect(page.locator('.token-lines')).not.toHaveClass(/is-compact/);
+  const lastChip = page.getByTestId('token-chip').last();
+  await lastChip.scrollIntoViewIfNeeded();
+  await lastChip.click();
+  await expect(page.getByTestId('trace-panel')).toBeInViewport({ ratio: 1 });
+});
+
+test('the walkthrough goes stage by stage, and stops at a failure', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('walk-next').click();
+  await expect(page.locator('.step.is-current')).toHaveAttribute('data-stage', 'lexer');
+  await expect(page.locator('#card-lexer')).toHaveClass(/is-current/);
+  await page.getByTestId('walk-next').click();
+  await expect(page.locator('.step.is-current')).toHaveAttribute('data-stage', 'parser');
+  await expect(page.getByTestId('grammar')).toBeVisible();
+  await page.getByTestId('walk-prev').click();
+  await expect(page.locator('.step.is-current')).toHaveAttribute('data-stage', 'lexer');
+
+  await page.getByTestId('preset-select').selectOption('error-P201-missing-then');
+  await page.getByTestId('walk-next').click();
+  await page.getByTestId('walk-next').click();
+  await expect(page.locator('.step.is-current')).toHaveAttribute('data-stage', 'parser');
+  await expect(page.getByTestId('walk-next')).toBeDisabled();
+});
+
+test('Play walks the brief through to the AC turning on', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('walk-play').click();
+  await expect(page.getByTestId('device-AC')).toHaveAttribute('data-state', 'ON', { timeout: 45000 });
+  await expect(page.getByTestId('output-event-log')).toContainText('Rule R1 fired: TURN_ON AC');
+});
+
+test('focus mode takes the stage full width, and Escape leaves it', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('focus-simulation').click();
+  const box = await page.locator('#card-simulation').boundingBox();
+  expect(box!.width).toBeGreaterThanOrEqual(1270);
+  await expect(page.getByTestId('large-floor-plan')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#card-simulation')).not.toHaveClass(/is-focused/);
+});
+
+test('every device state is written in words, and changes with the sliders', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByTestId('device-state-AC')).toHaveText('OFF 26 °C');
+  await expect(page.getByTestId('device-state-DOOR')).toHaveText('UNLOCKED');
+  await page.getByTestId('sensor-slider-TEMPERATURE').fill('31');
+  await expect(page.getByTestId('device-state-AC')).toHaveText('ON 26 °C');
+});
+
+test('hovering a squiggle shows the diagnostic code', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('preset-select').selectOption('error-S301-unknown-device');
+  await page.locator('.cm-lintRange-error').first().hover();
+  await expect(page.locator('.cm-tooltip-lint')).toContainText('S301');
+});
+
+test('an example that fails scrolls to its stage; typing never scrolls', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('preset-select').selectOption('error-S301-unknown-device');
+  await expect(page.locator('#card-semantic')).toBeInViewport();
+  await page.waitForTimeout(1000); // let the smooth scroll finish before resetting it
+  await page.locator('.right-pane').evaluate((el) => el.scrollTo({ top: 0 }));
+  await page.locator('.cm-content').click();
+  await page.keyboard.press('ControlOrMeta+End');
+  await page.keyboard.type('X');
+  await page.waitForTimeout(900);
+  expect(await page.locator('.right-pane').evaluate((el) => el.scrollTop)).toBe(0);
+});
+
+test('the page never scrolls sideways at 1280×720', async ({ page }) => {
+  await page.goto('/');
+  for (const preset of ['brief', 'advanced', 'error-P203-unbalanced-paren']) {
+    await page.getByTestId('preset-select').selectOption(preset);
+    const sizes = await page.evaluate(() => ({
+      bar: document.querySelector('.topbar')!.getBoundingClientRect().width,
+      layout: document.querySelector('.layout')!.getBoundingClientRect().width,
+      page: document.documentElement.scrollWidth,
+    }));
+    expect(sizes).toEqual({ bar: 1280, layout: 1280, page: 1280 });
+  }
+});

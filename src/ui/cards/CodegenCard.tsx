@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { emit, VmDebugger, type CodegenOutput, type Instr, type ObjectFile, type StageResult, type Value } from '../../compiler/index';
-import { Card, SkippedNote } from '../Card';
+import { Card, SkippedNote, useWalkStep } from '../Card';
 
 const NO_VALUES: Record<string, Value> = {};
 
@@ -22,7 +22,16 @@ function Listing({ code, pc, entries }: { code: readonly Instr[]; pc?: number | 
   );
 }
 
-function VmDebuggerPanel({ object }: { object: ObjectFile }) {
+/** The pace of the VM in the walkthrough, and how many instructions it shows. */
+const WALK_STEP_MS = 320;
+const WALK_MAX_INSTRUCTIONS = 24;
+
+function VmDebuggerPanel({ object, autoplay, onAutoplayEnd }: {
+  object: ObjectFile;
+  /** Goes up by one to step through from the start, as the walkthrough does. */
+  autoplay: number;
+  onAutoplayEnd: () => void;
+}) {
   const [ruleId, setRuleId] = useState(object.rules[0]?.id ?? '');
   const rule = object.rules.find((r) => r.id === ruleId) ?? object.rules[0];
   // Values belong to one compile result, so a new program starts from defaults.
@@ -36,6 +45,27 @@ function VmDebuggerPanel({ object }: { object: ObjectFile }) {
     () => (rule ? new VmDebugger(object, rule.id, values, wasTrue) : null),
     [object, rule, values, wasTrue],
   );
+
+  useEffect(() => {
+    if (autoplay === 0) return undefined;
+    if (!vm) {
+      onAutoplayEnd();
+      return undefined;
+    }
+    let count = 0;
+    const timer = setInterval(() => {
+      vm.step();
+      count++;
+      redraw((n) => n + 1);
+      if (vm.done || count >= WALK_MAX_INSTRUCTIONS) {
+        clearInterval(timer);
+        onAutoplayEnd();
+      }
+    }, WALK_STEP_MS);
+    return () => clearInterval(timer);
+    // Only a new request should restart it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoplay]);
 
   if (!vm || !rule) return <p class="muted">There are no rules to run.</p>;
   const entries = new Map(object.rules.map((r) => [r.entry, r.id]));
@@ -107,6 +137,20 @@ type Tab = 'bytecode' | 'debugger' | 'json' | 'yaml';
 export function CodegenCard({ stage }: { stage: StageResult }) {
   const object = stage.output as CodegenOutput | null;
   const [tab, setTab] = useState<Tab>('bytecode');
+  const [autoplay, setAutoplay] = useState(0);
+  const walkDone = useRef<() => void>(() => {});
+
+  useWalkStep('codegen', (done) => {
+    if (!object) {
+      done();
+      return undefined;
+    }
+    walkDone.current = done;
+    setTab('debugger');
+    setAutoplay((n) => n + 1);
+    return undefined;
+  });
+
   const tabs: readonly { id: Tab; label: string }[] = [
     { id: 'bytecode', label: 'Bytecode' },
     { id: 'debugger', label: 'VM debugger' },
@@ -126,7 +170,7 @@ export function CodegenCard({ stage }: { stage: StageResult }) {
             ))}
           </div>
           {tab === 'bytecode' && <Listing code={object.code} entries={new Map(object.rules.map((r) => [r.entry, r.id]))} />}
-          {tab === 'debugger' && <VmDebuggerPanel object={object} />}
+          {tab === 'debugger' && <VmDebuggerPanel object={object} autoplay={autoplay} onAutoplayEnd={() => walkDone.current()} />}
           {tab === 'json' && <pre class="code-block tall">{emit('bytecode', stage)}</pre>}
           {tab === 'yaml' && (
             <>

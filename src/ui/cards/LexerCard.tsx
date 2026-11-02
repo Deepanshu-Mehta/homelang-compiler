@@ -3,7 +3,7 @@ import {
   DFAS, DFA_BY_NAME, TOKEN_TABLE, type DfaTrace, type LexerOutput, type StageResult, type Token,
   type TokenCategory,
 } from '../../compiler/index';
-import { Card, Reference } from '../Card';
+import { Card, Reference, useWalkStep } from '../Card';
 import { DiagnosticRow, ErrorBox } from '../DiagnosticBox';
 import { DfaDiagram } from '../viz/DfaDiagram';
 
@@ -110,6 +110,19 @@ export function LexerCard({ stage, source }: { stage: StageResult; source: strin
     setSelectedIndex(index);
     setShown(0);
   }
+
+  // The walkthrough shows the most interesting token: one with several states.
+  useWalkStep('lexer', (done) => {
+    const quantity = tokens.findIndex((t) => t.type === 'QUANTITY' || t.type === 'TIME_LIT' || t.type === 'NUMBER');
+    const index = Math.max(0, quantity);
+    if (tokens.length === 0) {
+      done();
+      return undefined;
+    }
+    selectToken(index);
+    const timer = setTimeout(done, ((tokens[index]?.trace?.steps.length ?? 1) + 1) * STEP_MS);
+    return () => clearTimeout(timer);
+  });
 
   const visited = new Set<string>();
   let active: string | undefined;
