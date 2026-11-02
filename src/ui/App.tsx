@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import {
-  compile, stageResult, type CompileOptions, type LexerOutput, type StageResult,
+  compile, stageResult, type CompileOptions, type LexerOutput, type StageResult, type WitnessValue,
 } from '../compiler/index';
 import { Card, SkippedNote } from './Card';
 import { DomainCard } from './cards/DomainCard';
@@ -35,6 +35,7 @@ export function App() {
   const [loaded, setLoaded] = useState<LoadedText>({ text: source });
   const [presetId, setPresetId] = useState('');
   const [collectAllErrors, setCollectAllErrors] = useState(false);
+  const [, setWitness] = useState<readonly WitnessValue[]>([]);
   const options: CompileOptions = useMemo(() => ({ collectAllErrors }), [collectAllErrors]);
   const [result, setResult] = useState(() => compile(source, options));
   const compiledWith = useRef(options);
@@ -97,7 +98,7 @@ export function App() {
             <LexerCard stage={lexerStage} source={result.source} />
             <ParserCard stage={stageResult(result, 'parser')} source={result.source} tokens={tokens}
               collectAll={collectAllErrors} onCollectAll={setCollectAllErrors} />
-            <SemanticCard stage={stageResult(result, 'semantic')} source={result.source} />
+            <SemanticCard stage={stageResult(result, 'semantic')} source={result.source} onLoadWitness={setWitness} />
             {result.stages.slice(3).map((stage) => <PendingCard key={stage.stage} stage={stage} />)}
           </div>
         </div>

@@ -2,8 +2,8 @@
   {"name":"TIME","displayName":"TIME","kind":"BUILTIN","builtin":true,"useCount":1,"readBy":["R1"],"writtenBy":[],"typeName":"TIME"},
   {"name":"DAY","displayName":"DAY","kind":"BUILTIN","builtin":true,"useCount":0,"readBy":[],"writtenBy":[],"typeName":"DAY"},
   {"name":"LIVING_ROOM","displayName":"LIVING_ROOM","kind":"ROOM","builtin":false,"useCount":0,"readBy":[],"writtenBy":[],"declared":"2:6"},
-  {"name":"LAMP","displayName":"LAMP","kind":"DEVICE","builtin":false,"useCount":2,"readBy":[],"writtenBy":["R1","R1"],"typeName":"LIGHT","room":"LIVING_ROOM","declared":"3:8"},
-  {"name":"CEILING_FAN","displayName":"CEILING_FAN","kind":"DEVICE","builtin":false,"useCount":2,"readBy":[],"writtenBy":["R2","R2"],"typeName":"FAN","room":"LIVING_ROOM","declared":"4:8"},
+  {"name":"LAMP","displayName":"LAMP","kind":"DEVICE","builtin":false,"useCount":2,"readBy":[],"writtenBy":["R1"],"typeName":"LIGHT","room":"LIVING_ROOM","declared":"3:8"},
+  {"name":"CEILING_FAN","displayName":"CEILING_FAN","kind":"DEVICE","builtin":false,"useCount":2,"readBy":[],"writtenBy":["R2"],"typeName":"FAN","room":"LIVING_ROOM","declared":"4:8"},
   {"name":"LUX","displayName":"LUX","kind":"SENSOR","builtin":false,"useCount":3,"readBy":["R1"],"writtenBy":[],"typeName":"LIGHT_SENSOR","room":"LIVING_ROOM","dim":"illuminance","unit":"LUX","declared":"5:8"},
   {"name":"HUM","displayName":"HUM","kind":"SENSOR","builtin":false,"useCount":5,"readBy":["R2"],"writtenBy":[],"typeName":"HUMIDITY_SENSOR","room":"LIVING_ROOM","dim":"percent","unit":"%","declared":"6:8"},
   {"name":"PIR","displayName":"PIR","kind":"SENSOR","builtin":false,"useCount":5,"readBy":["R1","R2"],"writtenBy":[],"typeName":"MOTION_SENSOR","room":"LIVING_ROOM","declared":"7:8"}

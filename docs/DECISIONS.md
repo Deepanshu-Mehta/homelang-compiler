@@ -47,6 +47,8 @@
 | D24 | Numeric BETWEEN was unspecified. | Inclusive, `lo ≤ x ≤ hi`, which is how people read `TEMP BETWEEN 20 AND 25`. Time windows stay `[a, b)` with midnight wrap. Numeric `lo > hi` never wraps and gives a W409 "empty range" warning. |
 
 | D40 | `TEMP + 2F` is ambiguous. Converted as a temperature, 2 °F is −16.67 °C; in a sum it means a difference of about 1.1 °C. | °F arithmetic is S310, with a hint to use °C. Plain comparison with °F values still works and converts at compile time. |
+| D41 | W404 as written would flag two `WHEN` rules with different events, which never run at the same moment. | State rules can overlap. An event or time rule conflicts only with a rule started by the same trigger. This matches §1.3, which defines the bug as overlapping state rules. |
+| D42 | The spec says an SCC is guarded or not, but not what counts as a guard. | An edge is guarded if the target rule has a condition, or the write is inside a nested IF, follows a WAIT, or is a TOGGLE. A WAIT means the cascade cannot be instant, and TOGGLE's effect depends on the current state. |
 
 ## Runtime and optimizer
 

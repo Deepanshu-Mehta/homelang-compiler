@@ -290,7 +290,11 @@ class Checker {
         `${this.label(symbol)} does not support ${action.op}. Supported: ${type.actions.join(', ')}.`);
       return;
     }
-    symbol.writtenBy.push(this.currentRule);
+    this.noteWrite(symbol);
+  }
+
+  private noteWrite(symbol: SymbolEntry): void {
+    if (!symbol.writtenBy.includes(this.currentRule)) symbol.writtenBy.push(this.currentRule);
   }
 
   private checkSet(action: SetAttr): void {
@@ -307,7 +311,7 @@ class Checker {
         `${type.name} has no attribute ${action.attr}${names.length ? '. ' : '; '}${advice}`);
       return;
     }
-    symbol.writtenBy.push(this.currentRule);
+    this.noteWrite(symbol);
     if (attribute.kind === 'enum') this.checkEnumAttribute(action, attribute);
     else this.checkNumericAttribute(action, attribute);
   }

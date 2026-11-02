@@ -75,3 +75,14 @@ test('a semantic error stops at stage 3 and the symbol table greys built-ins', a
   await expect(page.getByTestId('stopped-box')).toContainText('Stopped at stage 3: Semantic analysis');
   await expect(page.getByTestId('stopped-box')).toContainText("Unknown device 'HEATPUMP'");
 });
+
+test('the semantic card shows number lines, a witness and a red cycle', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByTestId('number-lines').locator('figure')).toHaveCount(1);
+  await page.getByTestId('preset-select').selectOption('conflict');
+  await expect(page.getByTestId('load-witness')).toBeVisible();
+  await expect(page.getByTestId('conflict-matrix').locator('td.is-conflict')).toHaveCount(2);
+  await page.getByTestId('preset-select').selectOption('cascade');
+  await expect(page.locator('[data-stage="semantic"]')).toHaveAttribute('data-status', 'warn');
+  await expect(page.getByTestId('graph').first()).toBeVisible();
+});

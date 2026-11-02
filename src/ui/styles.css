@@ -207,3 +207,21 @@ tr.is-builtin code { color: var(--ink-3); }
 .diagnostic-group h4 { margin-top: 8px; font-family: var(--mono); font-size: 12.5px; }
 .diagnostic.sev-info { border-color: var(--blue); }
 .error-box.sev-info { border-color: var(--blue); }
+
+.graph { border: 1px solid var(--line); border-radius: 7px; background: var(--paper); }
+.number-lines { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 4px 16px; }
+.number-line { margin: 0; }
+.number-line figcaption { font-size: 12.5px; }
+.number-line svg { display: block; width: 100%; height: auto; }
+.nl-axis { stroke: var(--ink-3); stroke-width: 1.2; }
+.nl-band { fill: #bfe3cb; }
+.nl-open { fill: var(--card); stroke: var(--green); stroke-width: 1.6; }
+.nl-closed { fill: var(--green); }
+.nl-tick { font: 400 9.5px var(--mono); fill: var(--ink-2); }
+table.matrix { width: auto; }
+table.matrix th, table.matrix td { text-align: center; padding: 3px 9px; border: 1px solid var(--line); font-size: 12px; }
+table.matrix td.is-self { background: var(--line); }
+table.matrix td.is-conflict { background: var(--red-soft); color: var(--red); font-weight: 700; }
+.conflict-list { list-style: none; margin: 8px 0; padding: 0; font-size: 13px; }
+.conflict-list li { display: flex; gap: 10px; align-items: center; justify-content: space-between; padding: 4px 0; }
+.small-button { flex: none; border: 1px solid var(--blue); color: var(--blue); background: var(--card); border-radius: 6px; padding: 2px 9px; cursor: pointer; font-size: 12.5px; }

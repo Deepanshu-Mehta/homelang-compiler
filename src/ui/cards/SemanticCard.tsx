@@ -1,7 +1,11 @@
 import { useMemo, useState } from 'preact/hooks';
-import type { Diagnostic, SemanticOutput, StageResult, SymbolEntry } from '../../compiler/index';
+import type {
+  Conflict, DepGraph, Diagnostic, SemanticOutput, StageResult, SymbolEntry, WitnessValue,
+} from '../../compiler/index';
 import { Card, SkippedNote } from '../Card';
 import { DiagnosticRow, ErrorBox } from '../DiagnosticBox';
+import { GraphView, type GraphEdge, type GraphNode } from '../viz/GraphView';
+import { NumberLine } from '../viz/NumberLine';
 import { TreeView } from '../viz/TreeView';
 
 type SortKey = 'name' | 'kind' | 'typeName' | 'room' | 'useCount';
@@ -77,7 +81,73 @@ function DiagnosticGroups({ diagnostics }: { diagnostics: readonly Diagnostic[] 
   );
 }
 
-export function SemanticCard({ stage, source }: { stage: StageResult; source: string }) {
+function ConflictMatrix({ rules, conflicts, onLoadWitness }: {
+  rules: readonly string[];
+  conflicts: readonly Conflict[];
+  onLoadWitness: (witness: readonly WitnessValue[]) => void;
+}) {
+  const find = (a: string, b: string) => conflicts.find((c) =>
+    (c.ruleA === a && c.ruleB === b) || (c.ruleA === b && c.ruleB === a));
+  return (
+    <>
+      <div class="table-scroll">
+        <table class="matrix" data-testid="conflict-matrix">
+          <thead><tr><th />{rules.map((r) => <th key={r}>{r}</th>)}</tr></thead>
+          <tbody>
+            {rules.map((a) => (
+              <tr key={a}>
+                <th>{a}</th>
+                {rules.map((b) => <td key={b} class={a === b ? 'is-self' : find(a, b) ? 'is-conflict' : ''}>{a !== b && find(a, b) ? '✕' : ''}</td>)}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {conflicts.length === 0 && <p class="muted small">No two rules of equal priority fight over a device.</p>}
+      <ul class="conflict-list">
+        {conflicts.map((c) => (
+          <li key={`${c.ruleA}-${c.ruleB}`}>
+            <span><code>{c.ruleA}</code> and <code>{c.ruleB}</code> set <code>{c.target}</code> to {c.valueA} and {c.valueB}, for example at {c.witness.map((w) => w.text).join(', ') || 'the same event'}.</span>
+            {c.witness.length > 0 && (
+              <button class="small-button" data-testid="load-witness" onClick={() => onLoadWitness(c.witness)}>Load witness</button>
+            )}
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
+function DependencyGraph({ graph }: { graph: DepGraph }) {
+  const { nodes, edges } = useMemo(() => {
+    const inCycle = new Set(graph.cycles.flat());
+    const graphNodes: GraphNode[] = graph.nodes.map((n) => ({
+      id: n.id, label: n.label, ...(inCycle.has(n.id) && { tone: 'bad' as const }),
+    }));
+    const graphEdges: GraphEdge[] = graph.edges.map((e) => {
+      const cycleEdge = !e.physical && inCycle.has(e.from) && inCycle.has(e.to);
+      const tone = e.physical ? ('dashed' as const) : cycleEdge ? ('red' as const) : undefined;
+      return { from: e.from, to: e.to, label: e.via, ...(tone && { tone }) };
+    });
+    return { nodes: graphNodes, edges: graphEdges };
+  }, [graph]);
+
+  if (graph.nodes.length === 0) return <p class="muted small">There are no rules yet.</p>;
+  return (
+    <>
+      <GraphView nodes={nodes} edges={edges} />
+      <p class="muted small">An arrow means the first rule can start the second. Red marks a cycle. Dashed arrows are physical effects, such as the AC cooling the room; they never count as loops.</p>
+    </>
+  );
+}
+
+interface SemanticCardProps {
+  stage: StageResult;
+  source: string;
+  onLoadWitness: (witness: readonly WitnessValue[]) => void;
+}
+
+export function SemanticCard({ stage, source, onLoadWitness }: SemanticCardProps) {
   const output = stage.output as SemanticOutput | null;
   const firstError = stage.diagnostics.find((d) => d.severity === 'error');
 
@@ -106,6 +176,23 @@ export function SemanticCard({ stage, source }: { stage: StageResult; source: st
           <h3>The annotated AST</h3>
           <p class="muted small">The same tree as the parser's, now with a type and unit on every value.</p>
           <TreeView root={output.annotatedView} />
+          {output.truthLines.length > 0 && (
+            <>
+              <h3>When each condition is true</h3>
+              <p class="muted small">Interval analysis turns a condition into ranges. Each shaded band is where the rule's condition holds: a hollow dot excludes that exact value, a solid dot includes it.</p>
+              <div class="number-lines" data-testid="number-lines">
+                {output.truthLines.map((line, i) => <NumberLine key={i} line={line} />)}
+              </div>
+            </>
+          )}
+          {output.annotated.rules.length > 1 && (
+            <>
+              <h3>Which rules fight</h3>
+              <ConflictMatrix rules={output.annotated.rules.map((r) => r.id)} conflicts={output.conflicts} onLoadWitness={onLoadWitness} />
+            </>
+          )}
+          <h3>Which rules can start which</h3>
+          <DependencyGraph graph={output.depGraph} />
         </>
       )}
     </Card>
