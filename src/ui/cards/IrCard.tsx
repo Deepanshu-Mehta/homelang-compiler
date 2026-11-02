@@ -62,11 +62,11 @@ function Stepper({ output, step, setStep }: { output: IrOutput; step: number; se
   }, [playing, step, last, setStep]);
 
   return (
-    <div class="stepper">
+    <div class="toolbar">
       <button onClick={() => setStep(0)} disabled={step === 0}>Restart</button>
       <button onClick={() => setPlaying(!playing)}>{playing ? 'Pause' : 'Play'}</button>
       <button data-testid="ir-step" onClick={() => setStep(Math.min(last, step + 1))} disabled={step >= last}>Step</button>
-      <span class="stepper-note" data-testid="ir-note">
+      <span class="toolbar-note" data-testid="ir-note">
         {step + 1} of {output.steps.length}: <code>{output.steps[step]?.note}</code>
       </span>
     </div>
@@ -113,13 +113,13 @@ export function IrCard({ stage }: { stage: StageResult }) {
   const current = Math.min(step, last);
 
   return (
-    <Card id="ir" badge="4" title="Intermediate code" status={stage.status}
+    <Card stage={stage}
       intro="Each rule becomes simple instructions with at most three operands. AND, OR and NOT produce no instructions at all: they turn into jumps, so a test that cannot change the answer is skipped.">
       {stage.status === 'skipped' && <SkippedNote stage={stage} />}
       {output && output.program.quads.length === 0 && <p class="muted">There are no rules to translate.</p>}
       {output && output.program.quads.length > 0 && (
         <>
-          <div class="view-toggle" role="group" aria-label="Code view">
+          <div class="segmented" role="group" aria-label="Code view">
             <button class={view === 'table' ? 'is-on' : ''} onClick={() => setView('table')}>Quadruples</button>
             <button class={view === 'cfg' ? 'is-on' : ''} data-testid="cfg-toggle" onClick={() => setView('cfg')}>Control-flow graph</button>
           </div>

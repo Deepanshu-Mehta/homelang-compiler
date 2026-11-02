@@ -84,7 +84,7 @@ test('a pipeline badge scrolls to its card', async ({ page }) => {
 
 test('the primer opens, and the Home Assistant tab says it is approximate', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Read the primer' }).click();
+  await page.getByRole('button', { name: 'Open the primer' }).click();
   await expect(page.locator('#card-domain')).toContainText('Ten ways automations go wrong');
   await page.addStyleTag({ content: FLAT_PAGE });
   await page.locator('#card-domain').screenshot({ path: 'test-results/cards/domain-open.png' });

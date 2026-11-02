@@ -85,7 +85,7 @@ export function LexerCard({ stage, source }: { stage: StageResult; source: strin
   const firstError = stage.diagnostics[0];
 
   return (
-    <Card id="lexer" badge="1" title="Lexer" status={stage.status}
+    <Card stage={stage}
       intro="Reads the program one character at a time and groups the characters into tokens: keywords, names, numbers with units, operators.">
       {output && (
         <p class="stat-line" data-testid="lexer-stats">
@@ -111,7 +111,7 @@ export function LexerCard({ stage, source }: { stage: StageResult; source: strin
         </div>
       )}
 
-      <details class="doc-section">
+      <details class="reference">
         <summary>The tokens HomeLang has</summary>
         <div class="table-scroll">
           <table>
@@ -125,13 +125,13 @@ export function LexerCard({ stage, source }: { stage: StageResult; source: strin
         </div>
       </details>
 
-      <details class="doc-section">
+      <details class="reference">
         <summary>Maximal munch</summary>
         <p>The lexer always takes the longest match. <code>&gt;=</code> is one GE token, not GT then ASSIGN. <code>30C</code> is one QUANTITY, not a NUMBER then a name. The automaton keeps moving while it has a transition and remembers the last accepting state it passed.</p>
         <p>If it runs out of moves in a non-accepting state, it rolls back. In <code>PRIORITY 2:</code> the colon could start a time, so the automaton reads it and moves to q5. The next character is not a digit, so it falls back to q1, emits NUMBER, and re-scans the colon as COLON.</p>
       </details>
 
-      <details class="doc-section">
+      <details class="reference">
         <summary>All the automata</summary>
         <div class="dfa-grid">
           {DFAS.map((dfa) => (

@@ -1,6 +1,5 @@
 import { useState } from 'preact/hooks';
 import { DEVICE_TYPES, SENSOR_TYPES } from '../../compiler/index';
-import { Card } from '../Card';
 
 const TAP_BUGS: readonly [string, string, string][] = [
   ['Infinite Loop', 'Rule A triggers B, and B triggers A.', 'Tarjan SCC finds it (S317, W407). The runtime stops at depth 16.'],
@@ -19,14 +18,17 @@ function eventName(event: string): string {
   return event.replace('_', ' ');
 }
 
-export function DomainCard() {
+/** One line above Stage 1, which opens into the full explanation. */
+export function Primer() {
   const [open, setOpen] = useState(false);
   return (
-    <Card id="domain" badge="★" title="How a smart home thinks"
-      intro="A smart home is a loop: sensors report, rules decide, devices act. HomeLang rules are written the way people describe them: IF it is hot THEN turn on the AC.">
-      <button class="link-button" onClick={() => setOpen(!open)} aria-expanded={open}>
-        {open ? 'Hide the primer' : 'Read the primer'}
-      </button>
+    <section class="primer-section" id="card-domain" data-card="domain">
+      <p class="primer-line">
+        <span>A smart home is a loop: sensors report, rules decide, devices act.</span>
+        <button class="link-button" onClick={() => setOpen(!open)} aria-expanded={open}>
+          {open ? 'Close the primer' : 'Open the primer'}
+        </button>
+      </p>
       {open && (
         <div class="primer">
           <h3>Devices and sensors</h3>
@@ -77,6 +79,6 @@ export function DomainCard() {
           </div>
         </div>
       )}
-    </Card>
+    </section>
   );
 }

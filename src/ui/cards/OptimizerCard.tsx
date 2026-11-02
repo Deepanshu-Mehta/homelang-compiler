@@ -35,7 +35,7 @@ function ordinal(n: number): string {
 export function OptimizerCard({ stage }: { stage: StageResult }) {
   const output = stage.output as OptimizerOutput | null;
   return (
-    <Card id="optimizer" badge="5" title="Optimizer" status={stage.status}
+    <Card stage={stage}
       intro="Rewrites the code into fewer instructions without changing what the home does. Each pass has a reason it is safe, and a test runs the original and optimized programs side by side to check.">
       {stage.status === 'skipped' && <SkippedNote stage={stage} />}
       {output && (
@@ -46,7 +46,7 @@ export function OptimizerCard({ stage }: { stage: StageResult }) {
           <div class="passes">
             {[...output.passes].sort(byId).map((pass) => <PassPanel key={pass.id} pass={pass} />)}
           </div>
-          <details class="doc-section">
+          <details class="reference">
             <summary>The final code</summary>
             <pre class="code-block">{output.passes.at(-1)?.after.join('\n') || '(no code)'}</pre>
           </details>

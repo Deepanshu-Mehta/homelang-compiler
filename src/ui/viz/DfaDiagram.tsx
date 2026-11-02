@@ -38,7 +38,7 @@ function SelfLoop({ state, label }: { state: DfaState; label: string }) {
   return (
     <g class="dfa-edge">
       <path d={`M ${x - 9} ${top + 2} C ${x - 26} ${top - 26}, ${x + 26} ${top - 26}, ${x + 9} ${top + 2}`}
-        marker-end="url(#dfa-arrow)" />
+        marker-end="url(#arrowhead)" />
       <text x={x} y={top - 24} text-anchor="middle">{label}</text>
     </g>
   );
@@ -60,7 +60,7 @@ function Arrow({ edge, curved }: { edge: DrawnEdge; curved: boolean }) {
   const cy = (y1 + y2) / 2 + ux * bend;
   return (
     <g class="dfa-edge">
-      <path d={`M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`} marker-end="url(#dfa-arrow)" />
+      <path d={`M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`} marker-end="url(#arrowhead)" />
       <text x={cx} y={cy - 5} text-anchor="middle">{label}</text>
     </g>
   );
@@ -77,12 +77,12 @@ export function DfaDiagram({ dfa, visited, active }: DfaDiagramProps) {
     <svg class="dfa" viewBox={`0 0 ${dfa.width} ${dfa.height}`} style={{ maxWidth: `${dfa.width}px` }} role="img"
       aria-label={`State diagram: ${dfa.title}`} data-dfa={dfa.name}>
       <defs>
-        <marker id="dfa-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
-          <path d="M 0 0 L 8 4 L 0 8 z" class="dfa-arrowhead" />
+        <marker id="arrowhead" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M 0 0 L 8 4 L 0 8 z" class="arrowheadhead" />
         </marker>
       </defs>
       <path class="dfa-start" d={`M ${start.x - RADIUS - 24} ${start.y} L ${start.x - RADIUS - 4} ${start.y}`}
-        marker-end="url(#dfa-arrow)" />
+        marker-end="url(#arrowhead)" />
       {drawn.map((edge) =>
         edge.from === edge.to
           ? <SelfLoop key={edge.from.id} state={edge.from} label={edge.label} />

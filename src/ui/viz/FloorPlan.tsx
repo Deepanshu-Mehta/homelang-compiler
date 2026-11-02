@@ -174,8 +174,8 @@ export function FloorPlan({ state, rooms, flashing = NONE, id }: FloorPlanProps)
     <svg class="floor-plan" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Floor plan of the simulated home" data-testid={`${prefix}floor-plan`}>
       <defs>
         <radialGradient id={glowId}>
-          <stop offset="0%" stop-color="#ffd76a" stop-opacity="0.95" />
-          <stop offset="100%" stop-color="#ffd76a" stop-opacity="0" />
+          <stop offset="0%" stop-color="currentColor" stop-opacity="0.95" />
+          <stop offset="100%" stop-color="currentColor" stop-opacity="0" />
         </radialGradient>
       </defs>
       {shown.map((room, i) => (

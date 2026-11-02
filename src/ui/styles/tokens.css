@@ -1,0 +1,114 @@
+/*
+ * The design tokens: the only place a colour, size or duration is defined.
+ * tests/unit/design-tokens.test.ts fails if a colour appears anywhere else.
+ * See docs/ui/DIRECTION.md for why each value is what it is.
+ */
+:root {
+  /* Surfaces and ink */
+  --film: #f2f5f5;
+  --sheet: #ffffff;
+  --ink: #14202b;
+  --graphite: #465360;
+  --link: #16489a;
+  --rule: #cfd7da;
+  --rule-strong: #7f8d96;
+  --wash: #e6ecec;
+
+  /* The one attention accent: the current stage, rule, node or source span */
+  --marker: #ffe873;
+  --marker-soft: #fff6c2;
+
+  /* Token classes, shared by chips, the editor and parse-tree leaves */
+  --tok-keyword: #5a2a9e;
+  --tok-action: #0a5aa8;
+  --tok-state: #176b3a;
+  --tok-day: #086a73;
+  --tok-ident: #14202b;
+  --tok-literal: #964400;
+  --tok-operator: #a0165a;
+  --tok-punct: #505c68;
+
+  /* Diagnostics, kept apart from the accent */
+  --error: #ae1620;
+  --error-tint: #fcecec;
+  --warning: #855000;
+  --warning-tint: #fbf1dc;
+  --info: #16489a;
+  --info-tint: #e8eef9;
+  --pass: #176b3a;
+  --pass-tint: #e5f2ea;
+
+  /* Graph edges */
+  --edge-true: #176b3a;
+  --edge-false: #ae1620;
+  --edge-plain: #465360;
+
+  /* Backpatch blanks, kept from the original design */
+  --blank: #964400;
+
+  /* Floor plan */
+  --wall: #14202b;
+  --floor: #ffffff;
+  --device: #14202b;
+  --device-off: #dfe5e6;
+  --glow: #ffd64a;
+  --air: #1f7fc4;
+  --heat: #d9622b;
+  --curtain: #8c7a5b;
+  --glass: #cfe4f2;
+  --locked: #176b3a;
+  --unlocked: #855000;
+
+  /* Type: major third (1.25) from a base that grows with the screen */
+  --font-text: 'Atkinson Hyperlegible Next Variable', system-ui, sans-serif;
+  --font-code: 'Atkinson Hyperlegible Mono Variable', ui-monospace, Menlo, monospace;
+  --t-sm: 0.875rem;
+  --t-base: 1rem;
+  --t-lg: 1.25rem;
+  --t-xl: 1.563rem;
+  --t-2xl: 1.953rem;
+  --lh-text: 1.55;
+  --lh-code: 1.6;
+  --lh-tight: 1.2;
+  --measure: 72ch;
+
+  /* Spacing */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 3rem;
+  --sp-8: 4.5rem;
+
+  /* Shape */
+  --r-control: 2px;
+  --r-view: 4px;
+  --r-leaf: 999px;
+  --line: 1px;
+  --line-heavy: 2px;
+  --float: 0 2px 12px var(--rule-strong);
+
+  /* Sizes */
+  --bar-height: 4rem;
+  --control-height: 2rem;
+  --left-pane: 35%;
+
+  /* Motion */
+  --motion: 200ms;
+  --motion-fast: 150ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* 16px at 1280 wide and about 19.5px at 1920, so a projector gets larger text. */
+html {
+  font-size: clamp(16px, 0.55vw + 9px, 20px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion: 0ms;
+    --motion-fast: 0ms;
+  }
+}

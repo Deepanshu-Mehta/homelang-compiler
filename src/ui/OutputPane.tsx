@@ -23,7 +23,7 @@ function SensorControl({ sensor, sim }: { sensor: SensorState; sim: Simulation }
     return (
       <div class="control">
         <span class="control-name">{name}</span>
-        <div class="toggle-group">
+        <div class="segmented">
           {states.map((state) => (
             <button key={state} class={value === state ? 'is-on' : ''} data-testid={`sensor-toggle-${name}-${state}`}
               onClick={() => sim.setSensor(name, state)}>{state}</button>
@@ -51,7 +51,7 @@ export function PlayControls({ sim }: { sim: Simulation }) {
       <button onClick={sim.togglePlay} disabled={session.finished} data-testid="play">{playing ? 'Pause' : 'Play'}</button>
       <button onClick={sim.step} disabled={session.finished} data-testid="step">Step</button>
       <button onClick={sim.reset} data-testid="reset">Reset</button>
-      <div class="toggle-group">
+      <div class="segmented">
         {SPEEDS.map((s) => <button key={s} class={speed === s ? 'is-on' : ''} onClick={() => sim.setSpeed(s)}>{s}×</button>)}
       </div>
       <span class="clock" data-testid="clock">{state.day} {formatMinutes(state.minutes)}</span>

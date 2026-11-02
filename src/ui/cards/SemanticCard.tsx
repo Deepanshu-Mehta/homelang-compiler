@@ -109,7 +109,7 @@ function ConflictMatrix({ rules, conflicts, onLoadWitness }: {
           <li key={`${c.ruleA}-${c.ruleB}`}>
             <span><code>{c.ruleA}</code> and <code>{c.ruleB}</code> set <code>{c.target}</code> to {c.valueA} and {c.valueB}, for example at {c.witness.map((w) => w.text).join(', ') || 'the same event'}.</span>
             {c.witness.length > 0 && (
-              <button class="small-button" data-testid="load-witness" onClick={() => onLoadWitness(c.witness)}>Load witness</button>
+              <button class="button" data-testid="load-witness" onClick={() => onLoadWitness(c.witness)}>Load witness</button>
             )}
           </li>
         ))}
@@ -152,7 +152,7 @@ export function SemanticCard({ stage, source, onLoadWitness }: SemanticCardProps
   const firstError = stage.diagnostics.find((d) => d.severity === 'error');
 
   return (
-    <Card id="semantic" badge="3" title="Semantic analysis" status={stage.status}
+    <Card stage={stage}
       intro="The grammar says whether a sentence is well formed; this stage asks whether it makes sense. Does the device exist? Can it do that? Does the comparison mean anything?">
       {stage.status === 'skipped' && <SkippedNote stage={stage} />}
       {firstError && <ErrorBox diagnostic={firstError} source={source} />}

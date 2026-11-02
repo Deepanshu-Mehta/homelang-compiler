@@ -41,7 +41,7 @@ interface SimulationCardProps {
 export function SimulationCard({ stage, sim, object, onLine }: SimulationCardProps) {
   const [, setHovered] = useState<LogEntry | null>(null);
   return (
-    <Card id="simulation" badge="7" title="Simulation" status={stage.status}
+    <Card stage={stage}
       intro="The bytecode runs against a simulated home. Each change is one tick: the affected rules run, their commands are resolved, and every device change can trigger more rules.">
       {stage.status === 'skipped' && <SkippedNote stage={stage} />}
       {stage.diagnostics.length > 0 && (

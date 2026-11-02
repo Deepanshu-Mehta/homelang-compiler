@@ -1,28 +1,39 @@
-import type { StageResult, StageStatus } from '../compiler/index';
+import type { ComponentChildren } from 'preact';
+import type { StageResult } from '../compiler/index';
+import { formatTime, STATUS_WORD, StatusIcon } from './Card';
 import { scrollToCard } from './scroll';
 
-const BADGE: Record<StageStatus, string> = { ok: '✓', warn: '⚠', error: '✗', skipped: '–' };
-
-function formatTime(ms: number): string {
-  return ms < 10 ? `${ms.toFixed(1)} ms` : `${Math.round(ms)} ms`;
+interface PipelineBarProps {
+  stages: readonly StageResult[];
+  current: string | null;
+  children?: ComponentChildren;
 }
 
-export function PipelineBar({ stages }: { stages: readonly StageResult[] }) {
+/** The sticky stepper. Each step has a fixed shape, so recompiling never moves it. */
+export function PipelineBar({ stages, current, children }: PipelineBarProps) {
   return (
-    <nav class="pipeline" aria-label="Compiler stages" data-testid="pipeline">
-      {stages.map((s) => (
-        <button
-          key={s.stage}
-          class={`stage-badge is-${s.status}`}
-          data-stage={s.stage}
-          data-status={s.status}
-          onClick={() => scrollToCard(s.stage)}
-        >
-          <span class="stage-icon">{BADGE[s.status]}</span>
-          <span class="stage-name">{s.title}</span>
-          {s.status !== 'skipped' && <span class="stage-time">{formatTime(s.timeMs)}</span>}
-        </button>
-      ))}
-    </nav>
+    <header class="topbar">
+      <h1 class="brand">Let's Automate a Home</h1>
+      <ol class="stepper" aria-label="Compiler stages" data-testid="pipeline">
+        {stages.map((s) => (
+          <li key={s.stage}>
+            <button class={`step is-${s.status} ${current === s.stage ? 'is-current' : ''}`}
+              data-stage={s.stage} data-status={s.status}
+              aria-label={`Stage ${s.number}, ${s.title}: ${STATUS_WORD[s.status]}`}
+              onClick={() => scrollToCard(s.stage)}>
+              <span class="step-number">{s.number}</span>
+              <span class="step-text">
+                <span class="step-name">{s.title}</span>
+                <span class="step-meta">
+                  <StatusIcon status={s.status} />
+                  {s.status === 'skipped' ? 'Skipped' : formatTime(s.timeMs)}
+                </span>
+              </span>
+            </button>
+          </li>
+        ))}
+      </ol>
+      {children}
+    </header>
   );
 }

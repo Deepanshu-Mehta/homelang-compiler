@@ -78,11 +78,11 @@ function VmDebuggerPanel({ object }: { object: ObjectFile }) {
           <label class="debug-input"><input type="checkbox" checked={wasTrue} onChange={(e) => setWasTrue(e.currentTarget.checked)} /> was already true</label>
         )}
       </div>
-      <div class="stepper">
+      <div class="toolbar">
         <button data-testid="vm-step" onClick={stepOnce} disabled={vm.done}>Step</button>
         <button onClick={runAll} disabled={vm.done}>Run to end</button>
         <button onClick={reset}>Reset</button>
-        <span class="stepper-note" data-testid="vm-status">pc = {vm.frame.pc}, {vm.frame.status}</span>
+        <span class="toolbar-note" data-testid="vm-status">pc = {vm.frame.pc}, {vm.frame.status}</span>
       </div>
       <div class="debug-grid">
         <Listing code={object.code} pc={vm.frame.pc} entries={entries} />
@@ -114,13 +114,13 @@ export function CodegenCard({ stage }: { stage: StageResult }) {
     { id: 'yaml', label: 'Home Assistant YAML' },
   ];
   return (
-    <Card id="codegen" badge="6" title="Code generation" status={stage.status}
+    <Card stage={stage}
       intro="Turns the quadruples into bytecode for a small stack machine: values are pushed, operators pop them and push the result, and jumps move the program counter.">
       {stage.status === 'skipped' && <SkippedNote stage={stage} />}
       {object && (
         <>
           <p class="stat-line" data-testid="codegen-stats">{object.code.length} instructions for {object.rules.length} rule{object.rules.length === 1 ? '' : 's'}.</p>
-          <div class="view-toggle" role="group" aria-label="Output format">
+          <div class="segmented" role="group" aria-label="Output format">
             {tabs.map(({ id, label }) => (
               <button key={id} class={tab === id ? 'is-on' : ''} data-testid={`tab-${id}`} onClick={() => setTab(id)}>{label}</button>
             ))}

@@ -17,32 +17,36 @@ export interface GraphEdge {
   tone?: 'green' | 'red' | 'dashed';
 }
 
-const COLORS = { ink: '#1f1e1d', edge: '#8b8880', card: '#fffefb', red: '#b3261e', green: '#2f7d4f' };
+const token = (name: string): string => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
-const STYLE = [
-  {
-    selector: 'node',
-    style: {
-      shape: 'round-rectangle', 'background-color': COLORS.card, 'border-color': COLORS.ink, 'border-width': 1,
-      label: 'data(label)', 'text-valign': 'center', 'text-halign': 'center', 'text-wrap': 'wrap',
-      'font-family': 'JetBrains Mono, monospace', 'font-size': 11, color: COLORS.ink,
-      width: 'label', height: 'label', padding: '9px',
+/** Cytoscape takes plain values, so the design tokens are read when it draws. */
+function graphStyle() {
+  const [ink, sheet, graphite, film] = [token('--ink'), token('--sheet'), token('--edge-plain'), token('--film')];
+  const [green, red, error] = [token('--edge-true'), token('--edge-false'), token('--error')];
+  const font = token('--font-code');
+  return [
+    {
+      selector: 'node',
+      style: {
+        shape: 'round-rectangle', 'background-color': sheet, 'border-color': ink, 'border-width': 1.5,
+        label: 'data(label)', 'text-valign': 'center', 'text-halign': 'center', 'text-wrap': 'wrap',
+        'font-family': font, 'font-size': 14, color: ink, width: 'label', height: 'label', padding: '10px',
+      },
     },
-  },
-  { selector: 'node.bad', style: { 'border-color': COLORS.red, 'border-width': 2, color: COLORS.red } },
-  {
-    selector: 'edge',
-    style: {
-      width: 1.3, 'line-color': COLORS.edge, 'target-arrow-color': COLORS.edge, 'target-arrow-shape': 'triangle',
-      'curve-style': 'bezier', label: 'data(label)', 'font-size': 9, color: COLORS.ink,
-      'font-family': 'JetBrains Mono, monospace', 'text-background-color': '#faf9f5', 'text-background-opacity': 1,
-      'text-background-padding': '1px',
+    { selector: 'node.bad', style: { 'border-color': error, 'border-width': 3 } },
+    {
+      selector: 'edge',
+      style: {
+        width: 1.5, 'line-color': graphite, 'target-arrow-color': graphite, 'target-arrow-shape': 'triangle',
+        'curve-style': 'bezier', label: 'data(label)', 'font-size': 14, color: ink, 'font-family': font,
+        'text-background-color': film, 'text-background-opacity': 1, 'text-background-padding': '2px',
+      },
     },
-  },
-  { selector: 'edge.green', style: { 'line-color': COLORS.green, 'target-arrow-color': COLORS.green } },
-  { selector: 'edge.red', style: { 'line-color': COLORS.red, 'target-arrow-color': COLORS.red, width: 2 } },
-  { selector: 'edge.dashed', style: { 'line-style': 'dashed' } },
-];
+    { selector: 'edge.green', style: { 'line-color': green, 'target-arrow-color': green, width: 2 } },
+    { selector: 'edge.red', style: { 'line-color': red, 'target-arrow-color': red, width: 2 } },
+    { selector: 'edge.dashed', style: { 'line-style': 'dashed' } },
+  ];
+}
 
 /** A node-link diagram, laid out by dagre, for the CFG and the rule graph. */
 export function GraphView({ nodes, edges, height = 260 }: { nodes: readonly GraphNode[]; edges: readonly GraphEdge[]; height?: number }) {
@@ -59,7 +63,7 @@ export function GraphView({ nodes, edges, height = 260 }: { nodes: readonly Grap
     const graph: Core = cytoscape({
       container: host.current,
       elements,
-      style: STYLE as cytoscape.StylesheetJson,
+      style: graphStyle() as cytoscape.StylesheetJson,
       layout: { name: 'dagre', rankDir: 'TB', nodeSep: 30, rankSep: 40 } as cytoscape.LayoutOptions,
       userZoomingEnabled: false,
       autoungrabify: true,

@@ -54,12 +54,12 @@ function GrammarStepper({ output, tokens }: { output: ParserOutput; tokens: read
 
   return (
     <>
-      <div class="stepper">
+      <div class="toolbar">
         <button onClick={() => setIndex(Math.max(0, index - 1))} disabled={index === 0}>Back</button>
         <button onClick={() => setPlaying(!playing)}>{playing ? 'Pause' : 'Play'}</button>
         <button data-testid="grammar-step" onClick={() => setIndex(Math.min(steps.length - 1, index + 1))}
           disabled={index >= steps.length - 1}>Step</button>
-        <span class="stepper-note">
+        <span class="toolbar-note">
           Step {index + 1} of {steps.length}: in <code>{step?.rule}</code>, next token <code>{next?.lexeme || 'EOF'}</code>
         </span>
       </div>
@@ -135,7 +135,7 @@ export function ParserCard({ stage, source, tokens, collectAll, onCollectAll }: 
   }, [output, view]);
 
   return (
-    <Card id="parser" badge="2" title="Parser" status={stage.status}
+    <Card stage={stage}
       intro="Checks that the tokens follow the grammar, and builds a tree showing how the program fits together.">
       {stage.status === 'skipped' && <SkippedNote stage={stage} />}
 
@@ -155,7 +155,7 @@ export function ParserCard({ stage, source, tokens, collectAll, onCollectAll }: 
 
       {output && clean && (
         <>
-          <div class="view-toggle" role="group" aria-label="Tree view">
+          <div class="segmented" role="group" aria-label="Tree view">
             <button class={view === 'ast' ? 'is-on' : ''} onClick={() => setView('ast')}>AST</button>
             <button class={view === 'parse' ? 'is-on' : ''} data-testid="parse-tree-toggle"
               onClick={() => setView('parse')}>Parse tree</button>
@@ -177,7 +177,7 @@ export function ParserCard({ stage, source, tokens, collectAll, onCollectAll }: 
         ? <GrammarStepper output={output} tokens={tokens} />
         : <GrammarView active={undefined} />}
 
-      <details class="doc-section">
+      <details class="reference">
         <summary>Why LL(1)?</summary>
         <p>LL(1) means the parser reads left to right and picks each grammar rule by looking at just one token. HomeLang's grammar has no left recursion, and it is left-factored: comparison, IS and BETWEEN all start with a value, so they share <code>atom → value [ atomTail ]</code>.</p>
         <p>Two conditions must hold. The FIRST sets of a rule's alternatives must not overlap, and wherever something can be skipped, its FIRST must not overlap what follows it. This page computes both from the grammar above.</p>
@@ -185,12 +185,12 @@ export function ParserCard({ stage, source, tokens, collectAll, onCollectAll }: 
         <p>Nested IFs must end with END, so an ELSE always belongs to the nearest open IF. That removes the dangling-else ambiguity. Parentheses group conditions only, because if they could also group arithmetic, <code>(</code> would need unbounded lookahead.</p>
       </details>
 
-      <details class="doc-section">
+      <details class="reference">
         <summary>FIRST and FOLLOW sets</summary>
         <FirstFollowTable />
       </details>
 
-      <details class="doc-section">
+      <details class="reference">
         <summary>The LL(1) parse table</summary>
         <ParseTable />
       </details>
