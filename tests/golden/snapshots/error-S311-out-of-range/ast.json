@@ -1,0 +1,54 @@
+{
+  "kind": "Program",
+  "decls": [],
+  "rules": [
+    {
+      "kind": "Rule",
+      "id": "R1",
+      "priority": 1,
+      "trigger": {
+        "kind": "State",
+        "cond": {
+          "kind": "Compare",
+          "op": ">",
+          "left": {
+            "kind": "Ref",
+            "name": "TEMPERATURE",
+            "display": "TEMPERATURE",
+            "span": "2:4"
+          },
+          "right": {
+            "kind": "NumLit",
+            "value": 30,
+            "text": "30",
+            "span": "2:18"
+          },
+          "span": "2:4"
+        }
+      },
+      "thenActs": [
+        {
+          "kind": "SetAttr",
+          "target": {
+            "kind": "Ref",
+            "name": "AC",
+            "display": "AC",
+            "span": "2:30"
+          },
+          "attr": "TEMPERATURE",
+          "attrSpan": "2:33",
+          "value": {
+            "kind": "NumLit",
+            "value": 35,
+            "unit": "C",
+            "text": "35C",
+            "span": "2:48"
+          },
+          "span": "2:26"
+        }
+      ],
+      "span": "2:1"
+    }
+  ],
+  "span": "1:1"
+}

@@ -1,0 +1,46 @@
+{
+  "kind": "Program",
+  "decls": [],
+  "rules": [
+    {
+      "kind": "Rule",
+      "id": "R1",
+      "priority": 1,
+      "trigger": {
+        "kind": "State",
+        "cond": {
+          "kind": "Compare",
+          "op": ">",
+          "left": {
+            "kind": "Ref",
+            "name": "TEMPERATURE",
+            "display": "TEMPERATURE",
+            "span": "2:4"
+          },
+          "right": {
+            "kind": "NumLit",
+            "value": 30,
+            "text": "30",
+            "span": "2:18"
+          },
+          "span": "2:4"
+        }
+      },
+      "thenActs": [
+        {
+          "kind": "Power",
+          "op": "TURN_ON",
+          "target": {
+            "kind": "Ref",
+            "name": "HEATPUMP",
+            "display": "HEATPUMP",
+            "span": "2:34"
+          },
+          "span": "2:26"
+        }
+      ],
+      "span": "2:1"
+    }
+  ],
+  "span": "1:1"
+}

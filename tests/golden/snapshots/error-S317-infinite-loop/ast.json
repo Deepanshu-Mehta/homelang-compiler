@@ -1,0 +1,67 @@
+{
+  "kind": "Program",
+  "decls": [],
+  "rules": [
+    {
+      "kind": "Rule",
+      "id": "R1",
+      "priority": 1,
+      "trigger": {
+        "kind": "Event",
+        "source": {
+          "kind": "Ref",
+          "name": "LIGHT",
+          "display": "LIGHT",
+          "span": "2:6"
+        },
+        "event": "TURNS_ON",
+        "span": "2:1"
+      },
+      "thenActs": [
+        {
+          "kind": "Power",
+          "op": "TURN_OFF",
+          "target": {
+            "kind": "Ref",
+            "name": "LIGHT",
+            "display": "LIGHT",
+            "span": "2:35"
+          },
+          "span": "2:26"
+        }
+      ],
+      "span": "2:1"
+    },
+    {
+      "kind": "Rule",
+      "id": "R2",
+      "priority": 1,
+      "trigger": {
+        "kind": "Event",
+        "source": {
+          "kind": "Ref",
+          "name": "LIGHT",
+          "display": "LIGHT",
+          "span": "3:6"
+        },
+        "event": "TURNS_OFF",
+        "span": "3:1"
+      },
+      "thenActs": [
+        {
+          "kind": "Power",
+          "op": "TURN_ON",
+          "target": {
+            "kind": "Ref",
+            "name": "LIGHT",
+            "display": "LIGHT",
+            "span": "3:35"
+          },
+          "span": "3:27"
+        }
+      ],
+      "span": "3:1"
+    }
+  ],
+  "span": "1:1"
+}

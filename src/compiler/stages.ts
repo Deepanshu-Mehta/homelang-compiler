@@ -1,5 +1,6 @@
 import type { Diagnostic } from './diagnostics';
 import type { LexerOutput } from './lexer/lexer';
+import type { ParserOutput } from './parser/parser';
 
 export type StageName =
   | 'lexer' | 'parser' | 'semantic' | 'ir' | 'optimizer' | 'codegen' | 'simulation';
@@ -20,7 +21,7 @@ export interface StageResult<T = unknown> {
 /** What each stage produces. Later milestones extend this map. */
 export interface StageOutputs {
   lexer: LexerOutput;
-  parser: unknown;
+  parser: ParserOutput;
   semantic: unknown;
   ir: unknown;
   optimizer: unknown;

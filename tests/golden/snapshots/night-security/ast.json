@@ -1,0 +1,481 @@
+{
+  "kind": "Program",
+  "decls": [
+    {
+      "kind": "RoomDecl",
+      "name": "ENTRANCE",
+      "display": "ENTRANCE",
+      "nameSpan": "2:6",
+      "span": "2:1"
+    },
+    {
+      "kind": "RoomDecl",
+      "name": "HALL",
+      "display": "HALL",
+      "nameSpan": "3:6",
+      "span": "3:1"
+    },
+    {
+      "kind": "DeviceDecl",
+      "name": "FRONT_DOOR",
+      "display": "FRONT_DOOR",
+      "nameSpan": "5:8",
+      "typeName": "DOOR_LOCK",
+      "typeSpan": "5:22",
+      "room": "ENTRANCE",
+      "roomSpan": "5:35",
+      "span": "5:1"
+    },
+    {
+      "kind": "DeviceDecl",
+      "name": "PORCH_LIGHT",
+      "display": "PORCH_LIGHT",
+      "nameSpan": "6:8",
+      "typeName": "LIGHT",
+      "typeSpan": "6:22",
+      "room": "ENTRANCE",
+      "roomSpan": "6:35",
+      "span": "6:1"
+    },
+    {
+      "kind": "DeviceDecl",
+      "name": "HALL_LIGHT",
+      "display": "HALL_LIGHT",
+      "nameSpan": "7:8",
+      "typeName": "LIGHT",
+      "typeSpan": "7:22",
+      "room": "HALL",
+      "roomSpan": "7:35",
+      "span": "7:1"
+    },
+    {
+      "kind": "SensorDecl",
+      "name": "DOOR_CONTACT",
+      "display": "DOOR_CONTACT",
+      "nameSpan": "9:8",
+      "typeName": "CONTACT_SENSOR",
+      "typeSpan": "9:23",
+      "room": "ENTRANCE",
+      "roomSpan": "9:42",
+      "span": "9:1"
+    },
+    {
+      "kind": "SensorDecl",
+      "name": "HALL_PIR",
+      "display": "HALL_PIR",
+      "nameSpan": "10:8",
+      "typeName": "MOTION_SENSOR",
+      "typeSpan": "10:23",
+      "room": "HALL",
+      "roomSpan": "10:42",
+      "span": "10:1"
+    },
+    {
+      "kind": "SensorDecl",
+      "name": "OWNER",
+      "display": "OWNER",
+      "nameSpan": "11:8",
+      "typeName": "PRESENCE_SENSOR",
+      "typeSpan": "11:23",
+      "room": "ENTRANCE",
+      "roomSpan": "11:42",
+      "span": "11:1"
+    }
+  ],
+  "rules": [
+    {
+      "kind": "Rule",
+      "id": "R1",
+      "priority": 1,
+      "trigger": {
+        "kind": "State",
+        "cond": {
+          "kind": "Logic",
+          "op": "AND",
+          "left": {
+            "kind": "Between",
+            "subject": {
+              "kind": "Ref",
+              "name": "TIME",
+              "display": "TIME",
+              "span": "14:4"
+            },
+            "lo": {
+              "kind": "TimeLit",
+              "minutes": 1380,
+              "text": "23:00",
+              "span": "14:17"
+            },
+            "hi": {
+              "kind": "TimeLit",
+              "minutes": 360,
+              "text": "06:00",
+              "span": "14:27"
+            },
+            "span": "14:4"
+          },
+          "right": {
+            "kind": "StateTest",
+            "target": {
+              "kind": "Ref",
+              "name": "DOOR_CONTACT",
+              "display": "DOOR_CONTACT",
+              "span": "14:37"
+            },
+            "negated": false,
+            "state": "CLOSED",
+            "stateSpan": "14:53",
+            "span": "14:37"
+          },
+          "span": "14:4"
+        }
+      },
+      "thenActs": [
+        {
+          "kind": "Power",
+          "op": "LOCK",
+          "target": {
+            "kind": "Ref",
+            "name": "FRONT_DOOR",
+            "display": "FRONT_DOOR",
+            "span": "15:10"
+          },
+          "span": "15:5"
+        }
+      ],
+      "elseActs": [
+        {
+          "kind": "IfAction",
+          "cond": {
+            "kind": "StateTest",
+            "target": {
+              "kind": "Ref",
+              "name": "OWNER",
+              "display": "OWNER",
+              "span": "17:8"
+            },
+            "negated": false,
+            "state": "HOME",
+            "stateSpan": "17:17",
+            "span": "17:8"
+          },
+          "thenActs": [
+            {
+              "kind": "Power",
+              "op": "UNLOCK",
+              "target": {
+                "kind": "Ref",
+                "name": "FRONT_DOOR",
+                "display": "FRONT_DOOR",
+                "span": "17:34"
+              },
+              "span": "17:27"
+            }
+          ],
+          "span": "17:5"
+        }
+      ],
+      "name": "Lock up at night",
+      "span": "13:1"
+    },
+    {
+      "kind": "Rule",
+      "id": "R2",
+      "priority": 1,
+      "trigger": {
+        "kind": "State",
+        "cond": {
+          "kind": "Between",
+          "subject": {
+            "kind": "Ref",
+            "name": "TIME",
+            "display": "TIME",
+            "span": "21:4"
+          },
+          "lo": {
+            "kind": "TimeLit",
+            "minutes": 1140,
+            "text": "19:00",
+            "span": "21:17"
+          },
+          "hi": {
+            "kind": "TimeLit",
+            "minutes": 330,
+            "text": "05:30",
+            "span": "21:27"
+          },
+          "span": "21:4"
+        }
+      },
+      "thenActs": [
+        {
+          "kind": "SetAttr",
+          "target": {
+            "kind": "Ref",
+            "name": "PORCH_LIGHT",
+            "display": "PORCH_LIGHT",
+            "span": "22:9"
+          },
+          "attr": "BRIGHTNESS",
+          "attrSpan": "22:21",
+          "value": {
+            "kind": "NumLit",
+            "value": 40,
+            "unit": "%",
+            "text": "40%",
+            "span": "22:35"
+          },
+          "span": "22:5"
+        }
+      ],
+      "elseActs": [
+        {
+          "kind": "Power",
+          "op": "TURN_OFF",
+          "target": {
+            "kind": "Ref",
+            "name": "PORCH_LIGHT",
+            "display": "PORCH_LIGHT",
+            "span": "24:14"
+          },
+          "span": "24:5"
+        }
+      ],
+      "name": "Porch light after dark",
+      "span": "20:1"
+    },
+    {
+      "kind": "Rule",
+      "id": "R3",
+      "priority": 2,
+      "trigger": {
+        "kind": "Event",
+        "source": {
+          "kind": "Ref",
+          "name": "HALL_PIR",
+          "display": "HALL_PIR",
+          "span": "28:6"
+        },
+        "event": "DETECTED",
+        "span": "28:1",
+        "guard": {
+          "kind": "Between",
+          "subject": {
+            "kind": "Ref",
+            "name": "TIME",
+            "display": "TIME",
+            "span": "28:27"
+          },
+          "lo": {
+            "kind": "TimeLit",
+            "minutes": 1320,
+            "text": "22:00",
+            "span": "28:40"
+          },
+          "hi": {
+            "kind": "TimeLit",
+            "minutes": 360,
+            "text": "06:00",
+            "span": "28:50"
+          },
+          "span": "28:27"
+        }
+      },
+      "thenActs": [
+        {
+          "kind": "SetAttr",
+          "target": {
+            "kind": "Ref",
+            "name": "HALL_LIGHT",
+            "display": "HALL_LIGHT",
+            "span": "29:9"
+          },
+          "attr": "BRIGHTNESS",
+          "attrSpan": "29:20",
+          "value": {
+            "kind": "NumLit",
+            "value": 15,
+            "unit": "%",
+            "text": "15%",
+            "span": "29:34"
+          },
+          "span": "29:5"
+        },
+        {
+          "kind": "Wait",
+          "duration": {
+            "value": 3,
+            "unit": "MIN",
+            "text": "3MIN",
+            "span": "29:44"
+          },
+          "span": "29:39"
+        },
+        {
+          "kind": "Power",
+          "op": "TURN_OFF",
+          "target": {
+            "kind": "Ref",
+            "name": "HALL_LIGHT",
+            "display": "HALL_LIGHT",
+            "span": "29:59"
+          },
+          "span": "29:50"
+        }
+      ],
+      "name": "Hall night light",
+      "prioritySpan": "27:34",
+      "span": "27:1"
+    }
+  ],
+  "span": "1:1",
+  "sim": {
+    "kind": "Simulation",
+    "stmts": [
+      {
+        "minutes": 1320,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "OWNER",
+              "display": "OWNER",
+              "span": "33:15"
+            },
+            "value": {
+              "kind": "EnumLit",
+              "value": "HOME",
+              "category": "state",
+              "span": "33:23"
+            },
+            "span": "33:15"
+          },
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "DOOR_CONTACT",
+              "display": "DOOR_CONTACT",
+              "span": "33:29"
+            },
+            "value": {
+              "kind": "EnumLit",
+              "value": "CLOSED",
+              "category": "state",
+              "span": "33:44"
+            },
+            "span": "33:29"
+          },
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "HALL_PIR",
+              "display": "HALL_PIR",
+              "span": "33:52"
+            },
+            "value": {
+              "kind": "EnumLit",
+              "value": "CLEAR",
+              "category": "state",
+              "span": "33:63"
+            },
+            "span": "33:52"
+          }
+        ],
+        "span": "33:5"
+      },
+      {
+        "minutes": 1350,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "HALL_PIR",
+              "display": "HALL_PIR",
+              "span": "34:15"
+            },
+            "value": {
+              "kind": "EnumLit",
+              "value": "DETECTED",
+              "category": "state",
+              "span": "34:26"
+            },
+            "span": "34:15"
+          }
+        ],
+        "span": "34:5"
+      },
+      {
+        "minutes": 1352,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "HALL_PIR",
+              "display": "HALL_PIR",
+              "span": "35:15"
+            },
+            "value": {
+              "kind": "EnumLit",
+              "value": "CLEAR",
+              "category": "state",
+              "span": "35:26"
+            },
+            "span": "35:15"
+          }
+        ],
+        "span": "35:5"
+      },
+      {
+        "minutes": 135,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "HALL_PIR",
+              "display": "HALL_PIR",
+              "span": "36:15"
+            },
+            "value": {
+              "kind": "EnumLit",
+              "value": "DETECTED",
+              "category": "state",
+              "span": "36:26"
+            },
+            "span": "36:15"
+          }
+        ],
+        "span": "36:5"
+      },
+      {
+        "minutes": 136,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "HALL_PIR",
+              "display": "HALL_PIR",
+              "span": "37:15"
+            },
+            "value": {
+              "kind": "EnumLit",
+              "value": "CLEAR",
+              "category": "state",
+              "span": "37:26"
+            },
+            "span": "37:15"
+          }
+        ],
+        "span": "37:5"
+      }
+    ],
+    "span": "32:1",
+    "from": 1320,
+    "to": 390,
+    "step": {
+      "value": 1,
+      "unit": "MIN",
+      "text": "1MIN",
+      "span": "32:35"
+    }
+  }
+}

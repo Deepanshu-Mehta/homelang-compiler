@@ -1,0 +1,166 @@
+{
+  "kind": "Program",
+  "decls": [],
+  "rules": [
+    {
+      "kind": "Rule",
+      "id": "R1",
+      "priority": 1,
+      "trigger": {
+        "kind": "Event",
+        "source": {
+          "kind": "Ref",
+          "name": "MOTION",
+          "display": "MOTION",
+          "span": "3:6"
+        },
+        "event": "DETECTED",
+        "span": "3:1"
+      },
+      "thenActs": [
+        {
+          "kind": "Power",
+          "op": "TURN_ON",
+          "target": {
+            "kind": "Ref",
+            "name": "LIGHT",
+            "display": "LIGHT",
+            "span": "3:35"
+          },
+          "span": "3:27"
+        }
+      ],
+      "span": "3:1"
+    },
+    {
+      "kind": "Rule",
+      "id": "R2",
+      "priority": 1,
+      "trigger": {
+        "kind": "Event",
+        "source": {
+          "kind": "Ref",
+          "name": "LIGHT",
+          "display": "LIGHT",
+          "span": "4:6"
+        },
+        "event": "TURNS_ON",
+        "span": "4:1",
+        "guard": {
+          "kind": "Compare",
+          "op": ">",
+          "left": {
+            "kind": "Ref",
+            "name": "TEMPERATURE",
+            "display": "TEMPERATURE",
+            "span": "4:24"
+          },
+          "right": {
+            "kind": "NumLit",
+            "value": 0,
+            "text": "0",
+            "span": "4:38"
+          },
+          "span": "4:24"
+        }
+      },
+      "thenActs": [
+        {
+          "kind": "Power",
+          "op": "TURN_OFF",
+          "target": {
+            "kind": "Ref",
+            "name": "LIGHT",
+            "display": "LIGHT",
+            "span": "4:54"
+          },
+          "span": "4:45"
+        }
+      ],
+      "span": "4:1"
+    },
+    {
+      "kind": "Rule",
+      "id": "R3",
+      "priority": 1,
+      "trigger": {
+        "kind": "Event",
+        "source": {
+          "kind": "Ref",
+          "name": "LIGHT",
+          "display": "LIGHT",
+          "span": "5:6"
+        },
+        "event": "TURNS_OFF",
+        "span": "5:1",
+        "guard": {
+          "kind": "Compare",
+          "op": ">",
+          "left": {
+            "kind": "Ref",
+            "name": "TEMPERATURE",
+            "display": "TEMPERATURE",
+            "span": "5:25"
+          },
+          "right": {
+            "kind": "NumLit",
+            "value": 0,
+            "text": "0",
+            "span": "5:39"
+          },
+          "span": "5:25"
+        }
+      },
+      "thenActs": [
+        {
+          "kind": "Power",
+          "op": "TURN_ON",
+          "target": {
+            "kind": "Ref",
+            "name": "LIGHT",
+            "display": "LIGHT",
+            "span": "5:54"
+          },
+          "span": "5:46"
+        }
+      ],
+      "span": "5:1"
+    }
+  ],
+  "span": "1:1",
+  "sim": {
+    "kind": "Simulation",
+    "stmts": [
+      {
+        "minutes": 482,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "MOTION",
+              "display": "MOTION",
+              "span": "8:15"
+            },
+            "value": {
+              "kind": "EnumLit",
+              "value": "DETECTED",
+              "category": "state",
+              "span": "8:24"
+            },
+            "span": "8:15"
+          }
+        ],
+        "span": "8:5"
+      }
+    ],
+    "span": "7:1",
+    "from": 480,
+    "to": 485,
+    "step": {
+      "value": 1,
+      "unit": "MIN",
+      "text": "1MIN",
+      "span": "7:35"
+    }
+  }
+}

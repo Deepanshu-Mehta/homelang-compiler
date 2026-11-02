@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import {
   compile, stageResult, type CompileOptions, type LexerOutput, type StageResult,
 } from '../compiler/index';
 import { Card, SkippedNote } from './Card';
 import { DomainCard } from './cards/DomainCard';
 import { LexerCard } from './cards/LexerCard';
-import { Editor } from './Editor';
+import { ParserCard } from './cards/ParserCard';
+import { Editor, type LoadedText } from './Editor';
 import { OutputPane } from './OutputPane';
 import { PipelineBar } from './PipelineBar';
 import { PRESETS } from './presets';
@@ -13,7 +14,6 @@ import { PRESETS } from './presets';
 const DEBOUNCE_MS = 200;
 
 const CARD_INTROS: Record<string, string> = {
-  parser: 'Checks that the tokens follow the grammar and builds a tree showing how the program is structured.',
   semantic: 'Checks the meaning: do the devices exist, and do the conditions and actions make sense for them?',
   ir: 'Lowers each rule to simple three-address instructions, with AND and OR turned into jumps.',
   optimizer: 'Rewrites the instructions into fewer, faster ones without changing what the program does.',
@@ -32,13 +32,19 @@ function PendingCard({ stage }: { stage: StageResult }) {
 
 export function App() {
   const [source, setSource] = useState(PRESETS[0]!.source);
+  const [loaded, setLoaded] = useState<LoadedText>({ text: source });
   const [presetId, setPresetId] = useState('');
-  const [options] = useState<CompileOptions>({});
+  const [collectAllErrors, setCollectAllErrors] = useState(false);
+  const options: CompileOptions = useMemo(() => ({ collectAllErrors }), [collectAllErrors]);
   const [result, setResult] = useState(() => compile(source, options));
+  const compiledWith = useRef(options);
 
   useEffect(() => {
-    if (source === result.source) return undefined;
-    const timer = setTimeout(() => setResult(compile(source, options)), DEBOUNCE_MS);
+    if (source === result.source && options === compiledWith.current) return undefined;
+    const timer = setTimeout(() => {
+      compiledWith.current = options;
+      setResult(compile(source, options));
+    }, DEBOUNCE_MS);
     return () => clearTimeout(timer);
     // result.source only tells us whether a compile is needed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -51,7 +57,9 @@ export function App() {
   function loadPreset(id: string) {
     setPresetId(id);
     const preset = PRESETS.find((p) => p.id === id);
-    if (preset) setSource(preset.source);
+    if (!preset) return;
+    setSource(preset.source);
+    setLoaded({ text: preset.source });
   }
 
   return (
@@ -74,7 +82,8 @@ export function App() {
               ))}
             </select>
           </header>
-          <Editor value={source} onChange={setSource} tokens={tokens} diagnostics={diagnostics} highlightLine={null} />
+          <Editor loaded={loaded} onChange={setSource} compiledSource={result.source}
+            tokens={tokens} diagnostics={diagnostics} highlightLine={null} />
           <div class="editor-foot">
             <span data-testid="char-count">{source.length} characters</span>
             <span>Compiles as you type</span>
@@ -86,7 +95,9 @@ export function App() {
           <div class="cards">
             <DomainCard />
             <LexerCard stage={lexerStage} source={result.source} />
-            {result.stages.slice(1).map((stage) => <PendingCard key={stage.stage} stage={stage} />)}
+            <ParserCard stage={stageResult(result, 'parser')} source={result.source} tokens={tokens}
+              collectAll={collectAllErrors} onCollectAll={setCollectAllErrors} />
+            {result.stages.slice(2).map((stage) => <PendingCard key={stage.stage} stage={stage} />)}
           </div>
         </div>
       </main>

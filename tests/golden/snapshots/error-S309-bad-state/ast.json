@@ -1,0 +1,42 @@
+{
+  "kind": "Program",
+  "decls": [],
+  "rules": [
+    {
+      "kind": "Rule",
+      "id": "R1",
+      "priority": 1,
+      "trigger": {
+        "kind": "State",
+        "cond": {
+          "kind": "StateTest",
+          "target": {
+            "kind": "Ref",
+            "name": "DOOR",
+            "display": "DOOR",
+            "span": "2:4"
+          },
+          "negated": false,
+          "state": "ON",
+          "stateSpan": "2:12",
+          "span": "2:4"
+        }
+      },
+      "thenActs": [
+        {
+          "kind": "Power",
+          "op": "TURN_ON",
+          "target": {
+            "kind": "Ref",
+            "name": "LIGHT",
+            "display": "LIGHT",
+            "span": "2:28"
+          },
+          "span": "2:20"
+        }
+      ],
+      "span": "2:1"
+    }
+  ],
+  "span": "1:1"
+}

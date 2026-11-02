@@ -69,11 +69,11 @@ td { border-bottom: 1px solid var(--line); padding: 6px 10px 6px 0; vertical-ali
 .stopped-title { font-family: var(--display); font-weight: 700; color: var(--red); margin: 0; }
 .link-button { background: none; border: none; padding: 0; color: var(--blue); cursor: pointer; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
 
-.pipeline { position: sticky; top: 0; z-index: 5; background: var(--paper); display: flex; flex-wrap: wrap; gap: 4px; padding: 10px 0; border-bottom: 1px solid var(--line); }
-.stage-badge { display: inline-flex; align-items: center; gap: 5px; border: 1.5px solid transparent; background: none; border-radius: 16px; padding: 2px 9px 2px 4px; cursor: pointer; font: 500 13px var(--display); }
+.pipeline { position: sticky; top: 0; z-index: 5; background: var(--paper); display: flex; flex-wrap: wrap; gap: 2px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.stage-badge { display: inline-flex; align-items: center; gap: 5px; border: 1.5px solid transparent; background: none; border-radius: 16px; padding: 2px 7px 2px 3px; cursor: pointer; font: 500 12.5px var(--display); }
 .stage-badge:hover { background: var(--card); }
 .stage-icon { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; color: #fff; font-size: 12px; background: var(--ink-3); }
-.stage-time { font: 400 11px var(--mono); color: var(--ink-3); }
+.stage-time { font: 400 10px var(--mono); color: var(--ink-3); }
 .stage-badge.is-ok .stage-icon { background: var(--green); }
 .stage-badge.is-warn .stage-icon { background: var(--amber); }
 .stage-badge.is-error { border-color: var(--red); }
@@ -165,3 +165,35 @@ td { border-bottom: 1px solid var(--line); padding: 6px 10px 6px 0; vertical-ali
   .layout { grid-template-columns: 1fr; overflow-y: auto; }
   .left-pane, .right-pane { overflow: visible; }
 }
+
+.small { font-size: 13px; }
+table.compact td, table.compact th { font-size: 12px; padding: 4px 8px 4px 0; }
+table.compact code { font-size: 11.5px; }
+.toggle-line { display: block; font-size: 13px; color: var(--ink-2); margin: 8px 0; }
+.view-toggle { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; margin: 6px 0 2px; }
+.view-toggle button { border: none; background: var(--card); padding: 4px 12px; cursor: pointer; font: 500 13px var(--display); }
+.view-toggle button.is-on { background: var(--ink-2); color: #fff; }
+.code-block { background: var(--paper); border: 1px solid var(--line); border-radius: 7px; padding: 8px 10px; overflow-x: auto; margin: 6px 0; font-size: 12.5px; line-height: 1.45; max-height: 300px; overflow-y: auto; }
+
+.tree-scroll { overflow: auto; max-height: 430px; border: 1px solid var(--line); border-radius: 7px; background: var(--paper); }
+.tree { display: block; }
+.tree-link { fill: none; stroke: var(--ink-3); stroke-width: 1; }
+.tree-node { cursor: pointer; }
+.tree-node.is-leaf { cursor: default; }
+.tree-node rect { fill: var(--card); stroke: var(--ink-2); stroke-width: 1; }
+.tree-node.is-leaf rect { stroke: var(--green); fill: var(--green-soft); }
+.tree-node text { font: 500 11px var(--mono); fill: var(--ink); }
+.tree-node .tree-tag { font: 500 9px var(--display); fill: var(--orange); letter-spacing: 0.02em; }
+.tree-node .tree-hidden { font-weight: 600; fill: var(--blue); }
+
+.stepper { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 6px 0; }
+.stepper button { border: 1px solid var(--line); background: var(--card); border-radius: 6px; padding: 2px 10px; cursor: pointer; font-size: 13px; }
+.stepper button:disabled { color: var(--ink-3); cursor: default; }
+.stepper-note { font-size: 13px; color: var(--ink-2); }
+.grammar { font: 400 12.5px/1.5 var(--mono); max-height: 340px; overflow: auto; border: 1px solid var(--line); border-radius: 7px; padding: 6px 8px; background: var(--paper); }
+.grammar-rule { display: grid; grid-template-columns: 84px 18px 1fr; padding: 0 4px; border-radius: 4px; transition: background 0.15s; }
+.grammar-rule.is-active { background: var(--amber-soft); box-shadow: inset 3px 0 0 var(--amber); }
+.grammar-lhs { color: var(--purple); }
+.grammar-arrow { color: var(--ink-3); }
+.grammar-alt { display: block; }
+.grammar-bar { color: var(--ink-3); }

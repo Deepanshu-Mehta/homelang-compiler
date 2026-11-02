@@ -1,0 +1,198 @@
+{
+  "kind": "Program",
+  "decls": [],
+  "rules": [
+    {
+      "kind": "Rule",
+      "id": "R1",
+      "priority": 1,
+      "trigger": {
+        "kind": "State",
+        "cond": {
+          "kind": "Compare",
+          "op": ">",
+          "left": {
+            "kind": "Ref",
+            "name": "TEMPERATURE",
+            "display": "TEMPERATURE",
+            "span": "4:4"
+          },
+          "right": {
+            "kind": "NumLit",
+            "value": 28,
+            "text": "28",
+            "span": "4:18"
+          },
+          "span": "4:4"
+        }
+      },
+      "thenActs": [
+        {
+          "kind": "Power",
+          "op": "TURN_ON",
+          "target": {
+            "kind": "Ref",
+            "name": "AC",
+            "display": "AC",
+            "span": "4:34"
+          },
+          "span": "4:26"
+        }
+      ],
+      "elseActs": [
+        {
+          "kind": "Power",
+          "op": "TURN_OFF",
+          "target": {
+            "kind": "Ref",
+            "name": "AC",
+            "display": "AC",
+            "span": "4:51"
+          },
+          "span": "4:42"
+        }
+      ],
+      "name": "Cool down",
+      "span": "3:1"
+    },
+    {
+      "kind": "Rule",
+      "id": "R2",
+      "priority": 1,
+      "trigger": {
+        "kind": "State",
+        "cond": {
+          "kind": "Between",
+          "subject": {
+            "kind": "Ref",
+            "name": "TIME",
+            "display": "TIME",
+            "span": "7:4"
+          },
+          "lo": {
+            "kind": "TimeLit",
+            "minutes": 1320,
+            "text": "22:00",
+            "span": "7:17"
+          },
+          "hi": {
+            "kind": "TimeLit",
+            "minutes": 360,
+            "text": "06:00",
+            "span": "7:27"
+          },
+          "span": "7:4"
+        }
+      },
+      "thenActs": [
+        {
+          "kind": "Power",
+          "op": "TURN_OFF",
+          "target": {
+            "kind": "Ref",
+            "name": "AC",
+            "display": "AC",
+            "span": "7:47"
+          },
+          "span": "7:38"
+        }
+      ],
+      "elseActs": [
+        {
+          "kind": "Power",
+          "op": "TURN_ON",
+          "target": {
+            "kind": "Ref",
+            "name": "AC",
+            "display": "AC",
+            "span": "7:63"
+          },
+          "span": "7:55"
+        }
+      ],
+      "name": "Quiet hours",
+      "span": "6:1"
+    }
+  ],
+  "span": "1:1",
+  "sim": {
+    "kind": "Simulation",
+    "stmts": [
+      {
+        "minutes": 1310,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "TEMPERATURE",
+              "display": "TEMPERATURE",
+              "span": "10:15"
+            },
+            "value": {
+              "kind": "NumLit",
+              "value": 27,
+              "unit": "C",
+              "text": "27C",
+              "span": "10:29"
+            },
+            "span": "10:15"
+          }
+        ],
+        "span": "10:5"
+      },
+      {
+        "minutes": 1315,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "TEMPERATURE",
+              "display": "TEMPERATURE",
+              "span": "11:15"
+            },
+            "value": {
+              "kind": "NumLit",
+              "value": 29,
+              "unit": "C",
+              "text": "29C",
+              "span": "11:29"
+            },
+            "span": "11:15"
+          }
+        ],
+        "span": "11:5"
+      },
+      {
+        "minutes": 1330,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "TEMPERATURE",
+              "display": "TEMPERATURE",
+              "span": "12:15"
+            },
+            "value": {
+              "kind": "NumLit",
+              "value": 30,
+              "unit": "C",
+              "text": "30C",
+              "span": "12:29"
+            },
+            "span": "12:15"
+          }
+        ],
+        "span": "12:5"
+      }
+    ],
+    "span": "9:1",
+    "from": 1310,
+    "to": 1340,
+    "step": {
+      "value": 1,
+      "unit": "MIN",
+      "text": "1MIN",
+      "span": "9:35"
+    }
+  }
+}

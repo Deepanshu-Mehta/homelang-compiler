@@ -1,0 +1,582 @@
+{
+  "kind": "Program",
+  "decls": [
+    {
+      "kind": "RoomDecl",
+      "name": "BEDROOM",
+      "display": "BEDROOM",
+      "nameSpan": "2:6",
+      "span": "2:1"
+    },
+    {
+      "kind": "RoomDecl",
+      "name": "LIVING_ROOM",
+      "display": "LIVING_ROOM",
+      "nameSpan": "2:20",
+      "span": "2:15"
+    },
+    {
+      "kind": "RoomDecl",
+      "name": "ENTRANCE",
+      "display": "ENTRANCE",
+      "nameSpan": "2:38",
+      "span": "2:33"
+    },
+    {
+      "kind": "DeviceDecl",
+      "name": "AC",
+      "display": "AC",
+      "nameSpan": "4:8",
+      "typeName": "AIR_CONDITIONER",
+      "typeSpan": "4:21",
+      "room": "BEDROOM",
+      "roomSpan": "4:40",
+      "span": "4:1"
+    },
+    {
+      "kind": "DeviceDecl",
+      "name": "BED_LIGHT",
+      "display": "BED_LIGHT",
+      "nameSpan": "5:8",
+      "typeName": "LIGHT",
+      "typeSpan": "5:21",
+      "room": "BEDROOM",
+      "roomSpan": "5:40",
+      "span": "5:1"
+    },
+    {
+      "kind": "DeviceDecl",
+      "name": "FAN",
+      "display": "FAN",
+      "nameSpan": "6:8",
+      "typeName": "FAN",
+      "typeSpan": "6:21",
+      "room": "LIVING_ROOM",
+      "roomSpan": "6:40",
+      "span": "6:1"
+    },
+    {
+      "kind": "DeviceDecl",
+      "name": "FRONT_DOOR",
+      "display": "FRONT_DOOR",
+      "nameSpan": "7:8",
+      "typeName": "DOOR_LOCK",
+      "typeSpan": "7:21",
+      "room": "ENTRANCE",
+      "roomSpan": "7:40",
+      "span": "7:1"
+    },
+    {
+      "kind": "DeviceDecl",
+      "name": "CURTAIN",
+      "display": "CURTAIN",
+      "nameSpan": "8:8",
+      "typeName": "CURTAIN",
+      "typeSpan": "8:21",
+      "room": "BEDROOM",
+      "roomSpan": "8:40",
+      "span": "8:1"
+    },
+    {
+      "kind": "SensorDecl",
+      "name": "TEMP",
+      "display": "TEMP",
+      "nameSpan": "10:8",
+      "typeName": "TEMP_SENSOR",
+      "typeSpan": "10:17",
+      "room": "BEDROOM",
+      "roomSpan": "10:36",
+      "unit": "C",
+      "unitSpan": "10:49",
+      "span": "10:1"
+    },
+    {
+      "kind": "SensorDecl",
+      "name": "MOTION",
+      "display": "MOTION",
+      "nameSpan": "11:8",
+      "typeName": "MOTION_SENSOR",
+      "typeSpan": "11:17",
+      "room": "BEDROOM",
+      "roomSpan": "11:36",
+      "span": "11:1"
+    },
+    {
+      "kind": "SensorDecl",
+      "name": "OWNER",
+      "display": "OWNER",
+      "nameSpan": "12:8",
+      "typeName": "PRESENCE_SENSOR",
+      "typeSpan": "12:17",
+      "room": "ENTRANCE",
+      "roomSpan": "12:36",
+      "span": "12:1"
+    }
+  ],
+  "rules": [
+    {
+      "kind": "Rule",
+      "id": "R1",
+      "priority": 2,
+      "trigger": {
+        "kind": "State",
+        "cond": {
+          "kind": "Logic",
+          "op": "AND",
+          "left": {
+            "kind": "Compare",
+            "op": ">",
+            "left": {
+              "kind": "Ref",
+              "name": "TEMP",
+              "display": "TEMP",
+              "span": "15:4"
+            },
+            "right": {
+              "kind": "NumLit",
+              "value": 86,
+              "unit": "F",
+              "text": "86F",
+              "span": "15:11"
+            },
+            "span": "15:4"
+          },
+          "right": {
+            "kind": "Logic",
+            "op": "OR",
+            "left": {
+              "kind": "StateTest",
+              "target": {
+                "kind": "Ref",
+                "name": "MOTION",
+                "display": "MOTION",
+                "span": "15:20"
+              },
+              "negated": false,
+              "state": "DETECTED",
+              "stateSpan": "15:30",
+              "span": "15:20"
+            },
+            "right": {
+              "kind": "Between",
+              "subject": {
+                "kind": "Ref",
+                "name": "TIME",
+                "display": "TIME",
+                "span": "15:42"
+              },
+              "lo": {
+                "kind": "TimeLit",
+                "minutes": 1320,
+                "text": "22:00",
+                "span": "15:55"
+              },
+              "hi": {
+                "kind": "TimeLit",
+                "minutes": 360,
+                "text": "06:00",
+                "span": "15:65"
+              },
+              "span": "15:42"
+            },
+            "span": "15:20"
+          },
+          "span": "15:4"
+        },
+        "hold": {
+          "value": 2,
+          "unit": "MIN",
+          "text": "2MIN",
+          "span": "15:76"
+        }
+      },
+      "thenActs": [
+        {
+          "kind": "Power",
+          "op": "TURN_ON",
+          "target": {
+            "kind": "Ref",
+            "name": "AC",
+            "display": "AC",
+            "span": "16:13"
+          },
+          "span": "16:5"
+        },
+        {
+          "kind": "SetAttr",
+          "target": {
+            "kind": "Ref",
+            "name": "AC",
+            "display": "AC",
+            "span": "16:21"
+          },
+          "attr": "TEMPERATURE",
+          "attrSpan": "16:24",
+          "value": {
+            "kind": "NumLit",
+            "value": 24,
+            "unit": "C",
+            "text": "24C",
+            "span": "16:39"
+          },
+          "span": "16:17"
+        }
+      ],
+      "elseActs": [
+        {
+          "kind": "Power",
+          "op": "TURN_OFF",
+          "target": {
+            "kind": "Ref",
+            "name": "AC",
+            "display": "AC",
+            "span": "18:14"
+          },
+          "span": "18:5"
+        }
+      ],
+      "name": "Cool bedroom",
+      "prioritySpan": "14:30",
+      "span": "14:1"
+    },
+    {
+      "kind": "Rule",
+      "id": "R2",
+      "priority": 1,
+      "trigger": {
+        "kind": "Event",
+        "source": {
+          "kind": "Ref",
+          "name": "MOTION",
+          "display": "MOTION",
+          "span": "22:6"
+        },
+        "event": "DETECTED",
+        "span": "22:1",
+        "guard": {
+          "kind": "Between",
+          "subject": {
+            "kind": "Ref",
+            "name": "TIME",
+            "display": "TIME",
+            "span": "22:25"
+          },
+          "lo": {
+            "kind": "TimeLit",
+            "minutes": 1320,
+            "text": "22:00",
+            "span": "22:38"
+          },
+          "hi": {
+            "kind": "TimeLit",
+            "minutes": 360,
+            "text": "06:00",
+            "span": "22:48"
+          },
+          "span": "22:25"
+        }
+      },
+      "thenActs": [
+        {
+          "kind": "SetAttr",
+          "target": {
+            "kind": "Ref",
+            "name": "BED_LIGHT",
+            "display": "BED_LIGHT",
+            "span": "23:9"
+          },
+          "attr": "BRIGHTNESS",
+          "attrSpan": "23:19",
+          "value": {
+            "kind": "NumLit",
+            "value": 20,
+            "unit": "%",
+            "text": "20%",
+            "span": "23:33"
+          },
+          "span": "23:5"
+        },
+        {
+          "kind": "Wait",
+          "duration": {
+            "value": 5,
+            "unit": "MIN",
+            "text": "5MIN",
+            "span": "23:43"
+          },
+          "span": "23:38"
+        },
+        {
+          "kind": "Power",
+          "op": "TURN_OFF",
+          "target": {
+            "kind": "Ref",
+            "name": "BED_LIGHT",
+            "display": "BED_LIGHT",
+            "span": "23:58"
+          },
+          "span": "23:49"
+        }
+      ],
+      "name": "Night light",
+      "span": "21:1"
+    },
+    {
+      "kind": "Rule",
+      "id": "R3",
+      "priority": 1,
+      "trigger": {
+        "kind": "Time",
+        "minutes": 420,
+        "span": "27:1",
+        "days": [
+          "WEEKDAYS"
+        ]
+      },
+      "thenActs": [
+        {
+          "kind": "Power",
+          "op": "OPEN",
+          "target": {
+            "kind": "Ref",
+            "name": "CURTAIN",
+            "display": "CURTAIN",
+            "span": "27:32"
+          },
+          "span": "27:27"
+        },
+        {
+          "kind": "Notify",
+          "text": "Good morning!",
+          "span": "27:41"
+        }
+      ],
+      "name": "Morning",
+      "span": "26:1"
+    },
+    {
+      "kind": "Rule",
+      "id": "R4",
+      "priority": 5,
+      "trigger": {
+        "kind": "Event",
+        "source": {
+          "kind": "Ref",
+          "name": "OWNER",
+          "display": "OWNER",
+          "span": "30:6"
+        },
+        "event": "CHANGES",
+        "span": "30:1",
+        "guard": {
+          "kind": "StateTest",
+          "target": {
+            "kind": "Ref",
+            "name": "OWNER",
+            "display": "OWNER",
+            "span": "30:23"
+          },
+          "negated": false,
+          "state": "AWAY",
+          "stateSpan": "30:32",
+          "span": "30:23"
+        }
+      },
+      "thenActs": [
+        {
+          "kind": "Power",
+          "op": "LOCK",
+          "target": {
+            "kind": "Ref",
+            "name": "FRONT_DOOR",
+            "display": "FRONT_DOOR",
+            "span": "31:10"
+          },
+          "span": "31:5"
+        },
+        {
+          "kind": "Power",
+          "op": "TURN_OFF",
+          "target": {
+            "kind": "Ref",
+            "name": "AC",
+            "display": "AC",
+            "span": "31:31"
+          },
+          "span": "31:22"
+        },
+        {
+          "kind": "Power",
+          "op": "TURN_OFF",
+          "target": {
+            "kind": "Ref",
+            "name": "FAN",
+            "display": "FAN",
+            "span": "31:44"
+          },
+          "span": "31:35"
+        },
+        {
+          "kind": "Notify",
+          "text": "Home secured",
+          "span": "31:49"
+        }
+      ],
+      "name": "Leaving home",
+      "prioritySpan": "29:30",
+      "span": "29:1"
+    }
+  ],
+  "span": "1:1",
+  "sim": {
+    "kind": "Simulation",
+    "stmts": [
+      {
+        "minutes": 1290,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "TEMP",
+              "display": "TEMP",
+              "span": "35:15"
+            },
+            "value": {
+              "kind": "NumLit",
+              "value": 29,
+              "unit": "C",
+              "text": "29C",
+              "span": "35:22"
+            },
+            "span": "35:15"
+          },
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "MOTION",
+              "display": "MOTION",
+              "span": "35:27"
+            },
+            "value": {
+              "kind": "EnumLit",
+              "value": "CLEAR",
+              "category": "state",
+              "span": "35:36"
+            },
+            "span": "35:27"
+          },
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "OWNER",
+              "display": "OWNER",
+              "span": "35:43"
+            },
+            "value": {
+              "kind": "EnumLit",
+              "value": "HOME",
+              "category": "state",
+              "span": "35:51"
+            },
+            "span": "35:43"
+          }
+        ],
+        "span": "35:5"
+      },
+      {
+        "minutes": 1330,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "MOTION",
+              "display": "MOTION",
+              "span": "36:15"
+            },
+            "value": {
+              "kind": "EnumLit",
+              "value": "DETECTED",
+              "category": "state",
+              "span": "36:24"
+            },
+            "span": "36:15"
+          }
+        ],
+        "span": "36:5"
+      },
+      {
+        "minutes": 1335,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "TEMP",
+              "display": "TEMP",
+              "span": "37:15"
+            },
+            "value": {
+              "kind": "NumLit",
+              "value": 31,
+              "unit": "C",
+              "text": "31C",
+              "span": "37:22"
+            },
+            "span": "37:15"
+          }
+        ],
+        "span": "37:5"
+      },
+      {
+        "minutes": 1380,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "MOTION",
+              "display": "MOTION",
+              "span": "38:15"
+            },
+            "value": {
+              "kind": "EnumLit",
+              "value": "CLEAR",
+              "category": "state",
+              "span": "38:24"
+            },
+            "span": "38:15"
+          }
+        ],
+        "span": "38:5"
+      },
+      {
+        "minutes": 435,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "OWNER",
+              "display": "OWNER",
+              "span": "39:15"
+            },
+            "value": {
+              "kind": "EnumLit",
+              "value": "AWAY",
+              "category": "state",
+              "span": "39:23"
+            },
+            "span": "39:15"
+          }
+        ],
+        "span": "39:5"
+      }
+    ],
+    "span": "34:1",
+    "from": 1290,
+    "to": 450,
+    "step": {
+      "value": 1,
+      "unit": "MIN",
+      "text": "1MIN",
+      "span": "34:35"
+    }
+  }
+}

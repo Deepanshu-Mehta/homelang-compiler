@@ -1,0 +1,287 @@
+{
+  "kind": "Program",
+  "decls": [],
+  "rules": [
+    {
+      "kind": "Rule",
+      "id": "R1",
+      "priority": 1,
+      "trigger": {
+        "kind": "State",
+        "cond": {
+          "kind": "Compare",
+          "op": ">",
+          "left": {
+            "kind": "Ref",
+            "name": "TEMPERATURE",
+            "display": "TEMPERATURE",
+            "span": "4:4"
+          },
+          "right": {
+            "kind": "NumLit",
+            "value": 30,
+            "text": "30",
+            "span": "4:18"
+          },
+          "span": "4:4"
+        }
+      },
+      "thenActs": [
+        {
+          "kind": "Power",
+          "op": "TURN_ON",
+          "target": {
+            "kind": "Ref",
+            "name": "FAN",
+            "display": "FAN",
+            "span": "4:34"
+          },
+          "span": "4:26"
+        }
+      ],
+      "elseActs": [
+        {
+          "kind": "Power",
+          "op": "TURN_OFF",
+          "target": {
+            "kind": "Ref",
+            "name": "FAN",
+            "display": "FAN",
+            "span": "4:52"
+          },
+          "span": "4:43"
+        }
+      ],
+      "name": "Flapping fan",
+      "span": "3:1"
+    },
+    {
+      "kind": "Rule",
+      "id": "R2",
+      "priority": 1,
+      "trigger": {
+        "kind": "State",
+        "cond": {
+          "kind": "Compare",
+          "op": ">",
+          "left": {
+            "kind": "Ref",
+            "name": "TEMPERATURE",
+            "display": "TEMPERATURE",
+            "span": "7:4"
+          },
+          "right": {
+            "kind": "NumLit",
+            "value": 30,
+            "text": "30",
+            "span": "7:18"
+          },
+          "span": "7:4"
+        },
+        "hold": {
+          "value": 3,
+          "unit": "MIN",
+          "text": "3MIN",
+          "span": "7:25"
+        }
+      },
+      "thenActs": [
+        {
+          "kind": "Power",
+          "op": "TURN_ON",
+          "target": {
+            "kind": "Ref",
+            "name": "AC",
+            "display": "AC",
+            "span": "7:43"
+          },
+          "span": "7:35"
+        }
+      ],
+      "elseActs": [
+        {
+          "kind": "Power",
+          "op": "TURN_OFF",
+          "target": {
+            "kind": "Ref",
+            "name": "AC",
+            "display": "AC",
+            "span": "7:60"
+          },
+          "span": "7:51"
+        }
+      ],
+      "name": "Steady AC",
+      "span": "6:1"
+    }
+  ],
+  "span": "1:1",
+  "sim": {
+    "kind": "Simulation",
+    "stmts": [
+      {
+        "minutes": 720,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "TEMPERATURE",
+              "display": "TEMPERATURE",
+              "span": "10:15"
+            },
+            "value": {
+              "kind": "NumLit",
+              "value": 29.5,
+              "unit": "C",
+              "text": "29.5C",
+              "span": "10:29"
+            },
+            "span": "10:15"
+          }
+        ],
+        "span": "10:5"
+      },
+      {
+        "minutes": 722,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "TEMPERATURE",
+              "display": "TEMPERATURE",
+              "span": "11:15"
+            },
+            "value": {
+              "kind": "NumLit",
+              "value": 30.5,
+              "unit": "C",
+              "text": "30.5C",
+              "span": "11:29"
+            },
+            "span": "11:15"
+          }
+        ],
+        "span": "11:5"
+      },
+      {
+        "minutes": 723,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "TEMPERATURE",
+              "display": "TEMPERATURE",
+              "span": "12:15"
+            },
+            "value": {
+              "kind": "NumLit",
+              "value": 29.5,
+              "unit": "C",
+              "text": "29.5C",
+              "span": "12:29"
+            },
+            "span": "12:15"
+          }
+        ],
+        "span": "12:5"
+      },
+      {
+        "minutes": 724,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "TEMPERATURE",
+              "display": "TEMPERATURE",
+              "span": "13:15"
+            },
+            "value": {
+              "kind": "NumLit",
+              "value": 30.5,
+              "unit": "C",
+              "text": "30.5C",
+              "span": "13:29"
+            },
+            "span": "13:15"
+          }
+        ],
+        "span": "13:5"
+      },
+      {
+        "minutes": 725,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "TEMPERATURE",
+              "display": "TEMPERATURE",
+              "span": "14:15"
+            },
+            "value": {
+              "kind": "NumLit",
+              "value": 29.5,
+              "unit": "C",
+              "text": "29.5C",
+              "span": "14:29"
+            },
+            "span": "14:15"
+          }
+        ],
+        "span": "14:5"
+      },
+      {
+        "minutes": 726,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "TEMPERATURE",
+              "display": "TEMPERATURE",
+              "span": "15:15"
+            },
+            "value": {
+              "kind": "NumLit",
+              "value": 30.5,
+              "unit": "C",
+              "text": "30.5C",
+              "span": "15:29"
+            },
+            "span": "15:15"
+          }
+        ],
+        "span": "15:5"
+      },
+      {
+        "minutes": 735,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "TEMPERATURE",
+              "display": "TEMPERATURE",
+              "span": "16:15"
+            },
+            "value": {
+              "kind": "NumLit",
+              "value": 29,
+              "unit": "C",
+              "text": "29C",
+              "span": "16:29"
+            },
+            "span": "16:15"
+          }
+        ],
+        "span": "16:5"
+      }
+    ],
+    "span": "9:1",
+    "from": 720,
+    "to": 740,
+    "step": {
+      "value": 1,
+      "unit": "MIN",
+      "text": "1MIN",
+      "span": "9:35"
+    }
+  }
+}

@@ -48,16 +48,23 @@ const flashLine = StateField.define<DecorationSet>({
   provide: (field) => EditorView.decorations.from(field),
 });
 
+/** Text pushed into the editor from outside. A new object means "load this". */
+export interface LoadedText {
+  text: string;
+}
+
 interface EditorProps {
-  value: string;
+  loaded: LoadedText;
   onChange: (value: string) => void;
+  /** The source that `tokens` and `diagnostics` were computed from. */
+  compiledSource: string;
   tokens: readonly Token[];
   diagnostics: readonly Diagnostic[];
   /** 1-based line to highlight, e.g. after clicking a log entry. */
   highlightLine: number | null;
 }
 
-export function Editor({ value, onChange, tokens, diagnostics, highlightLine }: EditorProps) {
+export function Editor({ loaded, onChange, compiledSource, tokens, diagnostics, highlightLine }: EditorProps) {
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
   const change = useRef(onChange);
@@ -67,13 +74,12 @@ export function Editor({ value, onChange, tokens, diagnostics, highlightLine }: 
     const editor = new EditorView({
       parent: host.current!,
       state: EditorState.create({
-        doc: value,
+        doc: loaded.text,
         extensions: [
           basicSetup,
           lintGutter(),
           tokenHighlight,
           flashLine,
-          EditorView.lineWrapping,
           EditorView.updateListener.of((update) => {
             if (update.docChanged) change.current(update.state.doc.toString());
           }),
@@ -86,27 +92,32 @@ export function Editor({ value, onChange, tokens, diagnostics, highlightLine }: 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // The editor owns its text. Only an explicit load writes into it: mirroring
+  // every keystroke back in would race the user and loop forever on fast typing.
   useEffect(() => {
     const editor = view.current!;
-    const current = editor.state.doc.toString();
-    if (current !== value) {
-      editor.dispatch({ changes: { from: 0, to: current.length, insert: value } });
+    const { length } = editor.state.doc;
+    if (editor.state.doc.toString() !== loaded.text) {
+      editor.dispatch({ changes: { from: 0, to: length, insert: loaded.text } });
     }
-  }, [value]);
+  }, [loaded]);
 
   useEffect(() => {
     const editor = view.current!;
-    if (editor.state.doc.toString() !== value) return; // stale compile result
+    // While the user types, the last result describes older text. Its offsets
+    // no longer fit the document, so wait for the debounced compile to catch up.
+    if (editor.state.doc.toString() !== compiledSource) return;
     const docLength = editor.state.doc.length;
-    const lint: CmDiagnostic[] = diagnostics.map((d) => ({
-      from: Math.min(d.span.start, docLength),
-      to: Math.min(Math.max(d.span.end, d.span.start + 1), docLength),
-      severity: d.severity,
-      message: `${d.code}: ${d.message}`,
-    }));
+    const lint: CmDiagnostic[] = diagnostics.map((d) => {
+      // An error at end of input has an empty span, so underline the last
+      // character instead: otherwise there is nothing visible to squiggle.
+      const to = Math.min(Math.max(d.span.end, d.span.start + 1), docLength);
+      const from = Math.min(d.span.start, Math.max(0, to - 1));
+      return { from, to, severity: d.severity, message: `${d.code}: ${d.message}` };
+    });
     editor.dispatch(setDiagnostics(editor.state, lint));
     editor.dispatch({ effects: setTokens.of(tokens) });
-  }, [tokens, diagnostics, value]);
+  }, [tokens, diagnostics, compiledSource]);
 
   useEffect(() => {
     const editor = view.current!;

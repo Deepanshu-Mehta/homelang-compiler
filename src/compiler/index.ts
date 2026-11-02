@@ -3,7 +3,8 @@
  * which keeps the core pure: compile(source) → { stages }.
  */
 import { hasErrors, makeDiagnostic, type Diagnostic } from './diagnostics';
-import { lex } from './lexer/lexer';
+import { lex, type LexerOutput } from './lexer/lexer';
+import { parse } from './parser/parser';
 import {
   STAGE_ORDER, type StageName, type StageOutputs, type StageResult, type StageStatus,
 } from './stages';
@@ -11,6 +12,14 @@ import {
 export * from './diagnostics';
 export * from './stages';
 export type { LexerOutput } from './lexer/lexer';
+export type { ParserOutput } from './parser/parser';
+export type { Program, Rule, Cond, Expr, Action } from './parser/ast';
+export type { ParseStep, ViewNode } from './parser/parseTree';
+export { parseTreeToView } from './parser/parseTree';
+export { astToView, programText } from './parser/print';
+export { GRAMMAR, renderProduction } from './parser/grammar';
+export { analyzeGrammar } from './parser/ll1';
+export type { Ll1Analysis } from './parser/ll1';
 export type { Token, TokenCategory } from './lexer/tokens';
 export type { Dfa, DfaEdge, DfaState, DfaStep, DfaTrace } from './lexer/dfa/types';
 export { DFAS, DFA_BY_NAME } from './lexer/dfa/index';
@@ -69,12 +78,25 @@ function skipped(stage: StageName): StageResult {
   return { stage, number, title, status: 'skipped', output: null, diagnostics: [], timeMs: 0 };
 }
 
-export function compile(source: string, _options: CompileOptions = {}): CompileResult {
+export function compile(source: string, options: CompileOptions = {}): CompileResult {
   const stages: StageResult[] = [];
-  const lexer = runStage('lexer', () => lex(source));
-  stages.push(lexer);
 
-  // Later phases plug in here; each runs only if the previous one has no errors.
+  /** Adds a stage, unless an earlier stage failed. Returns its output, or null. */
+  function step<T>(stage: StageName, work: () => StageWork<T>): T | null {
+    const result = runStage(stage, work);
+    stages.push(result);
+    return result.status === 'error' ? null : result.output;
+  }
+
+  function pipeline(): void {
+    const tokens = step<LexerOutput>('lexer', () => lex(source));
+    if (!tokens) return;
+    const parsed = step('parser', () => parse(tokens.tokens, source, options.collectAllErrors));
+    if (!parsed) return;
+  }
+
+  pipeline();
+  // Every stage after a failure is reported as skipped.
   for (const { stage } of STAGE_ORDER.slice(stages.length)) stages.push(skipped(stage));
   return { source, stages };
 }

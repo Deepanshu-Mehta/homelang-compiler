@@ -1,0 +1,452 @@
+{
+  "kind": "Program",
+  "decls": [
+    {
+      "kind": "RoomDecl",
+      "name": "LIVING_ROOM",
+      "display": "LIVING_ROOM",
+      "nameSpan": "2:6",
+      "span": "2:1"
+    },
+    {
+      "kind": "DeviceDecl",
+      "name": "LAMP",
+      "display": "LAMP",
+      "nameSpan": "3:8",
+      "typeName": "LIGHT",
+      "typeSpan": "3:15",
+      "room": "LIVING_ROOM",
+      "roomSpan": "3:24",
+      "span": "3:1"
+    },
+    {
+      "kind": "DeviceDecl",
+      "name": "CEILING_FAN",
+      "display": "CEILING_FAN",
+      "nameSpan": "4:8",
+      "typeName": "FAN",
+      "typeSpan": "4:22",
+      "room": "LIVING_ROOM",
+      "roomSpan": "4:29",
+      "span": "4:1"
+    },
+    {
+      "kind": "SensorDecl",
+      "name": "LUX",
+      "display": "LUX",
+      "nameSpan": "5:8",
+      "typeName": "LIGHT_SENSOR",
+      "typeSpan": "5:14",
+      "room": "LIVING_ROOM",
+      "roomSpan": "5:30",
+      "span": "5:1"
+    },
+    {
+      "kind": "SensorDecl",
+      "name": "HUM",
+      "display": "HUM",
+      "nameSpan": "6:8",
+      "typeName": "HUMIDITY_SENSOR",
+      "typeSpan": "6:14",
+      "room": "LIVING_ROOM",
+      "roomSpan": "6:33",
+      "unit": "%",
+      "unitSpan": "6:50",
+      "span": "6:1"
+    },
+    {
+      "kind": "SensorDecl",
+      "name": "PIR",
+      "display": "PIR",
+      "nameSpan": "7:8",
+      "typeName": "MOTION_SENSOR",
+      "typeSpan": "7:14",
+      "room": "LIVING_ROOM",
+      "roomSpan": "7:31",
+      "span": "7:1"
+    }
+  ],
+  "rules": [
+    {
+      "kind": "Rule",
+      "id": "R1",
+      "priority": 1,
+      "trigger": {
+        "kind": "State",
+        "cond": {
+          "kind": "Logic",
+          "op": "AND",
+          "left": {
+            "kind": "Logic",
+            "op": "AND",
+            "left": {
+              "kind": "StateTest",
+              "target": {
+                "kind": "Ref",
+                "name": "PIR",
+                "display": "PIR",
+                "span": "9:4"
+              },
+              "negated": false,
+              "state": "DETECTED",
+              "stateSpan": "9:11",
+              "span": "9:4"
+            },
+            "right": {
+              "kind": "Compare",
+              "op": "<",
+              "left": {
+                "kind": "Ref",
+                "name": "LUX",
+                "display": "LUX",
+                "span": "9:24"
+              },
+              "right": {
+                "kind": "NumLit",
+                "value": 50,
+                "unit": "LUX",
+                "text": "50LUX",
+                "span": "9:30"
+              },
+              "span": "9:24"
+            },
+            "span": "9:4"
+          },
+          "right": {
+            "kind": "Not",
+            "operand": {
+              "kind": "Between",
+              "subject": {
+                "kind": "Ref",
+                "name": "TIME",
+                "display": "TIME",
+                "span": "9:44"
+              },
+              "lo": {
+                "kind": "TimeLit",
+                "minutes": 60,
+                "text": "01:00",
+                "span": "9:57"
+              },
+              "hi": {
+                "kind": "TimeLit",
+                "minutes": 300,
+                "text": "05:00",
+                "span": "9:67"
+              },
+              "span": "9:44"
+            },
+            "span": "9:40"
+          },
+          "span": "9:4"
+        }
+      },
+      "thenActs": [
+        {
+          "kind": "SetAttr",
+          "target": {
+            "kind": "Ref",
+            "name": "LAMP",
+            "display": "LAMP",
+            "span": "10:9"
+          },
+          "attr": "BRIGHTNESS",
+          "attrSpan": "10:14",
+          "value": {
+            "kind": "NumLit",
+            "value": 70,
+            "unit": "%",
+            "text": "70%",
+            "span": "10:28"
+          },
+          "span": "10:5"
+        }
+      ],
+      "elseActs": [
+        {
+          "kind": "Power",
+          "op": "TURN_OFF",
+          "target": {
+            "kind": "Ref",
+            "name": "LAMP",
+            "display": "LAMP",
+            "span": "12:14"
+          },
+          "span": "12:5"
+        }
+      ],
+      "span": "9:1"
+    },
+    {
+      "kind": "Rule",
+      "id": "R2",
+      "priority": 1,
+      "trigger": {
+        "kind": "State",
+        "cond": {
+          "kind": "Logic",
+          "op": "OR",
+          "left": {
+            "kind": "Compare",
+            "op": ">=",
+            "left": {
+              "kind": "Ref",
+              "name": "HUM",
+              "display": "HUM",
+              "span": "15:4"
+            },
+            "right": {
+              "kind": "NumLit",
+              "value": 70,
+              "unit": "%",
+              "text": "70%",
+              "span": "15:11"
+            },
+            "span": "15:4"
+          },
+          "right": {
+            "kind": "Logic",
+            "op": "AND",
+            "left": {
+              "kind": "StateTest",
+              "target": {
+                "kind": "Ref",
+                "name": "PIR",
+                "display": "PIR",
+                "span": "15:19"
+              },
+              "negated": false,
+              "state": "DETECTED",
+              "stateSpan": "15:26",
+              "span": "15:19"
+            },
+            "right": {
+              "kind": "Compare",
+              "op": ">",
+              "left": {
+                "kind": "Ref",
+                "name": "HUM",
+                "display": "HUM",
+                "span": "15:39"
+              },
+              "right": {
+                "kind": "NumLit",
+                "value": 60,
+                "unit": "%",
+                "text": "60%",
+                "span": "15:45"
+              },
+              "span": "15:39"
+            },
+            "span": "15:19"
+          },
+          "span": "15:4"
+        }
+      },
+      "thenActs": [
+        {
+          "kind": "SetAttr",
+          "target": {
+            "kind": "Ref",
+            "name": "CEILING_FAN",
+            "display": "CEILING_FAN",
+            "span": "15:59"
+          },
+          "attr": "SPEED",
+          "attrSpan": "15:71",
+          "value": {
+            "kind": "NumLit",
+            "value": 3,
+            "text": "3",
+            "span": "15:80"
+          },
+          "span": "15:55"
+        }
+      ],
+      "elseActs": [
+        {
+          "kind": "Power",
+          "op": "TURN_OFF",
+          "target": {
+            "kind": "Ref",
+            "name": "CEILING_FAN",
+            "display": "CEILING_FAN",
+            "span": "15:96"
+          },
+          "span": "15:87"
+        }
+      ],
+      "span": "15:1"
+    }
+  ],
+  "span": "1:1",
+  "sim": {
+    "kind": "Simulation",
+    "stmts": [
+      {
+        "minutes": 1080,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "LUX",
+              "display": "LUX",
+              "span": "18:15"
+            },
+            "value": {
+              "kind": "NumLit",
+              "value": 200,
+              "unit": "LUX",
+              "text": "200LUX",
+              "span": "18:21"
+            },
+            "span": "18:15"
+          },
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "PIR",
+              "display": "PIR",
+              "span": "18:29"
+            },
+            "value": {
+              "kind": "EnumLit",
+              "value": "CLEAR",
+              "category": "state",
+              "span": "18:35"
+            },
+            "span": "18:29"
+          },
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "HUM",
+              "display": "HUM",
+              "span": "18:42"
+            },
+            "value": {
+              "kind": "NumLit",
+              "value": 55,
+              "unit": "%",
+              "text": "55%",
+              "span": "18:48"
+            },
+            "span": "18:42"
+          }
+        ],
+        "span": "18:5"
+      },
+      {
+        "minutes": 1090,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "PIR",
+              "display": "PIR",
+              "span": "19:15"
+            },
+            "value": {
+              "kind": "EnumLit",
+              "value": "DETECTED",
+              "category": "state",
+              "span": "19:21"
+            },
+            "span": "19:15"
+          }
+        ],
+        "span": "19:5"
+      },
+      {
+        "minutes": 1100,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "LUX",
+              "display": "LUX",
+              "span": "20:15"
+            },
+            "value": {
+              "kind": "NumLit",
+              "value": 30,
+              "unit": "LUX",
+              "text": "30LUX",
+              "span": "20:21"
+            },
+            "span": "20:15"
+          }
+        ],
+        "span": "20:5"
+      },
+      {
+        "minutes": 1110,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "HUM",
+              "display": "HUM",
+              "span": "21:15"
+            },
+            "value": {
+              "kind": "NumLit",
+              "value": 72,
+              "unit": "%",
+              "text": "72%",
+              "span": "21:21"
+            },
+            "span": "21:15"
+          }
+        ],
+        "span": "21:5"
+      },
+      {
+        "minutes": 1125,
+        "assigns": [
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "PIR",
+              "display": "PIR",
+              "span": "22:15"
+            },
+            "value": {
+              "kind": "EnumLit",
+              "value": "CLEAR",
+              "category": "state",
+              "span": "22:21"
+            },
+            "span": "22:15"
+          },
+          {
+            "target": {
+              "kind": "Ref",
+              "name": "HUM",
+              "display": "HUM",
+              "span": "22:28"
+            },
+            "value": {
+              "kind": "NumLit",
+              "value": 58,
+              "unit": "%",
+              "text": "58%",
+              "span": "22:34"
+            },
+            "span": "22:28"
+          }
+        ],
+        "span": "22:5"
+      }
+    ],
+    "span": "17:1",
+    "from": 1080,
+    "to": 1140,
+    "step": {
+      "value": 1,
+      "unit": "MIN",
+      "text": "1MIN",
+      "span": "17:35"
+    }
+  }
+}
