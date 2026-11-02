@@ -15,6 +15,7 @@ const semanticError = ['ok', 'ok', 'error', 'skipped', 'skipped', 'skipped', 'sk
  */
 const FLAT_PAGE = `
   html, body, #app, .app { height: auto; }
+  .app { display: block; }
   .layout { display: block; }
   .left-pane, .right-pane { overflow: visible; }
   .pipeline { position: static; }

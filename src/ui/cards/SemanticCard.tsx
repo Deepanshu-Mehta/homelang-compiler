@@ -74,7 +74,7 @@ function DiagnosticGroups({ diagnostics }: { diagnostics: readonly Diagnostic[] 
     <div data-testid="semantic-diagnostics">
       {groups.map(([code, items]) => (
         <div key={code} class="diagnostic-group">
-          <h4>{code} <span class="muted">× {items.length}</span></h4>
+          {items.length > 1 && <h4>{code} <span class="muted">× {items.length}</span></h4>}
           <ul class="diagnostics">{items.map((d, i) => <DiagnosticRow key={i} diagnostic={d} />)}</ul>
         </div>
       ))}

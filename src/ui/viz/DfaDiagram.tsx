@@ -1,6 +1,12 @@
 import type { Dfa, DfaEdge, DfaState } from '../../compiler/index';
 
-const RADIUS = 17;
+const RADIUS = 19;
+const LINE = 16;
+/** Room above for self-loops, and below for labels under the last row. */
+const HEADROOM = 34;
+const FOOTROOM = 30;
+/** The drawing grows with the root font, so its text never drops below 14px. */
+const drawingScale = (): number => parseFloat(getComputedStyle(document.documentElement).fontSize) / 16;
 
 interface DfaDiagramProps {
   dfa: Dfa;
@@ -68,13 +74,15 @@ function Arrow({ edge, curved }: { edge: DrawnEdge; curved: boolean }) {
 
 export function DfaDiagram({ dfa, visited, active }: DfaDiagramProps) {
   const { drawn, errors } = joinEdges(dfa);
+  const scale = drawingScale();
   const hasReverse = (e: DrawnEdge) =>
     drawn.some((other) => other.from === e.to && other.to === e.from);
   const start = dfa.states.find((s) => s.id === dfa.start)!;
-  const stateById = new Map(dfa.states.map((s) => [s.id, s]));
 
   return (
-    <svg class="dfa" viewBox={`0 0 ${dfa.width} ${dfa.height}`} style={{ maxWidth: `${dfa.width}px` }} role="img"
+    <div class="dfa-scroll">
+    <svg class="dfa" width={dfa.width * scale} height={(dfa.height + HEADROOM + FOOTROOM) * scale}
+      viewBox={`0 ${-HEADROOM} ${dfa.width} ${dfa.height + HEADROOM + FOOTROOM}`} role="img"
       aria-label={`State diagram: ${dfa.title}`} data-dfa={dfa.name}>
       <defs>
         <marker id="arrowhead" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
@@ -87,14 +95,6 @@ export function DfaDiagram({ dfa, visited, active }: DfaDiagramProps) {
         edge.from === edge.to
           ? <SelfLoop key={edge.from.id} state={edge.from} label={edge.label} />
           : <Arrow key={`${edge.from.id}-${edge.to.id}`} edge={edge} curved={hasReverse(edge)} />)}
-      {errors.map((edge, i) => {
-        const state = stateById.get(edge.from)!;
-        return (
-          <text key={i} class="dfa-error" x={state.x + RADIUS + 3} y={state.y + RADIUS + 12 + 12 * (i % 2)}>
-            {edge.label}
-          </text>
-        );
-      })}
       {dfa.states.map((state) => {
         const classes = ['dfa-state'];
         if (state.accept) classes.push('is-accept');
@@ -106,11 +106,16 @@ export function DfaDiagram({ dfa, visited, active }: DfaDiagramProps) {
             {state.accept && <circle class="dfa-ring" cx={state.x} cy={state.y} r={RADIUS - 4} />}
             <text class="dfa-id" x={state.x} y={state.y + 4} text-anchor="middle">{state.id}</text>
             {state.label && (
-              <text class="dfa-label" x={state.x} y={state.y + RADIUS + 13} text-anchor="middle">{state.label}</text>
+              <text class="dfa-label" x={state.x} y={state.y + RADIUS + LINE} text-anchor="middle">{state.label}</text>
             )}
+            {errors.filter((edge) => edge.from === state.id).map((edge, i) => (
+              <text key={edge.label} class="dfa-error" text-anchor="middle" x={state.x}
+                y={state.y + RADIUS + LINE * (i + (state.label ? 2 : 1))}>{edge.label}</text>
+            ))}
           </g>
         );
       })}
     </svg>
+    </div>
   );
 }

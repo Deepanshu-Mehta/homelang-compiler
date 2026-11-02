@@ -1,24 +1,48 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import {
   DFAS, DFA_BY_NAME, TOKEN_TABLE, type DfaTrace, type LexerOutput, type StageResult, type Token,
+  type TokenCategory,
 } from '../../compiler/index';
-import { Card } from '../Card';
+import { Card, Reference } from '../Card';
 import { DiagnosticRow, ErrorBox } from '../DiagnosticBox';
 import { DfaDiagram } from '../viz/DfaDiagram';
 
 const STEP_MS = 320;
+/** Longer programs open in the compact view, so the token list stays short. */
+const COMPACT_ABOVE_TOKENS = 40;
 
-function subType(token: Token): string {
+const CLASSES: readonly { category: TokenCategory; label: string }[] = [
+  { category: 'keyword', label: 'Keyword' },
+  { category: 'action', label: 'Action' },
+  { category: 'state', label: 'State or event' },
+  { category: 'day', label: 'Day' },
+  { category: 'ident', label: 'Name' },
+  { category: 'literal', label: 'Literal' },
+  { category: 'operator', label: 'Operator' },
+  { category: 'punct', label: 'Punctuation' },
+];
+
+function typeLabel(token: Token): string {
   if (token.quantity) return `${token.type} ${token.quantity.display}`;
   return token.type;
 }
 
-function TokenChip({ token, selected, onSelect }: { token: Token; selected: boolean; onSelect: () => void }) {
+interface TokenChipProps {
+  token: Token;
+  selected: boolean;
+  compact: boolean;
+  onSelect: () => void;
+}
+
+function TokenChip({ token, selected, compact, onSelect }: TokenChipProps) {
+  // A keyword's type is its own spelling, so the compact view needs only one word.
+  const showType = !compact || token.upper !== token.type;
   return (
     <button class={`chip chip-${token.category} ${selected ? 'is-selected' : ''}`}
-      onClick={onSelect} data-testid="token-chip" data-token-type={token.type}>
+      onClick={onSelect} data-testid="token-chip" data-token-type={token.type}
+      aria-label={`${token.lexeme}, ${typeLabel(token)}`} aria-pressed={selected}>
       <span class="chip-lexeme">{token.lexeme}</span>
-      <span class="chip-type">{subType(token)}</span>
+      {showType && <span class="chip-type">{typeLabel(token)}</span>}
     </button>
   );
 }
@@ -44,16 +68,34 @@ function TraceStrip({ trace, shown }: { trace: DfaTrace; shown: number }) {
           </span>
         ))}
       </div>
-      {done && <p class="trace-summary" data-testid="dfa-summary">{trace.summary}</p>}
+      <p class="trace-summary" data-testid="dfa-summary">{done ? trace.summary : 'Reading…'}</p>
     </div>
   );
+}
+
+interface TokenLine {
+  line: number;
+  entries: { token: Token; index: number }[];
+}
+
+function groupByLine(tokens: readonly Token[]): TokenLine[] {
+  const lines: TokenLine[] = [];
+  tokens.forEach((token, index) => {
+    const last = lines[lines.length - 1];
+    if (last?.line === token.span.line) last.entries.push({ token, index });
+    else lines.push({ line: token.span.line, entries: [{ token, index }] });
+  });
+  return lines;
 }
 
 export function LexerCard({ stage, source }: { stage: StageResult; source: string }) {
   const output = stage.output as LexerOutput | null;
   const tokens = useMemo(() => output?.tokens.filter((t) => t.type !== 'EOF') ?? [], [output]);
+  const lines = useMemo(() => groupByLine(tokens), [tokens]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [shown, setShown] = useState(Number.MAX_SAFE_INTEGER);
+  const [viewChoice, setViewChoice] = useState<'compact' | 'expanded' | null>(null);
+  const compact = (viewChoice ?? (tokens.length > COMPACT_ABOVE_TOKENS ? 'compact' : 'expanded')) === 'compact';
 
   const selected = tokens[Math.min(selectedIndex, tokens.length - 1)];
   const trace = selected?.trace;
@@ -88,7 +130,7 @@ export function LexerCard({ stage, source }: { stage: StageResult; source: strin
     <Card stage={stage}
       intro="Reads the program one character at a time and groups the characters into tokens: keywords, names, numbers with units, operators.">
       {output && (
-        <p class="stat-line" data-testid="lexer-stats">
+        <p class="prose" data-testid="lexer-stats">
           {output.charCount} character{output.charCount === 1 ? '' : 's'} became {count} token{count === 1 ? '' : 's'}.
           {' '}Spaces and comments are thrown away. Tap a token to see how the lexer's automaton read it.
         </p>
@@ -97,24 +139,50 @@ export function LexerCard({ stage, source }: { stage: StageResult; source: strin
       {stage.diagnostics.length > 1 && (
         <ul class="diagnostics">{stage.diagnostics.slice(1).map((d, i) => <DiagnosticRow key={i} diagnostic={d} />)}</ul>
       )}
-      <div class="chips" data-testid="token-chips">
-        {tokens.map((token, i) => (
-          <TokenChip key={i} token={token} selected={token === selected} onSelect={() => selectToken(i)} />
-        ))}
-      </div>
 
-      {selected && trace && (
-        <div class="trace-block">
-          <h3>How the automaton read <code>{selected.lexeme}</code></h3>
-          <TraceStrip trace={trace} shown={shown} />
-          <DfaDiagram dfa={DFA_BY_NAME[trace.dfa]} visited={visited} active={active} />
+      {tokens.length === 0 && !firstError && <p class="muted">There are no tokens yet.</p>}
+
+      {tokens.length > 0 && (
+        <div class="lexer-story">
+          {selected && trace && (
+            <div class="trace-panel" data-testid="trace-panel">
+              <h3>How the automaton read <code>{selected.lexeme}</code></h3>
+              <TraceStrip trace={trace} shown={shown} />
+              <DfaDiagram dfa={DFA_BY_NAME[trace.dfa]} visited={visited} active={active} />
+            </div>
+          )}
+
+          <div class="toolbar">
+            <div class="segmented" role="group" aria-label="Token view">
+              <button class={compact ? 'is-on' : ''} data-testid="tokens-compact" onClick={() => setViewChoice('compact')}>Compact</button>
+              <button class={compact ? '' : 'is-on'} data-testid="tokens-expanded" onClick={() => setViewChoice('expanded')}>Expanded</button>
+            </div>
+            <ul class="token-legend" aria-label="Token classes">
+              {CLASSES.map(({ category, label }) => (
+                <li key={category} class={`chip-${category}`}><span class="token-swatch" /> {label}</li>
+              ))}
+            </ul>
+          </div>
+
+          <ol class={`token-lines ${compact ? 'is-compact' : ''}`} data-testid="token-chips">
+            {lines.map(({ line, entries }) => (
+              <li key={line} class="token-line">
+                <span class="token-line-number" aria-label={`Line ${line}`}>{line}</span>
+                <div class="chips">
+                  {entries.map(({ token, index }) => (
+                    <TokenChip key={index} token={token} compact={compact} selected={token === selected}
+                      onSelect={() => selectToken(index)} />
+                  ))}
+                </div>
+              </li>
+            ))}
+          </ol>
         </div>
       )}
 
-      <details class="reference">
-        <summary>The tokens HomeLang has</summary>
+      <Reference title="The tokens HomeLang has">
         <div class="table-scroll">
-          <table>
+          <table class="compact">
             <thead><tr><th>Token</th><th>Pattern</th><th>Examples</th></tr></thead>
             <tbody>
               {TOKEN_TABLE.map((row) => (
@@ -123,16 +191,14 @@ export function LexerCard({ stage, source }: { stage: StageResult; source: strin
             </tbody>
           </table>
         </div>
-      </details>
+      </Reference>
 
-      <details class="reference">
-        <summary>Maximal munch</summary>
+      <Reference title="Maximal munch">
         <p>The lexer always takes the longest match. <code>&gt;=</code> is one GE token, not GT then ASSIGN. <code>30C</code> is one QUANTITY, not a NUMBER then a name. The automaton keeps moving while it has a transition and remembers the last accepting state it passed.</p>
         <p>If it runs out of moves in a non-accepting state, it rolls back. In <code>PRIORITY 2:</code> the colon could start a time, so the automaton reads it and moves to q5. The next character is not a digit, so it falls back to q1, emits NUMBER, and re-scans the colon as COLON.</p>
-      </details>
+      </Reference>
 
-      <details class="reference">
-        <summary>All the automata</summary>
+      <Reference title="All the automata">
         <div class="dfa-grid">
           {DFAS.map((dfa) => (
             <figure key={dfa.name}>
@@ -141,7 +207,7 @@ export function LexerCard({ stage, source }: { stage: StageResult; source: strin
             </figure>
           ))}
         </div>
-      </details>
+      </Reference>
     </Card>
   );
 }

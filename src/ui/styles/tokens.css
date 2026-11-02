@@ -63,6 +63,7 @@
   --font-text: 'Atkinson Hyperlegible Next Variable', system-ui, sans-serif;
   --font-code: 'Atkinson Hyperlegible Mono Variable', ui-monospace, Menlo, monospace;
   --t-sm: 0.875rem;
+  --t-svg: 14px; /* inside DFA drawings, which scale up with the root font */
   --t-base: 1rem;
   --t-lg: 1.25rem;
   --t-xl: 1.563rem;

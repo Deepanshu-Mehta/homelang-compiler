@@ -148,6 +148,17 @@ input[type='number'] { min-height: var(--control-height); padding: 0 var(--sp-2)
 .diagnostic-group h4 { font-family: var(--font-code); margin-bottom: var(--sp-1); }
 
 /* Token chips */
+.lexer-story { display: flex; flex-direction: column; gap: var(--sp-3); }
+.trace-panel { position: sticky; top: 0; z-index: 4; display: flex; flex-direction: column; gap: var(--sp-1); padding: var(--sp-2) var(--sp-3); background: var(--sheet); border: var(--line) solid var(--rule-strong); border-radius: var(--r-view); box-shadow: var(--float); }
+.trace-panel h3 { margin: 0; font-size: var(--t-base); }
+.token-legend { list-style: none; display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-3); margin: 0; padding: 0; font-size: var(--t-sm); }
+.token-legend li { display: inline-flex; align-items: center; gap: var(--sp-1); }
+.token-swatch { width: var(--sp-1); height: 1em; background: var(--chip); }
+.token-lines { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--sp-2); }
+.token-line { display: grid; grid-template-columns: 2rem minmax(0, 1fr); align-items: start; gap: var(--sp-2); }
+.token-line-number { font: var(--t-sm) / 2rem var(--font-code); color: var(--graphite); text-align: right; }
+.token-lines.is-compact { gap: var(--sp-1); }
+.token-lines.is-compact .chip { flex-direction: row; gap: var(--sp-2); padding: 0 var(--sp-2); align-items: center; min-height: 1.75rem; }
 .chips { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
 .chip { --chip: var(--tok-punct); display: inline-flex; flex-direction: column; align-items: flex-start; padding: var(--sp-1) var(--sp-2); background: var(--sheet); border: var(--line) solid var(--rule); border-left: 3px solid var(--chip); border-radius: var(--r-control); }
 .chip:hover { border-color: var(--chip); }
@@ -174,18 +185,19 @@ input[type='number'] { min-height: var(--control-height); padding: 0 var(--sp-2)
 .trace-summary { max-width: var(--measure); }
 
 /* DFA diagrams */
-.dfa { display: block; width: 100%; height: auto; }
+.dfa-scroll { overflow-x: auto; }
+.dfa { display: block; }
 .dfa-edge path, .dfa-start { fill: none; stroke: var(--graphite); stroke-width: 1.5; }
 .dfa-arrowhead { fill: var(--graphite); }
-.dfa-edge text { font: var(--t-sm) var(--font-code); fill: var(--ink); }
-.dfa-error { font: 700 var(--t-sm) var(--font-code); fill: var(--error); }
+.dfa-edge text { font: var(--t-svg) var(--font-code); fill: var(--ink); paint-order: stroke; stroke: var(--sheet); stroke-width: 3px; }
+.dfa-error { font: 700 var(--t-svg) var(--font-code); fill: var(--error); paint-order: stroke; stroke: var(--sheet); stroke-width: 3px; }
 .dfa-state circle { fill: var(--sheet); stroke: var(--ink); stroke-width: 2; transition: fill var(--motion) var(--ease); }
 .dfa-state.is-accept circle { stroke: var(--pass); }
 .dfa-state .dfa-ring { fill: none; stroke-width: 1.5; }
 .dfa-state.is-visited circle:first-child { fill: var(--wash); }
 .dfa-state.is-active circle:first-child { fill: var(--marker); }
-.dfa-id { font: 700 var(--t-sm) var(--font-code); fill: var(--ink); }
-.dfa-label { font: var(--t-sm) var(--font-text); fill: var(--graphite); }
+.dfa-id { font: 700 var(--t-svg) var(--font-code); fill: var(--ink); }
+.dfa-label { font: var(--t-svg) var(--font-text); fill: var(--graphite); paint-order: stroke; stroke: var(--sheet); stroke-width: 3px; }
 .dfa-grid { display: flex; flex-direction: column; gap: var(--sp-4); }
 .dfa-grid figure { margin: 0; }
 .dfa-grid figcaption { font-weight: 700; }
@@ -251,7 +263,7 @@ tr.is-builtin td, tr.is-builtin code { color: var(--graphite); }
 .number-lines { display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); gap: var(--sp-2) var(--sp-4); }
 .number-line { margin: 0; }
 .number-line figcaption { font-size: var(--t-sm); }
-.number-line svg { display: block; width: 100%; height: auto; }
+.number-line svg { display: block; }
 .nl-axis { stroke: var(--graphite); stroke-width: 1.5; }
 .nl-band { fill: var(--pass-tint); stroke: var(--pass); }
 .nl-open { fill: var(--sheet); stroke: var(--pass); stroke-width: 2; }
