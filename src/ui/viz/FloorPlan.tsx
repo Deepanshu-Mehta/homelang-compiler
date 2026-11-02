@@ -7,7 +7,7 @@ const CELL = 86;
 const DEVICES_PER_ROW = 3;
 const ROW_HEIGHT = 66;
 /** Space for the room name above the devices and the sensor chips below. */
-const ROOM_CHROME = 62;
+const ROOM_CHROME = 72;
 
 type Attr = DeviceState['attributes'];
 
@@ -131,7 +131,7 @@ function Room({ name, x, y, height, devices, sensors, flashing, glowId, testPref
       <text class="room-name" x={10} y={17}>{name.replace(/_/g, ' ')}</text>
       {devices.map((device, i) => (
         <g key={device.name} class={`device ${flashing.has(device.name) ? 'is-flashing' : ''}`}
-          transform={`translate(${46 + (i % DEVICES_PER_ROW) * CELL}, ${46 + Math.floor(i / DEVICES_PER_ROW) * ROW_HEIGHT})`}
+          transform={`translate(${46 + (i % DEVICES_PER_ROW) * CELL}, ${56 + Math.floor(i / DEVICES_PER_ROW) * ROW_HEIGHT})`}
           data-testid={`${testPrefix}device-${device.name}`} data-state={device.state}>
           <Glyph device={device} glowId={glowId} />
           <text class="device-name" y={38} text-anchor="middle">{device.name}</text>

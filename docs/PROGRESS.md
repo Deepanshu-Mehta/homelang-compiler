@@ -9,7 +9,7 @@
 - **M5:** quadruples with Dragon Book backpatching (jump targets match §6.2 exactly), basic blocks and CFG (the eight blocks of §6.3), Intermediate code card with a step-by-step backpatch replay and a CFG view.
 - **M6:** nine optimizer passes (AST: O3, O4, O5, O9; quadruples: O2, O1, O6, O7, O8), available-expressions CSE, dense renumbering, Optimizer card with per-pass diffs and safety reasons.
 - **M7:** bytecode emitter, JSON object file, stack VM, step-through debugger, Code generation card, all CLI `--emit` kinds except `sim`.
-- **M8:** discrete-event scheduler, AST interpreter as the test oracle, simulator, animated floor plan, sensor controls and time scrubber, scenario playback at 1×/10×/60×, event log linked to the editor, Load witness, Simulation card. Three-way differential test over the examples, 40 targeted programs and 400 random programs.
+- **M8:** discrete-event scheduler, AST interpreter as the test oracle, simulator, animated floor plan, sensor controls and time scrubber, scenario playback at 1×/10×/60×, event log linked to the editor, Load witness, Simulation card. Three-way differential test over the examples, 39 targeted programs and 400 random programs.
 - **M9:** Home Assistant YAML export, browser checks for all 20 presets with a screenshot of every card, a diagnostics table whose examples are compiled by a test, README architecture diagrams, local viva notes.
 
 ## Next
