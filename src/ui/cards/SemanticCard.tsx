@@ -6,6 +6,7 @@ import { Card, SkippedNote } from '../Card';
 import { DiagnosticRow, ErrorBox } from '../DiagnosticBox';
 import { GraphView, type GraphEdge, type GraphNode } from '../viz/GraphView';
 import { NumberLine } from '../viz/NumberLine';
+import { astTree } from '../trees';
 import { TreeView } from '../viz/TreeView';
 
 type SortKey = 'name' | 'kind' | 'typeName' | 'room' | 'useCount';
@@ -150,6 +151,7 @@ interface SemanticCardProps {
 export function SemanticCard({ stage, source, onLoadWitness }: SemanticCardProps) {
   const output = stage.output as SemanticOutput | null;
   const firstError = stage.diagnostics.find((d) => d.severity === 'error');
+  const annotatedRoot = useMemo(() => (output ? astTree(output.annotated) : null), [output]);
 
   return (
     <Card stage={stage}
@@ -175,7 +177,7 @@ export function SemanticCard({ stage, source, onLoadWitness }: SemanticCardProps
           <SymbolTableView symbols={output.symbols} />
           <h3>The annotated AST</h3>
           <p class="muted small">The same tree as the parser's, now with a type and unit on every value.</p>
-          <TreeView root={output.annotatedView} />
+          <TreeView root={annotatedRoot!} legend="ast" />
           {output.truthLines.length > 0 && (
             <>
               <h3>When each condition is true</h3>

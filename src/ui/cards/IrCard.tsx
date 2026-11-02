@@ -84,8 +84,8 @@ function CfgView({ output }: { output: IrOutput }) {
     const graphNodes: GraphNode[] = blocks.map((b) => ({ id: b.id, label: `${b.id}\n${b.lines.join('\n')}` }));
     const graphEdges: GraphEdge[] = output.cfg.edges.filter((e) => ids.has(e.from)).map((e) => ({
       from: e.from, to: e.to,
-      ...(e.kind === 'true' && { tone: 'green' as const }),
-      ...(e.kind === 'false' && { tone: 'red' as const }),
+      ...(e.kind === 'true' && { tone: 'green' as const, label: 'true' }),
+      ...(e.kind === 'false' && { tone: 'red' as const, label: 'false' }),
     }));
     return { nodes: graphNodes, edges: graphEdges };
   }, [output, shown]);
@@ -97,7 +97,7 @@ function CfgView({ output }: { output: IrOutput }) {
           {ruleIds.map((id) => <option key={id}>{id}</option>)}
         </select>
       </label>
-      <GraphView nodes={nodes} edges={edges} height={Math.min(620, 150 + nodes.length * 78)} />
+      <GraphView nodes={nodes} edges={edges} />
       <p class="muted small">Each box is a basic block: code that runs straight through, with one way in and one way out. Green edges are taken when the test is true, red when it is false.</p>
     </>
   );

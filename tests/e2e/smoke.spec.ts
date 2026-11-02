@@ -26,6 +26,7 @@ test('the parser card toggles trees and steps through the grammar', async ({ pag
   await expect(page.getByTestId('program-text')).toContainText('TURN_ON AC');
   await page.getByTestId('parse-tree-toggle').click();
   await expect(page.locator('.tree-node', { hasText: 'andCond' }).first()).toBeVisible();
+  await page.locator('summary', { hasText: 'The grammar the parser follows' }).click();
   await page.getByTestId('grammar-step').click();
   await expect(page.locator('.grammar-rule.is-active')).toHaveCount(1);
 });

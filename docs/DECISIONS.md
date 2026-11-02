@@ -83,3 +83,10 @@
 |---|---|---|
 | D38 | `plan.txt`, `reference/` and the viva notes are working material, and the photos show classmates. | All are gitignored and stay on disk only. |
 | D39 | The Playwright browser cache holds no binary on the development machine. | E2E tests use the installed Google Chrome via `channel: "chrome"`. |
+
+## UI redesign
+
+| ID | Problem | Decision |
+|---|---|---|
+| D47 | Text must stay readable from the back of a classroom. | Atkinson Hyperlegible Next and Mono replace Inter, Space Grotesk and JetBrains Mono, because they keep similar characters distinct. They are bundled through `@fontsource-variable`, so the page stays offline. |
+| D48 | Trees need source spans, but the compiler's view nodes have none, and the compiler must not change. | `src/ui/trees.ts` builds trees from the public AST, whose nodes carry spans. Parse-tree leaves are matched to tokens by order. |

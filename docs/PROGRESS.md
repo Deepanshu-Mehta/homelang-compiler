@@ -16,6 +16,24 @@
 
 All nine milestones are complete.
 
+## UI redesign (in progress)
+
+Direction: `docs/ui/DIRECTION.md`, approved. Audit: `docs/ui/AUDIT.md`.
+
+Done:
+
+- Design tokens in one file, Atkinson type, two-pane frame, stage stepper, stage headers, focus mode, one-line primer, scroll to the failing stage on example load, slower failure display while typing.
+- Vertical tree for parse tree, AST and annotated AST, with fold, zoom, fit, reset, pan, parse tree and AST morph, and editor linking both ways. True-size top-to-bottom graphs.
+
+Next, in this order:
+
+1. Stage cards. Lexer: chips grouped by source line, compact and expanded toggle, sticky automaton panel, token-class legend. DFA, number-line and floor-plan SVGs drawn at true size, with no text under 14px. Move remaining reference material into `Reference` sections.
+2. Floor plan. Rebuild `src/ui/viz/FloorPlan.tsx` as one building with solid walls, door swings, windows, plan-view icons and every state in words. Add live motion, and controls grouped by room. **It is a plain temporary drawing until then.**
+3. Walkthrough. Prev, Next and Play in the top bar, running each stage's animation. Pass `current` through `FocusContext`, which is `null` for now.
+4. First-run hint, then the empty, loading and error states.
+5. Measure and report: smallest rendered text, AA contrast, and whether the slider, plan and newest log line fit at 1280×720.
+6. Update `docs/ui/DIRECTION.md` and the README, with about 10 compressed before and after screenshots.
+
 ## Fixed along the way
 
 - **Typing fast froze the tab (shipped in M1, fixed in M2).** The editor mirrored the app's `value` back into CodeMirror. Two keys inside one render made the old value overwrite the new text, each write re-fired the change listener, and the two states chased each other forever. The editor now owns its text, and the app writes to it only on an explicit preset load. `tests/e2e/smoke.spec.ts` covers it.

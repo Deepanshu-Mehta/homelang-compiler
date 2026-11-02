@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import {
-  analyzeGrammar, astToView, GRAMMAR, parseTreeToView, programText, renderProduction,
-  type ParserOutput, type StageResult, type Token,
+  analyzeGrammar, GRAMMAR, programText, renderProduction, type ParserOutput, type StageResult, type Token,
 } from '../../compiler/index';
-import { Card, SkippedNote } from '../Card';
+import { Card, Reference, SkippedNote } from '../Card';
 import { DiagnosticRow, ErrorBox } from '../DiagnosticBox';
+import { astTree, parseTree } from '../trees';
 import { TreeView } from '../viz/TreeView';
 
 const ANALYSIS = analyzeGrammar();
@@ -129,10 +129,10 @@ export function ParserCard({ stage, source, tokens, collectAll, onCollectAll }: 
   const output = stage.output as ParserOutput | null;
   const [view, setView] = useState<'ast' | 'parse'>('ast');
   const clean = stage.status !== 'error';
-  const tree = useMemo(() => {
-    if (!output) return null;
-    return view === 'ast' ? astToView(output.ast) : parseTreeToView(output.parseTree);
-  }, [output, view]);
+
+  const astRoot = useMemo(() => (output ? astTree(output.ast) : null), [output]);
+  const parseRoot = useMemo(() => (output ? parseTree(output, tokens) : null), [output, tokens]);
+  const root = view === 'ast' ? astRoot : parseRoot;
 
   return (
     <Card stage={stage}
@@ -147,53 +147,48 @@ export function ParserCard({ stage, source, tokens, collectAll, onCollectAll }: 
         <label class="toggle-line">
           <input type="checkbox" checked={collectAll} data-testid="collect-all"
             onChange={(e) => onCollectAll(e.currentTarget.checked)} />
-          {' '}{collectAll
+          {collectAll
             ? 'Collecting all errors: after an error the parser skips to the next rule (panic mode).'
             : 'The parser stops at the first error. Tick to collect all errors.'}
         </label>
       )}
 
-      {output && clean && (
+      {output && clean && root && (
         <>
-          <div class="segmented" role="group" aria-label="Tree view">
-            <button class={view === 'ast' ? 'is-on' : ''} onClick={() => setView('ast')}>AST</button>
-            <button class={view === 'parse' ? 'is-on' : ''} data-testid="parse-tree-toggle"
-              onClick={() => setView('parse')}>Parse tree</button>
+          <div class="toolbar">
+            <div class="segmented" role="group" aria-label="Tree view">
+              <button class={view === 'ast' ? 'is-on' : ''} data-testid="ast-toggle" onClick={() => setView('ast')}>AST</button>
+              <button class={view === 'parse' ? 'is-on' : ''} data-testid="parse-tree-toggle" onClick={() => setView('parse')}>Parse tree</button>
+            </div>
+            <span class="toolbar-note">
+              {view === 'ast'
+                ? 'The AST keeps only what carries meaning.'
+                : 'The parse tree shows every grammar step, so one number sits under a long chain of rules.'}
+              {' '}Click a box to fold it. Hover to find it in the editor.
+            </span>
           </div>
-          <p class="muted small">
-            {view === 'ast'
-              ? 'The AST keeps only what carries meaning. Click a node to fold it.'
-              : 'The parse tree shows every grammar step, so one number sits under a long chain of rules. Click a node to fold it.'}
-          </p>
-          {tree && <TreeView key={view} root={tree} />}
+          <TreeView root={root} legend={view} />
 
           <h3>The whole program as the parser sees it</h3>
           <pre class="code-block" data-testid="program-text">{programText(output.ast) || '(an empty program)'}</pre>
         </>
       )}
 
-      <h3>The grammar the parser follows</h3>
-      {output && clean && output.steps.length > 1
-        ? <GrammarStepper output={output} tokens={tokens} />
-        : <GrammarView active={undefined} />}
+      <Reference title="The grammar the parser follows" open={stage.status === 'error'}>
+        {output && clean && output.steps.length > 1
+          ? <GrammarStepper output={output} tokens={tokens} />
+          : <GrammarView active={undefined} />}
+      </Reference>
 
-      <details class="reference">
-        <summary>Why LL(1)?</summary>
+      <Reference title="Why LL(1)?">
         <p>LL(1) means the parser reads left to right and picks each grammar rule by looking at just one token. HomeLang's grammar has no left recursion, and it is left-factored: comparison, IS and BETWEEN all start with a value, so they share <code>atom → value [ atomTail ]</code>.</p>
         <p>Two conditions must hold. The FIRST sets of a rule's alternatives must not overlap, and wherever something can be skipped, its FIRST must not overlap what follows it. This page computes both from the grammar above.</p>
         <p data-testid="ll1-result"><strong>LL(1) conflicts found: {ANALYSIS.conflicts.length}.</strong></p>
         <p>Nested IFs must end with END, so an ELSE always belongs to the nearest open IF. That removes the dangling-else ambiguity. Parentheses group conditions only, because if they could also group arithmetic, <code>(</code> would need unbounded lookahead.</p>
-      </details>
+      </Reference>
 
-      <details class="reference">
-        <summary>FIRST and FOLLOW sets</summary>
-        <FirstFollowTable />
-      </details>
-
-      <details class="reference">
-        <summary>The LL(1) parse table</summary>
-        <ParseTable />
-      </details>
+      <Reference title="FIRST and FOLLOW sets"><FirstFollowTable /></Reference>
+      <Reference title="The LL(1) parse table"><ParseTable /></Reference>
     </Card>
   );
 }

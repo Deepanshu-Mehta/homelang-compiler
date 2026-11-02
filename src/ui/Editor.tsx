@@ -1,12 +1,14 @@
 import { setDiagnostics, lintGutter, type Diagnostic as CmDiagnostic } from '@codemirror/lint';
 import { EditorState, StateEffect, StateField, type Range } from '@codemirror/state';
-import { Decoration, EditorView, type DecorationSet } from '@codemirror/view';
+import { Decoration, EditorView, placeholder, type DecorationSet } from '@codemirror/view';
 import { basicSetup } from 'codemirror';
 import { useEffect, useRef } from 'preact/hooks';
 import type { Diagnostic, Token } from '../compiler/index';
+import type { SourceSpan } from './trees';
 
 const setTokens = StateEffect.define<readonly Token[]>();
 const setFlashLine = StateEffect.define<number | null>();
+const setSpan = StateEffect.define<SourceSpan | null>();
 
 /** Colours come from the compiler's own token stream, not a second grammar. */
 const tokenHighlight = StateField.define<DecorationSet>({
@@ -53,6 +55,24 @@ export interface LoadedText {
   text: string;
 }
 
+/** Shows the source of the tree node under the pointer. */
+const spanHighlight = StateField.define<DecorationSet>({
+  create: () => Decoration.none,
+  update(decorations, transaction) {
+    let next = decorations.map(transaction.changes);
+    for (const effect of transaction.effects) {
+      if (!effect.is(setSpan)) continue;
+      const span = effect.value;
+      const docLength = transaction.state.doc.length;
+      next = span && span.end <= docLength && span.start < span.end
+        ? Decoration.set([Decoration.mark({ class: 'cm-span-highlight' }).range(span.start, span.end)])
+        : Decoration.none;
+    }
+    return next;
+  },
+  provide: (field) => EditorView.decorations.from(field),
+});
+
 interface EditorProps {
   loaded: LoadedText;
   onChange: (value: string) => void;
@@ -62,13 +82,19 @@ interface EditorProps {
   diagnostics: readonly Diagnostic[];
   /** 1-based line to highlight, e.g. after clicking a log entry. */
   highlightLine: number | null;
+  /** Source range to mark, e.g. the tree node under the pointer. */
+  span: SourceSpan | null;
+  /** A click in the text, which selects the matching tree node. */
+  onPick: (position: number) => void;
 }
 
-export function Editor({ loaded, onChange, compiledSource, tokens, diagnostics, highlightLine }: EditorProps) {
+export function Editor({ loaded, onChange, compiledSource, tokens, diagnostics, highlightLine, span, onPick }: EditorProps) {
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
   const change = useRef(onChange);
   change.current = onChange;
+  const pick = useRef(onPick);
+  pick.current = onPick;
 
   useEffect(() => {
     const editor = new EditorView({
@@ -80,8 +106,12 @@ export function Editor({ loaded, onChange, compiledSource, tokens, diagnostics, 
           lintGutter(),
           tokenHighlight,
           flashLine,
+          spanHighlight,
+          placeholder('Type a rule, such as IF TEMPERATURE > 30 THEN TURN_ON AC, or choose Load an example…'),
           EditorView.updateListener.of((update) => {
             if (update.docChanged) change.current(update.state.doc.toString());
+            const clicked = update.selectionSet && update.transactions.some((t) => t.isUserEvent('select.pointer'));
+            if (clicked) pick.current(update.state.selection.main.head);
           }),
         ],
       }),
@@ -127,6 +157,10 @@ export function Editor({ loaded, onChange, compiledSource, tokens, diagnostics, 
     }
     editor.dispatch({ effects });
   }, [highlightLine]);
+
+  useEffect(() => {
+    view.current!.dispatch({ effects: setSpan.of(span) });
+  }, [span]);
 
   return <div class="editor" ref={host} data-testid="editor" />;
 }

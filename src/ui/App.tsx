@@ -17,6 +17,8 @@ import { OutputPane } from './OutputPane';
 import { PipelineBar } from './PipelineBar';
 import { PRESETS } from './presets';
 import { scrollToCard, scrollToTop } from './scroll';
+import { SpanLink } from './SpanLink';
+import type { SourceSpan } from './trees';
 import { useSimulation } from './useSimulation';
 
 const DEBOUNCE_MS = 200;
@@ -30,6 +32,8 @@ export function App() {
   const [collectAllErrors, setCollectAllErrors] = useState(false);
   const [highlightLine, setHighlightLine] = useState<number | null>(null);
   const [focused, setFocused] = useState<string | null>(null);
+  const [hoverSpan, setHoverSpan] = useState<SourceSpan | null>(null);
+  const [picked, setPicked] = useState<{ position: number; source: string } | null>(null);
   const options: CompileOptions = useMemo(() => ({ collectAllErrors }), [collectAllErrors]);
   const [result, setResult] = useState<CompileResult>(() => compile(source, options));
   const compiledWith = useRef(options);
@@ -89,9 +93,13 @@ export function App() {
   }
 
   const focusState = useMemo(() => ({ focused, setFocused, current: null }), [focused]);
+  // A position only means something for the text it was picked in.
+  const pickedPosition = picked?.source === result.source ? picked.position : null;
+  const spanLink = useMemo(() => ({ setHoverSpan, pickedPosition }), [pickedPosition]);
 
   return (
     <FocusContext.Provider value={focusState}>
+      <SpanLink.Provider value={spanLink}>
       <div class="app">
         <PipelineBar stages={result.stages} current={null} />
         <main class="layout">
@@ -109,7 +117,8 @@ export function App() {
               </select>
             </header>
             <Editor loaded={loaded} onChange={setSource} compiledSource={result.source}
-              tokens={tokens} diagnostics={diagnostics} highlightLine={highlightLine} />
+              tokens={tokens} diagnostics={diagnostics} highlightLine={highlightLine} span={hoverSpan}
+              onPick={(position) => setPicked({ position, source })} />
             <div class="editor-foot">
               <span data-testid="char-count">{source.length} characters</span>
               <span>Compiles as you type</span>
@@ -132,6 +141,7 @@ export function App() {
           </div>
         </main>
       </div>
+      </SpanLink.Provider>
     </FocusContext.Provider>
   );
 }
