@@ -5,6 +5,7 @@ import { loadExamples } from '../helpers';
 const FILE_NAME: Partial<Record<EmitKind, string>> = {
   tokens: 'tokens.json',
   ast: 'ast.json',
+  symbols: 'symbols.json',
 };
 
 describe.each(loadExamples())('golden: $name', ({ name, source }) => {

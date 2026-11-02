@@ -6,6 +6,7 @@ import { Card, SkippedNote } from './Card';
 import { DomainCard } from './cards/DomainCard';
 import { LexerCard } from './cards/LexerCard';
 import { ParserCard } from './cards/ParserCard';
+import { SemanticCard } from './cards/SemanticCard';
 import { Editor, type LoadedText } from './Editor';
 import { OutputPane } from './OutputPane';
 import { PipelineBar } from './PipelineBar';
@@ -14,7 +15,6 @@ import { PRESETS } from './presets';
 const DEBOUNCE_MS = 200;
 
 const CARD_INTROS: Record<string, string> = {
-  semantic: 'Checks the meaning: do the devices exist, and do the conditions and actions make sense for them?',
   ir: 'Lowers each rule to simple three-address instructions, with AND and OR turned into jumps.',
   optimizer: 'Rewrites the instructions into fewer, faster ones without changing what the program does.',
   codegen: 'Turns the instructions into bytecode for a small stack machine.',
@@ -97,7 +97,8 @@ export function App() {
             <LexerCard stage={lexerStage} source={result.source} />
             <ParserCard stage={stageResult(result, 'parser')} source={result.source} tokens={tokens}
               collectAll={collectAllErrors} onCollectAll={setCollectAllErrors} />
-            {result.stages.slice(2).map((stage) => <PendingCard key={stage.stage} stage={stage} />)}
+            <SemanticCard stage={stageResult(result, 'semantic')} source={result.source} />
+            {result.stages.slice(3).map((stage) => <PendingCard key={stage.stage} stage={stage} />)}
           </div>
         </div>
       </main>

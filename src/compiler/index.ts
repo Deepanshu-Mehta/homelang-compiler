@@ -5,6 +5,7 @@
 import { hasErrors, makeDiagnostic, type Diagnostic } from './diagnostics';
 import { lex, type LexerOutput } from './lexer/lexer';
 import { parse } from './parser/parser';
+import { analyze } from './semantic/analyze';
 import {
   STAGE_ORDER, type StageName, type StageOutputs, type StageResult, type StageStatus,
 } from './stages';
@@ -13,6 +14,8 @@ export * from './diagnostics';
 export * from './stages';
 export type { LexerOutput } from './lexer/lexer';
 export type { ParserOutput } from './parser/parser';
+export type { SemanticOutput } from './semantic/analyze';
+export type { SymbolEntry } from './semantic/symbols';
 export type { Program, Rule, Cond, Expr, Action } from './parser/ast';
 export type { ParseStep, ViewNode } from './parser/parseTree';
 export { parseTreeToView } from './parser/parseTree';
@@ -93,6 +96,8 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
     if (!tokens) return;
     const parsed = step('parser', () => parse(tokens.tokens, source, options.collectAllErrors));
     if (!parsed) return;
+    const semantic = step('semantic', () => analyze(parsed.ast));
+    if (!semantic) return;
   }
 
   pipeline();

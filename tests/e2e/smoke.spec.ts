@@ -67,3 +67,11 @@ test('loading a preset after typing replaces the text', async ({ page }) => {
   await page.getByTestId('preset-select').selectOption('cascade');
   await expect(page.locator('.cm-content')).toContainText('WHEN MOTION DETECTED');
 });
+
+test('a semantic error stops at stage 3 and the symbol table greys built-ins', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('[data-testid="symbol-table"] tr.is-builtin').first()).toBeVisible();
+  await page.getByTestId('preset-select').selectOption('error-S301-unknown-device');
+  await expect(page.getByTestId('stopped-box')).toContainText('Stopped at stage 3: Semantic analysis');
+  await expect(page.getByTestId('stopped-box')).toContainText("Unknown device 'HEATPUMP'");
+});

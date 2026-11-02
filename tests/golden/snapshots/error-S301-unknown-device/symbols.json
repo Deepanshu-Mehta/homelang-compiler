@@ -1,0 +1,18 @@
+[
+  {"name":"TIME","displayName":"TIME","kind":"BUILTIN","builtin":true,"useCount":0,"readBy":[],"writtenBy":[],"typeName":"TIME"},
+  {"name":"DAY","displayName":"DAY","kind":"BUILTIN","builtin":true,"useCount":0,"readBy":[],"writtenBy":[],"typeName":"DAY"},
+  {"name":"LIVING_ROOM","displayName":"LIVING_ROOM","kind":"ROOM","builtin":true,"useCount":0,"readBy":[],"writtenBy":[]},
+  {"name":"BEDROOM","displayName":"BEDROOM","kind":"ROOM","builtin":true,"useCount":0,"readBy":[],"writtenBy":[]},
+  {"name":"KITCHEN","displayName":"KITCHEN","kind":"ROOM","builtin":true,"useCount":0,"readBy":[],"writtenBy":[]},
+  {"name":"ENTRANCE","displayName":"ENTRANCE","kind":"ROOM","builtin":true,"useCount":0,"readBy":[],"writtenBy":[]},
+  {"name":"AC","displayName":"AC","kind":"DEVICE","builtin":true,"useCount":0,"readBy":[],"writtenBy":[],"typeName":"AIR_CONDITIONER","room":"LIVING_ROOM"},
+  {"name":"LIGHT","displayName":"LIGHT","kind":"DEVICE","builtin":true,"useCount":0,"readBy":[],"writtenBy":[],"typeName":"LIGHT","room":"LIVING_ROOM"},
+  {"name":"FAN","displayName":"FAN","kind":"DEVICE","builtin":true,"useCount":0,"readBy":[],"writtenBy":[],"typeName":"FAN","room":"BEDROOM"},
+  {"name":"DOOR","displayName":"DOOR","kind":"DEVICE","builtin":true,"useCount":0,"readBy":[],"writtenBy":[],"typeName":"DOOR_LOCK","room":"ENTRANCE"},
+  {"name":"CURTAIN","displayName":"CURTAIN","kind":"DEVICE","builtin":true,"useCount":0,"readBy":[],"writtenBy":[],"typeName":"CURTAIN","room":"BEDROOM"},
+  {"name":"TEMPERATURE","displayName":"TEMPERATURE","kind":"SENSOR","builtin":true,"useCount":1,"readBy":["R1"],"writtenBy":[],"typeName":"TEMP_SENSOR","room":"LIVING_ROOM","dim":"temperature","unit":"C"},
+  {"name":"HUMIDITY","displayName":"HUMIDITY","kind":"SENSOR","builtin":true,"useCount":0,"readBy":[],"writtenBy":[],"typeName":"HUMIDITY_SENSOR","room":"LIVING_ROOM","dim":"percent","unit":"%"},
+  {"name":"MOTION","displayName":"MOTION","kind":"SENSOR","builtin":true,"useCount":0,"readBy":[],"writtenBy":[],"typeName":"MOTION_SENSOR","room":"LIVING_ROOM"},
+  {"name":"CONTACT","displayName":"CONTACT","kind":"SENSOR","builtin":true,"useCount":0,"readBy":[],"writtenBy":[],"typeName":"CONTACT_SENSOR","room":"ENTRANCE"},
+  {"name":"PRESENCE","displayName":"PRESENCE","kind":"SENSOR","builtin":true,"useCount":0,"readBy":[],"writtenBy":[],"typeName":"PRESENCE_SENSOR","room":"ENTRANCE"}
+]

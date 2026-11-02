@@ -63,3 +63,23 @@ A value alone is not a condition unless it is TRUE or FALSE (P216).
 **END:** optional at the end of a top-level rule, and mandatory on a nested IF. This is why there is no dangling else. A new IF after an action list starts a new rule, and a nested IF must follow THEN, ELSE or `,`.
 
 **Errors:** the parser stops at the first syntax error by default. With "collect all errors" on, it uses panic-mode recovery: it records the error, discards tokens up to `;`, END or the start of a rule, and resumes.
+
+## 3. Types
+
+| Type | Values | Operations |
+|---|---|---|
+| Quantity | A number with a dimension: temperature, percent, illuminance, duration, colour temperature, or count (unitless) | `< <= > >= == !=` within a dimension; `+ -` within a dimension; `* /` by a count |
+| Time | Minutes 0–1439 | Comparisons with times; `BETWEEN`, which wraps midnight |
+| Day | MON to SUN | `==`, `!=`, `IS` |
+| Enum | The state set of a device or sensor | `IS`, `IS NOT`, `==`, `!=`; no ordering |
+| Boolean | TRUE, FALSE | Only as whole conditions |
+
+**Implicit units:** a bare number takes the unit of what it meets, and W415 notes it. In a sensor declared `UNIT F`, `TEMP > 86` means 86 °F.
+
+**Canonical units:** temperatures are stored in °C and durations in seconds. `86F` is converted at compile time (W410).
+
+**Arithmetic limits:** °F values cannot be used in arithmetic (S310). Time arithmetic works only on literals, as in `22:00 + 30MIN` (S319). Parentheses cannot group arithmetic.
+
+**Names:** with no declarations, the standard home is loaded: rooms LIVING_ROOM, BEDROOM, KITCHEN and ENTRANCE; devices AC, LIGHT, FAN, DOOR and CURTAIN; sensors TEMPERATURE, HUMIDITY, MOTION, CONTACT and PRESENCE. With any declaration, only declared names exist. TIME and DAY always exist.
+
+**Enum attributes:** `SET AC MODE TO FAN` reads FAN from the attribute's own value set, so it does not mean the device FAN.

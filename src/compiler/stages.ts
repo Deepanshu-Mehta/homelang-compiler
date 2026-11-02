@@ -1,6 +1,7 @@
 import type { Diagnostic } from './diagnostics';
 import type { LexerOutput } from './lexer/lexer';
 import type { ParserOutput } from './parser/parser';
+import type { SemanticOutput } from './semantic/analyze';
 
 export type StageName =
   | 'lexer' | 'parser' | 'semantic' | 'ir' | 'optimizer' | 'codegen' | 'simulation';
@@ -22,7 +23,7 @@ export interface StageResult<T = unknown> {
 export interface StageOutputs {
   lexer: LexerOutput;
   parser: ParserOutput;
-  semantic: unknown;
+  semantic: SemanticOutput;
   ir: unknown;
   optimizer: unknown;
   codegen: unknown;

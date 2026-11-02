@@ -197,3 +197,13 @@ table.compact code { font-size: 11.5px; }
 .grammar-arrow { color: var(--ink-3); }
 .grammar-alt { display: block; }
 .grammar-bar { color: var(--ink-3); }
+
+.symbol-table { max-height: 280px; overflow-y: auto; }
+.th-button { border: none; background: none; padding: 0; cursor: pointer; font: inherit; }
+.th-button.is-on { text-decoration: underline; text-underline-offset: 3px; }
+tr.is-builtin td { color: var(--ink-3); }
+tr.is-builtin code { color: var(--ink-3); }
+.tag { display: inline-block; margin-left: 6px; padding: 0 5px; border: 1px solid var(--line); border-radius: 8px; font: 500 10px var(--display); color: var(--ink-3); }
+.diagnostic-group h4 { margin-top: 8px; font-family: var(--mono); font-size: 12.5px; }
+.diagnostic.sev-info { border-color: var(--blue); }
+.error-box.sev-info { border-color: var(--blue); }

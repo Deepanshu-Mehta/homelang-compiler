@@ -46,6 +46,8 @@
 | D23 | Several checks had no code. | New S320 bad PRIORITY, S321 unknown or incompatible UNIT, S322 scenario time outside the window, S323 assignment to a non-sensor, S324 literal division by zero or overflow, W415 implicit unit, W416 DNF cap reached. |
 | D24 | Numeric BETWEEN was unspecified. | Inclusive, `lo ≤ x ≤ hi`, which is how people read `TEMP BETWEEN 20 AND 25`. Time windows stay `[a, b)` with midnight wrap. Numeric `lo > hi` never wraps and gives a W409 "empty range" warning. |
 
+| D40 | `TEMP + 2F` is ambiguous. Converted as a temperature, 2 °F is −16.67 °C; in a sum it means a difference of about 1.1 °C. | °F arithmetic is S310, with a hint to use °C. Plain comparison with °F values still works and converts at compile time. |
+
 ## Runtime and optimizer
 
 | ID | Problem | Decision |

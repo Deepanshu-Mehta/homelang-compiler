@@ -1,6 +1,7 @@
 import type { Span } from './diagnostics';
 import type { LexerOutput } from './lexer/lexer';
 import type { ParserOutput } from './parser/parser';
+import type { SemanticOutput } from './semantic/analyze';
 import type { StageName, StageResult } from './stages';
 
 export type EmitKind = 'tokens' | 'ast' | 'symbols' | 'ir' | 'opt' | 'bytecode' | 'sim';
@@ -30,10 +31,18 @@ function compactSpans(key: string, value: unknown): unknown {
   return value;
 }
 
+/** One symbol per line, without the catalogue entry each one points at. */
+function emitSymbols(output: SemanticOutput): string {
+  const lines = output.symbols.map(({ catalog: _catalog, declSpan, ...rest }) =>
+    JSON.stringify({ ...rest, ...(declSpan && { declared: `${declSpan.line}:${declSpan.col}` }) }));
+  return `[\n  ${lines.join(',\n  ')}\n]\n`;
+}
+
 /** Text form of a stage's output, used by the CLI and by the golden tests. */
 export function emit(kind: EmitKind, stage: StageResult): string {
   if (stage.output === null) return '';
   if (kind === 'tokens') return emitTokens(stage.output as LexerOutput);
+  if (kind === 'symbols') return emitSymbols(stage.output as SemanticOutput);
   if (kind === 'ast') return `${JSON.stringify((stage.output as ParserOutput).ast, compactSpans, 2)}\n`;
   return `${JSON.stringify(stage.output, null, 2)}\n`;
 }
