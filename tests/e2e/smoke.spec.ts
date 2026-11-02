@@ -99,3 +99,12 @@ test('the IR card replays backpatching and draws the CFG', async ({ page }) => {
   await page.getByTestId('cfg-toggle').click();
   await expect(page.locator('[data-card="ir"] [data-testid="graph"]')).toBeVisible();
 });
+
+test('the optimizer card lists nine passes with a diff', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('preset-select').selectOption('advanced');
+  await expect(page.getByTestId('pass')).toHaveCount(9);
+  await expect(page.getByTestId('opt-totals')).toContainText('instructions');
+  await page.locator('[data-pass="O8"] summary').click();
+  await expect(page.locator('[data-pass="O8"] [data-testid="diff"] .diff-removed').first()).toBeVisible();
+});

@@ -1,6 +1,7 @@
 import type { Span } from './diagnostics';
 import type { IrOutput } from './ir/cfg';
 import { quadText } from './ir/quads';
+import type { OptimizerOutput } from './opt/pipeline';
 import type { LexerOutput } from './lexer/lexer';
 import type { ParserOutput } from './parser/parser';
 import type { SemanticOutput } from './semantic/analyze';
@@ -40,7 +41,7 @@ function emitSymbols(output: SemanticOutput): string {
   return `[\n  ${lines.join(',\n  ')}\n]\n`;
 }
 
-function emitQuads(output: IrOutput): string {
+function emitQuads(output: Pick<IrOutput, 'program'>): string {
   return output.program.quads.map((q) => `${q.index} ${quadText(q)}`).join('\n') + '\n';
 }
 
@@ -49,6 +50,7 @@ export function emit(kind: EmitKind, stage: StageResult): string {
   if (stage.output === null) return '';
   if (kind === 'tokens') return emitTokens(stage.output as LexerOutput);
   if (kind === 'ir') return emitQuads(stage.output as IrOutput);
+  if (kind === 'opt') return emitQuads(stage.output as OptimizerOutput);
   if (kind === 'symbols') return emitSymbols(stage.output as SemanticOutput);
   if (kind === 'ast') return `${JSON.stringify((stage.output as ParserOutput).ast, compactSpans, 2)}\n`;
   return `${JSON.stringify(stage.output, null, 2)}\n`;

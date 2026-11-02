@@ -12,6 +12,8 @@ type Base = {
   /** Position in the listing. Renumbered after every pass, so it has no gaps. */
   index: number;
   ruleId: string;
+  /** The rule a command came from, when O9 merged it into another. */
+  origin?: string;
 };
 
 /**

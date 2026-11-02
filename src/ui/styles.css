@@ -232,3 +232,16 @@ table.quads td, table.quads th { padding-left: 8px; }
 table.quads td.is-open code { color: #fff; background: var(--orange); padding: 0 6px; border-radius: 3px; font-weight: 600; }
 table.quads tr.is-patched td { background: var(--amber-soft); }
 table.quads tr.rule-row td { background: var(--paper); font: 700 11px var(--display); color: var(--ink-2); }
+
+.passes { display: flex; flex-direction: column; gap: 4px; }
+.pass { border: 1px solid var(--line); border-radius: 7px; padding: 5px 10px; }
+.pass summary { cursor: pointer; font: 500 13.5px var(--display); display: flex; gap: 8px; align-items: baseline; list-style-position: inside; }
+.pass-count { margin-left: auto; font: 400 12px var(--sans); color: var(--ink-3); }
+.pass.is-active .pass-count { color: var(--green); font-weight: 600; }
+.pass-reason { font-size: 13px; margin: 6px 0 2px; }
+.change-list { list-style: none; margin: 6px 0; padding: 0; font-size: 12.5px; }
+.change-list li { padding: 1px 0; }
+.diff { background: var(--paper); border: 1px solid var(--line); border-radius: 7px; padding: 6px 8px; margin: 6px 0; max-height: 260px; overflow: auto; font-size: 12px; line-height: 1.4; }
+.diff-removed { display: block; background: var(--red-soft); color: var(--red); }
+.diff-added { display: block; background: var(--green-soft); color: var(--green); }
+.diff-same { display: block; color: var(--ink-2); }

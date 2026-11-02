@@ -58,7 +58,8 @@
 | D26 | A state rule busy in WAIT could miss an edge and stay out of step. | When it finishes, the rule is re-evaluated once. |
 | D27 | `reads` could include nested-IF reads, re-running rules needlessly. | `reads` covers trigger reads only. Nested reads go to the dependency graph. It is recomputed after optimization. |
 | D28 | O7 as written would merge `TOGGLE X, TOGGLE X`, which is not idempotent. | O7 excludes TOGGLE. |
-| D29 | O9 could change who wins a priority tie when another rule sits between the two merged rules. | Each action keeps its origin rule ID, and resolution uses it. |
+| D29 | O9 could reorder notifications and change who wins a priority tie when another rule sits between the two merged rules. | O9 merges neighbouring rules only. Each action keeps its origin rule ID, so the log still names the original rule, and O7 never removes a duplicate credited to a different rule. |
+| D43 | O6 as described reuses any earlier load, but short-circuit jumps mean an earlier load may never have run. In `B > 2 AND A > 1 OR A < 0`, the first `LOAD A` is skipped when B fails. | O6 is available-expressions analysis: a value is reused only if every path to that point computed it, using intersection at joins. |
 | D30 | O3, O4, O5 and O9 work on conditions and rules, but the spec calls every pass `IR → IR`. | These four run on a clone of the AST, which is re-lowered with the same `irgen`. O1, O2, O6, O7 and O8 then run on quadruples. The UI shows O1–O9 and states the real run order. |
 | D31 | "Store tenths as integers" cannot represent every literal. | A shared `round6()` runs after arithmetic, in folding and in the VM, so fold-time and run-time values agree. |
 | D32 | Only R501 was defined. | New R502 division by zero or non-finite result, R503 computed SET value out of range (clamped), R504 oscillation warning. |

@@ -7,6 +7,7 @@ const FILE_NAME: Partial<Record<EmitKind, string>> = {
   ast: 'ast.json',
   symbols: 'symbols.json',
   ir: 'ir.txt',
+  opt: 'opt.txt',
 };
 
 describe.each(loadExamples())('golden: $name', ({ name, source }) => {

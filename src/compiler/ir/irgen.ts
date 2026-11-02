@@ -39,6 +39,7 @@ const CONVERSIONS: Partial<Record<UnitName, Conversion>> = {
 };
 
 const constant = (value: number | string): Operand => ({ kind: 'const', value });
+const originOf = ({ origin }: { origin?: string }) => (origin ? { origin } : {});
 
 /**
  * One-pass lowering with backpatching (Dragon Book §6.7). A jump is emitted with
@@ -129,10 +130,10 @@ class IrGenerator {
     for (const action of actions) {
       switch (action.kind) {
         case 'Power':
-          this.emit({ kind: 'call', op: action.op, device: action.target.name });
+          this.emit({ kind: 'call', op: action.op, device: action.target.name, ...originOf(action) });
           break;
         case 'SetAttr':
-          this.emit({ kind: 'set', device: action.target.name, attr: action.attr, value: this.expr(action.value) });
+          this.emit({ kind: 'set', device: action.target.name, attr: action.attr, value: this.expr(action.value), ...originOf(action) });
           break;
         case 'Wait': {
           const { value, unit } = action.duration;
@@ -140,7 +141,7 @@ class IrGenerator {
           break;
         }
         case 'Notify':
-          this.emit({ kind: 'notify', text: action.text });
+          this.emit({ kind: 'notify', text: action.text, ...originOf(action) });
           break;
         case 'IfAction':
           this.nestedIf(action);

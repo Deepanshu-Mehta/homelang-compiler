@@ -132,14 +132,19 @@ export interface DurationLit {
   seconds?: number;
 }
 
-export interface Power {
+/** Set by O9 on actions moved into a merged rule, so the log still names their rule. */
+interface Attributed {
+  origin?: string;
+}
+
+export interface Power extends Attributed {
   kind: 'Power';
   op: PowerOp;
   target: Ref;
   span: Span;
 }
 
-export interface SetAttr {
+export interface SetAttr extends Attributed {
   kind: 'SetAttr';
   target: Ref;
   attr: string;
@@ -154,7 +159,7 @@ export interface Wait {
   span: Span;
 }
 
-export interface Notify {
+export interface Notify extends Attributed {
   kind: 'Notify';
   text: string;
   span: Span;
@@ -205,6 +210,8 @@ export interface Rule {
   trigger: Trigger;
   thenActs: Action[];
   elseActs?: Action[];
+  /** Rule ids folded into this one by O9, including its own. */
+  mergedFrom?: string[];
   span: Span;
 }
 

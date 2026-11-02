@@ -7,6 +7,7 @@ import { lex, type LexerOutput } from './lexer/lexer';
 import { parse } from './parser/parser';
 import { buildCfg, type IrOutput } from './ir/cfg';
 import { generateIr } from './ir/irgen';
+import { optimize, skipOptimizer, type OptimizerOutput } from './opt/pipeline';
 import { analyze } from './semantic/analyze';
 import {
   STAGE_ORDER, type StageName, type StageOutputs, type StageResult, type StageStatus,
@@ -36,6 +37,8 @@ export { TOKEN_TABLE } from './lexer/tokens';
 export { CATALOG, DEVICE_TYPES, SENSOR_TYPES, PRELUDE } from './semantic/catalog';
 export type { DeviceType, SensorType } from './semantic/catalog';
 export { formatMinutes } from './numeric';
+export type { OptimizerOutput } from './opt/pipeline';
+export type { Change, PassReport } from './opt/types';
 export type { Quad, QuadColumns } from './ir/quads';
 export { quadColumns, quadText } from './ir/quads';
 export type { IrProgram, IrStep, Routine } from './ir/irgen';
@@ -45,6 +48,8 @@ export { emit, EMIT_KINDS, EMIT_STAGE, type EmitKind } from './emit';
 export interface CompileOptions {
   /** Use panic-mode recovery so the parser reports every syntax error. */
   collectAllErrors?: boolean;
+  /** Set to false to skip every pass, as the differential test does. Default true. */
+  optimize?: boolean;
 }
 
 export interface CompileResult {
@@ -113,6 +118,13 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
       return { output: { program, steps, cfg: buildCfg(program) }, diagnostics: [] };
     });
     if (!ir) return;
+    const optimized = step<OptimizerOutput>('optimizer', () => ({
+      output: options.optimize === false
+        ? skipOptimizer(semantic.annotated, ir.program, ir.cfg)
+        : optimize(semantic.annotated, semantic.symbols, ir.program),
+      diagnostics: [],
+    }));
+    if (!optimized) return;
   }
 
   pipeline();

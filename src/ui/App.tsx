@@ -6,6 +6,7 @@ import { Card, SkippedNote } from './Card';
 import { DomainCard } from './cards/DomainCard';
 import { IrCard } from './cards/IrCard';
 import { LexerCard } from './cards/LexerCard';
+import { OptimizerCard } from './cards/OptimizerCard';
 import { ParserCard } from './cards/ParserCard';
 import { SemanticCard } from './cards/SemanticCard';
 import { Editor, type LoadedText } from './Editor';
@@ -16,7 +17,6 @@ import { PRESETS } from './presets';
 const DEBOUNCE_MS = 200;
 
 const CARD_INTROS: Record<string, string> = {
-  optimizer: 'Rewrites the instructions into fewer, faster ones without changing what the program does.',
   codegen: 'Turns the instructions into bytecode for a small stack machine.',
   simulation: 'Runs the bytecode against a simulated home.',
 };
@@ -102,7 +102,8 @@ export function App() {
               collectAll={collectAllErrors} onCollectAll={setCollectAllErrors} />
             <SemanticCard stage={stageResult(result, 'semantic')} source={result.source} onLoadWitness={setWitness} />
             <IrCard stage={stageResult(result, 'ir')} />
-            {result.stages.slice(4).map((stage) => <PendingCard key={stage.stage} stage={stage} />)}
+            <OptimizerCard stage={stageResult(result, 'optimizer')} />
+            {result.stages.slice(5).map((stage) => <PendingCard key={stage.stage} stage={stage} />)}
           </div>
         </div>
       </main>
