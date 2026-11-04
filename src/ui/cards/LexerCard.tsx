@@ -159,8 +159,10 @@ export function LexerCard({ stage, source }: { stage: StageResult; source: strin
         <div class="lexer-story">
           {selected && trace && (
             <div class="trace-panel" data-testid="trace-panel">
-              <h3>How the automaton read <code>{selected.lexeme}</code></h3>
-              <TraceStrip trace={trace} shown={shown} />
+              <div class="trace-text">
+                <h3>How the automaton read <code>{selected.lexeme}</code></h3>
+                <TraceStrip trace={trace} shown={shown} />
+              </div>
               <DfaDiagram dfa={DFA_BY_NAME[trace.dfa]} visited={visited} active={active} />
             </div>
           )}

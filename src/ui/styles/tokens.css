@@ -4,8 +4,19 @@
  * See docs/ui/DIRECTION.md for why each value is what it is.
  */
 :root {
+  /* The rail: the dark strip that carries the wire from source to home */
+  --rail: #17222d;
+  --rail-raised: #243240;
+  --rail-ink: #ffffff;
+  --rail-muted: #c3ccd4;
+  --rail-dim: #9aa6b1;
+  --rail-wire: #6b7884;
+  --rail-error: #ff8a80;
+  /* Power: the wire is lit up to where the program reached, and a light that is on glows */
+  --live: #ffc23d;
+
   /* Surfaces and ink */
-  --film: #f2f5f5;
+  --film: #e6eaee;
   --sheet: #ffffff;
   --ink: #14202b;
   --graphite: #465360;
@@ -85,7 +96,7 @@
 
   /* Shape */
   --r-control: 2px;
-  --r-view: 4px;
+  --r-view: 6px;
   --r-leaf: 999px;
   --line: 1px;
   --line-heavy: 2px;
@@ -94,7 +105,9 @@
   /* Sizes */
   --bar-height: 4rem;
   --control-height: 2rem;
-  --left-pane: 35%;
+  --left-pane: clamp(22rem, 40%, 44rem);
+  --rail-node: 1.75rem;
+  --wire: 3px;
 
   /* Motion */
   --motion: 200ms;
@@ -105,6 +118,11 @@
 /* 16px at 1280 wide and about 19.5px at 1920, so a projector gets larger text. */
 html {
   font-size: clamp(16px, 0.55vw + 9px, 20px);
+}
+
+/* A wide screen shows each stage's time on the rail, so the rail grows */
+@media (min-width: 1700px) {
+  :root { --bar-height: 4.5rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

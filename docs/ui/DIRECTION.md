@@ -2,7 +2,20 @@
 
 This is the final design as built. The measured results are at the end.
 
-![The walkthrough at 1280×720, after the temperature passes 30](shots/after-overview.jpg)
+![Stage 7 at 1280×720, after the temperature passes 30](shots/after-overview.jpg)
+
+## Second pass: one stage at a time, on a wire
+
+The first version passed every measurement but still read as a long grey document. The second audit is at the end of `AUDIT.md`. The second pass keeps the type, the colour classes, the trees and the floor plan, and changes the frame:
+
+- **The rail.** The top bar is now dark, and the seven stages are stations on one wire. The wire is lit in amber up to where the program got. A failed stage turns red and breaks the wire, and the stages after it are hollow and joined by a dashed line. Amber has one meaning across the page: power is here. It lights the wire and the current station, and a light that is on glows the same colour.
+- **One stage at a time.** Choosing a station opens that stage and nothing else, like turning to a slide. The page no longer scrolls through all seven. Previous and next links at the bottom, the arrow keys and Page Up or Page Down (which a presenter's clicker sends) move between stages. They never fire while someone is typing or using a slider.
+- **The program pane.** The left pane is the program and its result. The editor fills the height, long lines wrap so nothing is hidden, and the file name sits above it. Under the editor is either the red stopped box or a compiled line with a one-line-per-device summary of the home, which stays live on every stage.
+- **The home lives in Stage 7.** The plan, sliders, clock and log appear once, at a size where labels can't collide. Load witness on Stage 3 sets the sliders and opens Stage 7. A plan cell is never narrower than its longest label.
+- **Quieter detail.** Stage titles step down to `--t-xl`, so a title and its status fit on one line. Status is a tinted pill with icon, word and time. The automaton panel puts the trace beside the diagram and moves a wide diagram underneath. Optimizer passes that changed nothing are plain rows, so the passes that did something stand out.
+- **The primer is its own page,** opened from the rail.
+
+Every test id the suite relied on still exists, except that the home's controls now have the unprefixed ids in Stage 7, and the summary under the editor uses `glance-*`.
 
 ## The idea
 
@@ -42,6 +55,19 @@ All values are computed. Text clears AA on both backgrounds, and stays above 4.3
 | `--marker` | `#FFE873` | The teaching highlight: "look here" | | |
 
 The highlighter yellow is the one accent, and it always means the same thing: the current stage, grammar rule, node or source span. It never appears as decoration. Ink stays 13:1 on it.
+
+**The rail** is the one dark surface. Its own text colours were computed against it.
+
+| Token | Hex | Role | On rail |
+|---|---|---|---|
+| `--rail` | `#17222D` | Top bar | |
+| `--rail-raised` | `#243240` | Open station, hover | |
+| `--rail-ink` | `#FFFFFF` | Open station's name, buttons | 16.1 |
+| `--rail-muted` | `#C3CCD4` | Other station names | 9.9 |
+| `--rail-dim` | `#9AA6B1` | Skipped stations, times | 6.5 |
+| `--rail-wire` | `#6B7884` | Dark wire after a failure, button outlines | 3.6 |
+| `--rail-error` | `#FF8A80` | Failed station | 7.1 |
+| `--live` | `#FFC23D` | Lit wire, station nodes, Play | 10.0, and ink on it 10.3 |
 
 **Token classes** match the editor and the chips. Each chip also prints its type, so colour is never the only signal.
 
@@ -104,35 +130,35 @@ All SVG text is drawn at true size, so no label can shrink below 14px. Diagrams 
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│ Let's Automate  ✓1 Lexer ✓2 Parser ⚠3 Semantic ... 7 Sim   ‹ Prev ▶ › │  sticky, 64px
-├──────────────────────┬───────────────────────────────────────────────┤
-│ Source   [Load an    │ ━━ 1  Lexer                       Passed  Focus │
-│           example]   │ Plain-language paragraph, under 72 characters   │
-│ ┌──────────────────┐ │                                                 │
-│ │ editor           │ │ ┌ the visual ────────────────────────────────┐  │
-│ └──────────────────┘ │ │ chips, then the automaton                  │  │
-│                      │ └────────────────────────────────────────────┘  │
-│ Home                 │ ▸ Reference: token table                        │
-│ ┌──────────────────┐ │ ▸ Reference: every automaton                    │
-│ │ floor plan       │ │                                                 │
-│ └──────────────────┘ │ ━━ 2  Parser                                    │
-│ controls by room     │                                                 │
-│ event log            │        stage sheets scroll here                 │
-└──────────────────────┴───────────────────────────────────────────────┘
-   fixed: 35% wide          scrolls independently
+│ ⌂ Let's Automate  Primer  ①━②━③━④━⑤━⑥━⑦                ‹ ▶ Play › │  dark rail, 64px
+│   a Home                 Lexer Parser … Simulation                   │
+├────────────────────────┬─────────────────────────────────────────────┤
+│ brief.home  [Example ▾]│ Stage 1 · Lexer              ✓ Passed  Focus │
+│ ┌────────────────────┐ │ One-paragraph intro, under 72 characters     │
+│ │                    │ │ ─────────────────────────────────────────── │
+│ │ editor, full height│ │ ┌ the visual ─────────────────────────────┐ │
+│ │ long lines wrap    │ │ └─────────────────────────────────────────┘ │
+│ └────────────────────┘ │ ▸ Reference sections                         │
+│ ✓ Compiled: 1 rule     │                                              │
+│ Home now               │ ‹ Previous stage            Next stage ›     │
+│ AC  OFF 26 °C   LIGHT …│                                              │
+└────────────────────────┴─────────────────────────────────────────────┘
+   40% wide, 22–44rem       one stage at a time, scrolls on its own
 ```
 
 **Token wall:** chips are grouped by source line, with a compact and an expanded view. The automaton panel is sticky, so picking a chip never scrolls the trace off screen.
 
-**Why two fixed panes:** the left pane is the program and its result, and the right is the explanation. Keeping the left pane still means that dragging a slider while reading any stage shows the home respond, and an example never scrolls away from its own explanation.
+**Why two panes:** the left pane is the program and what it produced, and the right is the explanation of one stage. The home summary under the editor stays live on every stage, so a scenario playing in Stage 7 is still visible from Stage 2.
 
-**The tight case is 1280×720.** With the brief loaded, the slider, floor plan and newest log line are all visible without scrolling. The bar holds the title, stepper and walkthrough controls in one row, controls sit in two columns under the plan, and the log stays scrolled to its newest line. Longer programs scroll the left pane.
+**Why one stage at a time:** a class follows one idea at a time, and the presenter always knows where they are. Stages that are not open stay mounted but hidden, so a selected token, a folded tree or a debugger position survive moving away and back.
 
-**Primer:** it becomes one line above Stage 1 with "Open the primer", so it stops taking the top of the page.
+**The tight case is 1280×720.** The rail fits in one row because station names sit under their nodes. Times appear under the names from 1700px wide, and on hover below that. The stage title and its status share one line.
 
-**Failure:** on loading a failing example, the page scrolls to the failing stage. It never scrolls while someone is typing.
+**Failure:** loading a failing example opens the failing stage. Typing never changes the open stage.
 
 **Focus mode:** any stage expands to full width over the page. On Simulation, focus gives a large plan with controls and log beside it. This is the projected finale.
+
+**Narrow screens:** under 1100px the panes stack and the rail names only the open stage. Under 700px the stations get their own row.
 
 ## The floor plan
 
@@ -140,7 +166,7 @@ All SVG text is drawn at true size, so no label can shrink below 14px. Diagrams 
 - Solid black walls, door openings with swing arcs, and windows breaking the top wall line.
 - One icon style: everything in plan view, as seen from above. Lights are the standard circled cross and glow when on. The fan is a three-blade plan symbol. The AC is a wall unit with airflow. Curtains slide along the window. The lock sits on the door.
 - Each device prints its state in words beside it, such as `ON 24°` or `LOCKED`.
-- Sliders and toggles are grouped under room names. The large plan also prints sensor readings inside each room; the side-pane plan leaves them to the controls below it, to stay readable at 14px.
+- Sliders and toggles are grouped under room names, and the plan prints sensor readings inside each room. A plan cell is at least as wide as its longest device name or state, so labels never overlap.
 - The event log is timestamped and clickable, with firing rules in bold, and the newest line stays in view.
 
 ## Trees and graphs
@@ -162,7 +188,7 @@ All SVG text is drawn at true size, so no label can shrink below 14px. Diagrams 
 
 ## Walkthrough
 
-Prev, Play and Next sit in the top bar. Each step scrolls to a stage, marks it in yellow and runs that stage's animation: DFA trace, parser steps, a pause on semantic analysis, backpatching, optimizer passes, VM steps, then the simulation. Play ends at a failed stage, because nothing after it ran. On a program with no scenario, Stage 7 raises the first numeric sensor until a rule fires. The brief takes about 22 seconds.
+Prev, Play and Next sit at the right of the rail. Before the walkthrough starts, Next and Play begin at the open stage. Choosing a stage yourself ends the walkthrough. Each step scrolls to a stage, marks it in yellow and runs that stage's animation: DFA trace, parser steps, a pause on semantic analysis, backpatching, optimizer passes, VM steps, then the simulation. Play ends at a failed stage, because nothing after it ran. On a program with no scenario, Stage 7 raises the first numeric sensor until a rule fires. The brief takes about 22 seconds.
 
 ## Measured results
 
@@ -175,11 +201,15 @@ Checked with Playwright on the brief, advanced, P203 and conflict examples, with
 | Text failing AA contrast | 21 kinds of element, worst 3.16:1 | None |
 | Controls under 24px tall | 20 | None |
 | Sideways page scroll | None | None, including the top bar |
-| Slider, plan and newest log line at 1280×720 (brief) | Log below the fold on longer programs | All visible, with the left pane at exactly 656 of 656px |
+| Home state at 1280×720 | Log below the fold on longer programs | A one-line-per-device summary under the editor on every stage; in Stage 7 the plan and the first sensor fit above the fold for the brief |
 
 The advanced program has more rooms and rules, so its left pane scrolls at 1280×720.
 
+Re-checked after the second pass: every text size still comes from the tokens, so nothing is under 14px. The rail adds the colours in the rail table above, all of which clear AA. All 55 browser tests pass at 1280×720.
+
 ## Before and after
+
+The "before" shots are the original page. The "after" shots are the second pass.
 
 | | Before | After |
 |---|---|---|

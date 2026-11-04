@@ -1,4 +1,10 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
+
+/** Stages are pages: the rail opens one at a time. */
+async function open(page: Page, stage: string) {
+  await page.locator(`[data-stage="${stage}"]`).click();
+  await expect(page.locator(`#card-${stage}`)).toBeVisible();
+}
 
 test('the brief compiles through the lexer and shows its tokens', async ({ page }) => {
   await page.goto('/');
@@ -22,6 +28,7 @@ test('a lexical error stops the pipeline at stage 1', async ({ page }) => {
 
 test('the parser card toggles trees and steps through the grammar', async ({ page }) => {
   await page.goto('/');
+  await open(page, 'parser');
   await expect(page.locator('[data-stage="parser"]')).toHaveAttribute('data-status', 'ok');
   await expect(page.getByTestId('program-text')).toContainText('TURN_ON AC');
   await page.getByTestId('parse-tree-toggle').click();
@@ -45,6 +52,7 @@ test('collect-all reports several syntax errors', async ({ page }) => {
   await page.keyboard.press('ControlOrMeta+a');
   await page.keyboard.type('IF TRUE TURN_ON AC; IF TRUE THEN TURN ON AC;');
   await expect(page.locator('[data-card="parser"] .error-box')).toHaveCount(1);
+  await open(page, 'parser');
   await page.getByTestId('collect-all').check();
   await expect(page.locator('[data-card="parser"] .diagnostic')).toHaveCount(1);
 });
@@ -71,6 +79,7 @@ test('loading a preset after typing replaces the text', async ({ page }) => {
 
 test('a semantic error stops at stage 3 and the symbol table greys built-ins', async ({ page }) => {
   await page.goto('/');
+  await open(page, 'semantic');
   await expect(page.locator('[data-testid="symbol-table"] tr.is-builtin').first()).toBeVisible();
   await page.getByTestId('preset-select').selectOption('error-S301-unknown-device');
   await expect(page.getByTestId('stopped-box')).toContainText('Stopped at stage 3: Semantic analysis');
@@ -79,19 +88,23 @@ test('a semantic error stops at stage 3 and the symbol table greys built-ins', a
 
 test('the semantic card shows number lines, a witness and a red cycle', async ({ page }) => {
   await page.goto('/');
+  await open(page, 'semantic');
   await expect(page.getByTestId('number-lines').locator('figure')).toHaveCount(1);
   await page.getByTestId('preset-select').selectOption('conflict');
   await expect(page.getByTestId('load-witness')).toBeVisible();
   await expect(page.getByTestId('conflict-matrix').locator('td.is-conflict')).toHaveCount(2);
   await page.getByTestId('preset-select').selectOption('cascade');
   await expect(page.locator('[data-stage="semantic"]')).toHaveAttribute('data-status', 'warn');
-  await expect(page.getByTestId('graph').first()).toBeVisible();
+  // Cascade fails at run time, so loading it opens stage 7.
+  await open(page, 'semantic');
+  await expect(page.locator('#card-semantic').getByTestId('graph').first()).toBeVisible();
 });
 
 test('the IR card replays backpatching and draws the CFG', async ({ page }) => {
   await page.goto('/');
   await page.getByTestId('preset-select').selectOption('advanced');
   await expect(page.locator('[data-stage="ir"]')).toHaveAttribute('data-status', 'ok');
+  await open(page, 'ir');
   await page.getByRole('button', { name: 'Restart' }).click();
   await expect(page.getByTestId('ir-note')).toContainText('emit t1 := LOAD TEMP');
   // After t1, t2, `if t1 > t2 goto _` and `goto _`, two jumps are open.
@@ -104,6 +117,7 @@ test('the IR card replays backpatching and draws the CFG', async ({ page }) => {
 test('the optimizer card lists nine passes with a diff', async ({ page }) => {
   await page.goto('/');
   await page.getByTestId('preset-select').selectOption('advanced');
+  await open(page, 'optimizer');
   await expect(page.getByTestId('pass')).toHaveCount(9);
   await expect(page.getByTestId('opt-totals')).toContainText('instructions');
   await page.locator('[data-pass="O8"] summary').click();
@@ -113,6 +127,7 @@ test('the optimizer card lists nine passes with a diff', async ({ page }) => {
 test('the VM debugger steps through the brief', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('[data-stage="codegen"]')).toHaveAttribute('data-status', 'ok');
+  await open(page, 'codegen');
   await page.getByTestId('tab-debugger').click();
   await page.getByTestId('debug-TEMPERATURE').fill('31');
   await page.getByTestId('debug-TEMPERATURE').dispatchEvent('change');
@@ -126,9 +141,13 @@ test('the VM debugger steps through the brief', async ({ page }) => {
 test('the deliverable: dragging temperature past 30 turns the AC on', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByTestId('device-AC')).toHaveAttribute('data-state', 'OFF');
+  await open(page, 'simulation');
   await page.getByTestId('sensor-slider-TEMPERATURE').fill('31');
   await expect(page.getByTestId('device-AC')).toHaveAttribute('data-state', 'ON');
   await expect(page.getByTestId('output-event-log')).toContainText('Rule R1 fired: TURN_ON AC');
+  // The summary under the editor follows the same home.
+  await expect(page.getByTestId('glance-AC')).toHaveAttribute('data-state', 'ON');
+  await expect(page.getByTestId('glance-last')).toContainText('Rule R1 fired: TURN_ON AC');
   for (const stage of ['lexer', 'parser', 'semantic', 'ir', 'optimizer', 'codegen', 'simulation']) {
     await expect(page.locator(`[data-stage="${stage}"]`)).not.toHaveAttribute('data-status', 'error');
     await expect(page.locator(`[data-stage="${stage}"]`)).not.toHaveAttribute('data-status', 'skipped');
@@ -138,7 +157,8 @@ test('the deliverable: dragging temperature past 30 turns the AC on', async ({ p
 test('a scenario plays, and a log line finds its rule in the editor', async ({ page }) => {
   await page.goto('/');
   await page.getByTestId('preset-select').selectOption('advanced');
-  const output = page.getByTestId('output');
+  await open(page, 'simulation');
+  const output = page.getByTestId('sim');
   await expect(output.getByTestId('clock')).toContainText('21:30');
   for (let i = 0; i < 40; i++) await output.getByTestId('step').click();
   await expect(output.getByTestId('clock')).toContainText('22:10');
@@ -153,7 +173,9 @@ test('a scenario plays, and a log line finds its rule in the editor', async ({ p
 test('Load witness moves the sliders to the conflicting moment', async ({ page }) => {
   await page.goto('/');
   await page.getByTestId('preset-select').selectOption('conflict');
+  await open(page, 'semantic');
   await page.getByTestId('load-witness').click();
+  await expect(page.locator('#card-simulation')).toBeVisible();
   await expect(page.getByTestId('sensor-slider-TEMPERATURE')).toHaveValue('29');
   await expect(page.getByTestId('time-value')).toHaveText('23:00');
 });
@@ -175,6 +197,7 @@ test('an empty program says there is nothing to simulate', async ({ page }) => {
 
 test('trees run top-down, and link to the editor both ways', async ({ page }) => {
   await page.goto('/');
+  await open(page, 'parser');
   const card = page.locator('#card-parser');
   const root = await card.locator('.tree-node[data-label="Program"]').boundingBox();
   const rule = await card.locator('.tree-node[data-label^="Rule R1"]').boundingBox();
@@ -190,6 +213,7 @@ test('trees run top-down, and link to the editor both ways', async ({ page }) =>
 test('a tree fits, resets, and keeps labels at true size until asked', async ({ page }) => {
   await page.goto('/');
   await page.getByTestId('preset-select').selectOption('advanced');
+  await open(page, 'parser');
   const card = page.locator('#card-parser');
   await card.getByTestId('parse-tree-toggle').click();
   await expect(card.getByTestId('tree-zoom')).toHaveText('100%');
@@ -222,8 +246,9 @@ test('the walkthrough goes stage by stage, and stops at a failure', async ({ pag
   await page.getByTestId('walk-prev').click();
   await expect(page.locator('.step.is-current')).toHaveAttribute('data-stage', 'lexer');
 
+  // A failing example opens its stage, and the walkthrough starts there.
   await page.getByTestId('preset-select').selectOption('error-P201-missing-then');
-  await page.getByTestId('walk-next').click();
+  await expect(page.locator('#card-parser')).toBeVisible();
   await page.getByTestId('walk-next').click();
   await expect(page.locator('.step.is-current')).toHaveAttribute('data-stage', 'parser');
   await expect(page.getByTestId('walk-next')).toBeDisabled();
@@ -238,10 +263,11 @@ test('Play walks the brief through to the AC turning on', async ({ page }) => {
 
 test('focus mode takes the stage full width, and Escape leaves it', async ({ page }) => {
   await page.goto('/');
+  await open(page, 'simulation');
   await page.getByTestId('focus-simulation').click();
   const box = await page.locator('#card-simulation').boundingBox();
   expect(box!.width).toBeGreaterThanOrEqual(1270);
-  await expect(page.getByTestId('large-floor-plan')).toBeVisible();
+  await expect(page.getByTestId('floor-plan')).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.locator('#card-simulation')).not.toHaveClass(/is-focused/);
 });
@@ -250,6 +276,7 @@ test('every device state is written in words, and changes with the sliders', asy
   await page.goto('/');
   await expect(page.getByTestId('device-state-AC')).toHaveText('OFF 26 °C');
   await expect(page.getByTestId('device-state-DOOR')).toHaveText('UNLOCKED');
+  await open(page, 'simulation');
   await page.getByTestId('sensor-slider-TEMPERATURE').fill('31');
   await expect(page.getByTestId('device-state-AC')).toHaveText('ON 26 °C');
 });
@@ -261,17 +288,42 @@ test('hovering a squiggle shows the diagnostic code', async ({ page }) => {
   await expect(page.locator('.cm-tooltip-lint')).toContainText('S301');
 });
 
-test('an example that fails scrolls to its stage; typing never scrolls', async ({ page }) => {
+test('an example that fails opens its stage; typing never changes the stage', async ({ page }) => {
   await page.goto('/');
   await page.getByTestId('preset-select').selectOption('error-S301-unknown-device');
-  await expect(page.locator('#card-semantic')).toBeInViewport();
-  await page.waitForTimeout(1000); // let the smooth scroll finish before resetting it
-  await page.locator('.right-pane').evaluate((el) => el.scrollTo({ top: 0 }));
+  await expect(page.locator('#card-semantic')).toBeVisible();
+  await open(page, 'lexer');
   await page.locator('.cm-content').click();
   await page.keyboard.press('ControlOrMeta+End');
   await page.keyboard.type('X');
   await page.waitForTimeout(900);
+  await expect(page.locator('#card-lexer')).toBeVisible();
+  await expect(page.locator('#card-semantic')).toBeHidden();
   expect(await page.locator('.right-pane').evaluate((el) => el.scrollTop)).toBe(0);
+});
+
+test('the arrow keys move between stages, but not while typing', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('#title-lexer').click();
+  await page.keyboard.press('ArrowRight');
+  await expect(page.locator('#card-parser')).toBeVisible();
+  await expect(page.locator('.step.is-selected')).toHaveAttribute('data-stage', 'parser');
+  await page.keyboard.press('PageDown');
+  await expect(page.locator('#card-semantic')).toBeVisible();
+  await page.keyboard.press('ArrowLeft');
+  await expect(page.locator('#card-parser')).toBeVisible();
+  await page.locator('.cm-content').click();
+  await page.keyboard.press('ArrowRight');
+  await expect(page.locator('#card-parser')).toBeVisible();
+});
+
+test('a failed stage breaks the wire, and the stages after it stay dark', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('.wire.is-off')).toHaveCount(0);
+  await page.getByTestId('preset-select').selectOption('error-P203-unbalanced-paren');
+  // Lexer to parser stays lit; the five links after the parser go dark.
+  await expect(page.locator('.wire.is-lit')).toHaveCount(1);
+  await expect(page.locator('.wire.is-off')).toHaveCount(5);
 });
 
 test('the page never scrolls sideways at 1280×720', async ({ page }) => {
@@ -290,6 +342,7 @@ test('the page never scrolls sideways at 1280×720', async ({ page }) => {
 test('reduced motion stops the live motion, and the state is still in words', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
+  await open(page, 'simulation');
   await page.getByTestId('sensor-slider-TEMPERATURE').fill('31');
   await expect(page.getByTestId('device-state-AC')).toHaveText('ON 26 °C');
   const motion = await page.evaluate(() => ({

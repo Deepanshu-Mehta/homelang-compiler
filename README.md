@@ -2,7 +2,7 @@
 
 A complete compiler for a smart-home automation language (`IF TEMPERATURE > 30 THEN TURN_ON AC`), with a live, phase-by-phase visual walkthrough from lexer to simulated home.
 
-![The walkthrough: source and a live floor plan on the left, the compiler stages on the right](docs/ui/shots/after-overview.jpg)
+![The walkthrough: the source and a live summary of the home on the left, one compiler stage on the right, and the stages along a wire at the top](docs/ui/shots/after-overview.jpg)
 
 ## Run it
 
@@ -82,7 +82,7 @@ flowchart TB
 
 ### The walkthrough
 
-Seven stages run from a single program, each with its own explanation and animation. Press Play in the top bar to go through them in order, or Focus to enlarge one for a projector.
+Seven stages run from a single program, each with its own explanation and animation. The stages sit along a wire at the top: choose one to open it, or use the arrow keys or a clicker to move between them. Press Play to go through them in order with their animations, or Focus to enlarge one for a projector.
 
 | Trees run top-down, and link to the editor | The home is drawn as an architect's plan |
 |---|---|

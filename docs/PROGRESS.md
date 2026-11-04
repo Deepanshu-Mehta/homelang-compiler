@@ -26,6 +26,17 @@ Finished. The direction and measured results are in `docs/ui/DIRECTION.md`, and 
 - An architectural floor plan with live motion, controls grouped by room, and a timestamped log.
 - A walkthrough with an animation for each stage.
 
+### Second pass (4 November 2026)
+
+The first redesign still read as one long grey document. The audit is at the end of `docs/ui/AUDIT.md`.
+
+- A dark rail where the stages are stations on one wire, lit as far as the program got and broken at a failure.
+- One stage at a time, with previous and next links, arrow keys and clicker keys (Page Up and Page Down).
+- A full-height editor with wrapped lines, and a live "Home now" summary under it. The full home lives only in Stage 7.
+- Floor-plan cells sized to their longest label, so names never collide.
+- Status pills with times, a side-by-side automaton panel, and quieter optimizer rows.
+- Browser tests updated for the new navigation, plus new tests for the arrow keys, the broken wire and the rail. 55 tests pass.
+
 ## Fixed along the way
 
 - **Typing fast froze the tab (shipped in M1, fixed in M2).** The editor mirrored the app's `value` back into CodeMirror. Two keys inside one render made the old value overwrite the new text, each write re-fired the change listener, and the two states chased each other forever. The editor now owns its text, and the app writes to it only on an explicit preset load. `tests/e2e/smoke.spec.ts` covers it.

@@ -1,4 +1,3 @@
-import { useState } from 'preact/hooks';
 import { DEVICE_TYPES, SENSOR_TYPES } from '../../compiler/index';
 
 const TAP_BUGS: readonly [string, string, string][] = [
@@ -18,17 +17,19 @@ function eventName(event: string): string {
   return event.replace('_', ' ');
 }
 
-/** One line above Stage 1, which opens into the full explanation. */
-export function Primer() {
-  const [open, setOpen] = useState(false);
+/** What a class needs to know about smart homes before the compiler starts. */
+export function Primer({ open, onClose }: { open: boolean; onClose: () => void }) {
   return (
-    <section class="primer-section" id="card-domain" data-card="domain">
-      <p class="primer-line">
-        <span>A smart home is a loop: sensors report, rules decide, devices act.</span>
-        <button class="link-button" onClick={() => setOpen(!open)} aria-expanded={open}>
-          {open ? 'Close the primer' : 'Open the primer'}
-        </button>
-      </p>
+    <section class="primer-section" id="card-domain" data-card="domain" hidden={!open} aria-labelledby="title-domain">
+      <header class="stage-head">
+        <div class="stage-heading">
+          <h2 id="title-domain">Primer: how a smart home thinks</h2>
+          <p class="stage-intro">A smart home is a loop: sensors report, rules decide, devices act. HomeLang is the language for the rules.</p>
+        </div>
+        <div class="stage-actions">
+          <button class="button is-primary" data-testid="primer-start" onClick={onClose}>Start at stage 1</button>
+        </div>
+      </header>
       {open && (
         <div class="primer">
           <h3>Devices and sensors</h3>

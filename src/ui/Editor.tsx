@@ -103,6 +103,8 @@ export function Editor({ loaded, onChange, compiledSource, tokens, diagnostics, 
         doc: loaded.text,
         extensions: [
           basicSetup,
+          // Long comments wrap, so no part of the program hides off the right edge.
+          EditorView.lineWrapping,
           lintGutter(),
           tokenHighlight,
           flashLine,

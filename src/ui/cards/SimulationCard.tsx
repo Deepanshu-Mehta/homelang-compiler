@@ -101,28 +101,37 @@ export function SimulationCard({ stage, sim, object, onLine }: SimulationCardPro
         <ul class="diagnostics">{stage.diagnostics.map((d, i) => <DiagnosticRow key={i} diagnostic={d} />)}</ul>
       )}
       {sim && object && (
-        <>
-          <p class="prose">
-            {sim.session.hasScenario
-              ? 'This program has a SIMULATE block. Press Play to run its timeline, or move a slider at any time.'
-              : 'This program has no SIMULATE block, so the home is live: move a slider and watch what happens.'}
-          </p>
-          <PlayControls sim={sim} />
+        <div class="sim" data-testid="sim">
+          <div class="sim-intro">
+            <p class="prose">
+              {sim.session.hasScenario
+                ? 'This program has a SIMULATE block. Press Play scenario to run its timeline, or move a slider at any time.'
+                : 'This program has no SIMULATE block, so the home is live: move a slider and watch what happens.'}
+            </p>
+            <PlayControls sim={sim} />
+          </div>
           <div class="sim-layout">
             <div class="sim-main">
-              <FloorPlan state={sim.state} rooms={object.rooms} flashing={flashing} id="large" />
+              <FloorPlan state={sim.state} rooms={object.rooms} flashing={flashing} id="output" />
               <Timeline sim={sim} />
             </div>
             <div class="sim-side">
-              <Controls sim={sim} object={object} id="large" />
-              <div class="log-block">
-                <h3>Event log</h3>
-                <p class="muted small">Click a line to find its rule in the editor.</p>
-                <EventLog entries={sim.session.log} onLine={onLine} onHover={setHovered} id="large" />
-              </div>
+              <section class="panel sim-controls" aria-labelledby="sim-controls-title">
+                <h3 class="panel-title" id="sim-controls-title">Sensors and clock</h3>
+                <Controls sim={sim} object={object} id="output" />
+              </section>
+              <section class="panel log-block" aria-labelledby="sim-log-title">
+                <h3 class="panel-title" id="sim-log-title">Event log <span class="panel-note">Click a line to find its rule</span></h3>
+                <EventLog entries={sim.session.log} onLine={onLine} onHover={setHovered} id="output" />
+                {sim.state.notifications.length > 0 && (
+                  <ul class="notifications" data-testid="notifications" aria-label="Notifications">
+                    {sim.state.notifications.map((n, i) => <li key={i}><span class="log-time">{n.time}</span> {n.text}</li>)}
+                  </ul>
+                )}
+              </section>
             </div>
           </div>
-        </>
+        </div>
       )}
     </Card>
   );

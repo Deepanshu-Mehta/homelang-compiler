@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import { failedStage, type CompileResult, type StageName } from '../compiler/index';
-import { scrollToCard } from './scroll';
 
 /** How long a finished stage stays on screen before Play moves on. */
 const DWELL_MS = 1400;
@@ -23,9 +22,10 @@ export interface Walkthrough {
 /**
  * Takes the class through the stages in order. The stages themselves own their
  * animations; this only says whose turn it is, and moves on when told it ended.
- * It never goes past a failed stage, because nothing after it ran.
+ * It never goes past a failed stage, because nothing after it ran. Until it
+ * starts, `viewing` (the stage on screen) is where Next and Play begin.
  */
-export function useWalkthrough(result: CompileResult, onMove: (stage: StageName) => void): Walkthrough {
+export function useWalkthrough(result: CompileResult, viewing: number, onMove: (stage: StageName) => void): Walkthrough {
   const [index, setIndex] = useState<number | null>(null);
   const [run, setRun] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -44,7 +44,6 @@ export function useWalkthrough(result: CompileResult, onMove: (stage: StageName)
     setIndex(target);
     setRun((n) => n + 1);
     latest.current.onMove(stage);
-    scrollToCard(stage);
   }, []);
 
   const finish = useCallback(() => {
@@ -66,18 +65,20 @@ export function useWalkthrough(result: CompileResult, onMove: (stage: StageName)
 
   useEffect(() => () => clearTimeout(dwell.current), []);
 
+  const from = Math.min(Math.max(0, viewing), lastIndex);
   return {
     current: index === null ? null : stages[index]!.stage,
     run, playing, finish, stop,
-    canPrev: index !== null && index > 0,
+    canPrev: (index ?? from) > 0,
     canNext: index === null || index < lastIndex,
     prev: () => {
       setPlaying(false);
-      if (index !== null && index > 0) go(index - 1);
+      const at = index ?? from;
+      if (at > 0) go(at - 1);
     },
     next: () => {
       setPlaying(false);
-      go(index === null ? 0 : Math.min(index + 1, lastIndex));
+      go(index === null ? from : Math.min(index + 1, lastIndex));
     },
     togglePlay: () => {
       if (playing) {
@@ -87,7 +88,7 @@ export function useWalkthrough(result: CompileResult, onMove: (stage: StageName)
       }
       setPlaying(true);
       latest.current.playing = true;
-      go(index === null || index >= lastIndex ? 0 : index + 1);
+      go(index === null ? from : index >= lastIndex ? 0 : index + 1);
     },
   };
 }

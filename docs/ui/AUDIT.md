@@ -77,3 +77,18 @@ The biggest miss. See `advanced-1280-output.png`.
 - The error box with the caret, which is close to the instructor's demo.
 - The backpatching replay with orange blanks, and the green and red CFG edges.
 - The optimizer diffs with a stated safety reason.
+
+## Second audit: the first redesign
+
+The first redesign fixed the measurable problems: text size, contrast, hit areas and top-down trees. It still didn't work as a presentation. These are the problems found on 4 November 2026 at 1280×720, 1440×900 and 1920×1080 with the brief, advanced, night-security and P203 examples.
+
+| Problem | What you saw |
+|---|---|
+| One endless page | Seven stages stacked to about 6,500px. The stepper only jumped to an anchor, so a presenter kept losing their place, and every stage repeated the same 31px heading and three-line grey intro. |
+| A cramped left pane | The editor was capped at 28% of the height, so the advanced program showed 10 lines, cut off on the right (`IN BEDR`). The plan, sliders, clock and log were squeezed in under it. |
+| Collisions in the small plan | At 35% width, `FRONT_DOOR`, `PORCH_LIGHT` and `HALL_LIGHT` overlapped, and `DOOR UNLOCKED` ran into a door swing. |
+| The same home twice | The plan, sliders and log appeared in the left pane and again in Stage 7. |
+| No sense of flow | The stages looked like seven separate buttons. Nothing showed that they run in order, or where a failed program stopped. |
+| A flat, grey page | Grey on grey with black rules, with every part at the same weight. It read as a printed document rather than a tool. |
+| Wasted space and noise | The automaton panel was mostly empty. The optimizer showed nine identical rows, eight of them "nothing to do". |
+| A crowded top bar | The title wrapped into two small lines, and each stage time was as prominent as its status. |

@@ -194,7 +194,7 @@ function layoutRooms(names: readonly string[], state: SimulatorState, width: num
       const perRow = Math.max(1, Math.floor((w - 12) / m.cellW));
       const deviceRows = Math.ceil(devices.length / perRow);
       const chips = large ? sensorRows(sensors, w - 24, m.charW).length : 0;
-      return { name, devices, sensors, perRow, height: m.head + Math.max(1, deviceRows) * m.cellH + chips * m.sensorRow + (large ? 8 : 4) };
+      return { name, devices, sensors, perRow, height: m.head + Math.max(1, deviceRows) * m.cellH + chips * m.sensorRow + (large ? 14 : 4) };
     });
     const h = Math.max(...planned.map((p) => p.height));
     planned.forEach((p, i) => rooms.push({ ...p, x: m.outer + i * w, y, w, h, row: rowIndex }));
@@ -242,9 +242,12 @@ export function FloorPlan({ state, rooms, flashing = NONE, id }: FloorPlanProps)
   const large = width >= LARGE_FROM_PX * u;
   const prefix = id === 'output' ? '' : `${id}-`;
   const glowId = `glow-${id}`;
+  const charW = 8.8 * u;
+  // A cell is never narrower than its longest label, so names cannot collide.
+  const longest = Math.max(0, ...state.devices.map((d) => Math.max(d.name.length, stateWords(d).length)));
   const metrics: PlanMetrics = {
-    wall: 4, outer: 6, cellW: (large ? 124 : 88) * u, cellH: (large ? 108 : 72) * u, head: (large ? 34 : 24) * u,
-    symbolScale: large ? 1.3 * u : 0.8 * u, sensorRow: 28 * u, charW: 8.8 * u,
+    wall: 4, outer: 6, cellW: Math.max((large ? 124 : 88) * u, longest * charW + 20 * u), cellH: (large ? 108 : 72) * u,
+    head: (large ? 34 : 24) * u, symbolScale: large ? 1.3 * u : 0.8 * u, sensorRow: 28 * u, charW,
   };
 
   const unplaced = [...state.devices, ...state.sensors].some((item) => !item.room);
@@ -326,7 +329,7 @@ export function FloorPlan({ state, rooms, flashing = NONE, id }: FloorPlanProps)
             })}
             {large && sensorRows(b.sensors, b.w - 24, metrics.charW).map((row, rowIndex, all) => {
               let cursor = b.x + 12;
-              const y = b.y + b.h - (all.length - rowIndex) * metrics.sensorRow - 2;
+              const y = b.y + b.h - (all.length - rowIndex) * metrics.sensorRow - 8;
               return row.map((sensor) => {
                 const text = sensorText(sensor);
                 const w = text.length * metrics.charW + 12;

@@ -1,13 +1,10 @@
-import { useMemo, useState } from 'preact/hooks';
 import {
-  failedStage, formatMinutes, type CompileResult, type LogEntry, type ObjectFile,
+  failedStage, formatMinutes, type CompileResult, type DeviceState, type LogEntry, type ObjectFile,
 } from '../compiler/index';
-import { Controls } from './Controls';
-import { EventLog } from './EventLog';
-import { CrossIcon, PauseIcon, PlayIcon } from './icons';
-import { scrollToCard } from './scroll';
+import type { View } from './App';
+import { CheckIcon, CrossIcon, NextIcon, PauseIcon, PlayIcon, WarnIcon } from './icons';
 import type { Simulation, Speed } from './useSimulation';
-import { FloorPlan } from './viz/FloorPlan';
+import { stateWords } from './viz/FloorPlan';
 
 const SPEEDS: readonly Speed[] = [1, 10, 60];
 
@@ -16,8 +13,8 @@ export function PlayControls({ sim }: { sim: Simulation }) {
   if (!session.hasScenario) return null;
   return (
     <div class="play-controls" data-testid="play-controls">
-      <button class="button" onClick={sim.togglePlay} disabled={session.finished} data-testid="play">
-        {playing ? <PauseIcon /> : <PlayIcon />} {playing ? 'Pause' : 'Play'}
+      <button class="button is-primary" onClick={sim.togglePlay} disabled={session.finished} data-testid="play">
+        {playing ? <PauseIcon /> : <PlayIcon />} {playing ? 'Pause' : 'Play scenario'}
       </button>
       <button class="button" onClick={sim.step} disabled={session.finished} data-testid="step">Step</button>
       <button class="button" onClick={sim.reset} data-testid="reset">Reset</button>
@@ -34,50 +31,68 @@ export function devicesIn(entry: LogEntry | null, sim: Simulation): ReadonlySet<
   return new Set(sim.state.devices.map((d) => d.name).filter((name) => new RegExp(`\\b${name}\\b`).test(entry.text)));
 }
 
-interface OutputPaneProps {
+/** Whether a device is doing something: on, open or unlocked. */
+function isActive(device: DeviceState): boolean {
+  return device.state === 'ON' || device.state === 'OPEN' || device.state === 'UNLOCKED';
+}
+
+interface ResultPanelProps {
   result: CompileResult;
   sim: Simulation | null;
   object: ObjectFile | null;
-  onLine: (line: number) => void;
+  onShow: (view: View) => void;
 }
 
-export function OutputPane({ result, sim, object, onLine }: OutputPaneProps) {
+/**
+ * What the program produced, under the editor: where it stopped, or a
+ * one-line-per-device view of the home that stays live on every stage.
+ */
+export function ResultPanel({ result, sim, object, onShow }: ResultPanelProps) {
   const failed = failedStage(result);
-  const [hovered, setHovered] = useState<LogEntry | null>(null);
-  const flashing = useMemo(() => (sim ? devicesIn(hovered, sim) : new Set<string>()), [hovered, sim]);
   const ruleCount = object?.rules.length ?? 0;
+  const warnings = result.stages.reduce((n, s) => n + s.diagnostics.filter((d) => d.severity === 'warning').length, 0);
   const empty = object !== null && ruleCount === 0 && !object.scenario;
   // Broken code keeps the last working home on screen, marked as out of date.
   const stale = failed !== undefined && failed.stage !== 'simulation';
+  const lastFired = sim ? [...sim.session.log].reverse().find((e) => e.kind === 'fired') : undefined;
 
   return (
-    <section class="output" data-testid="output">
-      <header class="pane-head">
-        <h2>Output</h2>
-        <span class="pane-note">{failed ? 'Stopped' : `${ruleCount} rule${ruleCount === 1 ? '' : 's'}`}</span>
-      </header>
-      {failed && (
+    <section class="result" data-testid="result" aria-label="Result">
+      {failed ? (
         <div class="stopped-box" data-testid="stopped-box">
           <p class="stopped-title"><CrossIcon /> Stopped at stage {failed.number}: {failed.title}</p>
           <p>{failed.diagnostics.find((d) => d.severity === 'error')?.message}</p>
-          <button class="link-button" onClick={() => scrollToCard(failed.stage)}>Show the error</button>
+          <button class="link-button" onClick={() => onShow(failed.stage)}>Show the error</button>
         </div>
+      ) : (
+        <p class="compiled-line" data-testid="compiled-line">
+          <CheckIcon /> Compiled: {ruleCount} rule{ruleCount === 1 ? '' : 's'}
+          {warnings > 0 && <span class="compiled-warnings"><WarnIcon /> {warnings} warning{warnings === 1 ? '' : 's'}</span>}
+        </p>
       )}
       {empty && <p class="muted" data-testid="no-rules">No rules: nothing to simulate.</p>}
       {sim && object && !empty && (
-        <div class={`output-live ${stale ? 'is-stale' : ''}`}>
-          <PlayControls sim={sim} />
-          <FloorPlan state={sim.state} rooms={object.rooms} flashing={flashing} id="output" />
-          <Controls sim={sim} object={object} id="output" />
-          <div class="log-block">
-            <h3>Event log</h3>
-            <EventLog entries={sim.session.log} onLine={onLine} onHover={setHovered} id="output" />
-          </div>
-          {sim.state.notifications.length > 0 && (
-            <ul class="notifications" data-testid="notifications" aria-label="Notifications">
-              {sim.state.notifications.map((n, i) => <li key={i}><span class="log-time">{n.time}</span> {n.text}</li>)}
-            </ul>
-          )}
+        <div class={`glance ${stale ? 'is-stale' : ''}`} data-testid="glance">
+          <header class="glance-head">
+            <h2>Home now{stale && <span class="glance-note"> · last working program</span>}</h2>
+            <button class="link-button" data-testid="open-home" onClick={() => onShow('simulation')}>
+              Open the home <NextIcon />
+            </button>
+          </header>
+          <ul class="glance-list">
+            {sim.state.devices.map((device) => (
+              <li key={device.name} class={`glance-device ${isActive(device) ? 'is-active' : ''}`}
+                data-testid={`glance-${device.name}`} data-state={device.state}>
+                <span class="glance-dot" aria-hidden="true" />
+                <span class="glance-name">{device.name}</span>
+                <span class="glance-state">{stateWords(device)}</span>
+              </li>
+            ))}
+          </ul>
+          <p class="glance-last" data-testid="glance-last">
+            <span class="log-time">{formatMinutes(sim.state.minutes)}</span>{' '}
+            {lastFired ? lastFired.text : 'No rule has fired yet.'}
+          </p>
         </div>
       )}
     </section>

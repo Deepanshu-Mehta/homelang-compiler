@@ -64,23 +64,31 @@ for (const [preset, statuses, stoppedAt] of PRESETS) {
 
     await page.addStyleTag({ content: FLAT_PAGE });
     for (const card of CARDS) {
+      if (card === 'domain') await page.getByRole('button', { name: 'Open the primer' }).click();
+      else await page.locator(`[data-stage="${card}"]`).click();
       await page.locator(`#card-${card}`).screenshot({ path: `test-results/cards/${preset}/${card}.png` });
     }
     expect(problems).toEqual([]);
   });
 }
 
-test('"Show the error" scrolls to the failing card', async ({ page }) => {
+test('"Show the error" opens the failing stage', async ({ page }) => {
   await page.goto('/');
   await page.getByTestId('preset-select').selectOption('error-S308-type-mismatch');
+  await page.locator('[data-stage="lexer"]').click();
+  await expect(page.locator('#card-semantic')).toBeHidden();
   await page.getByTestId('stopped-box').getByRole('button', { name: 'Show the error' }).click();
   await expect(page.locator('#card-semantic')).toBeInViewport();
 });
 
-test('a pipeline badge scrolls to its card', async ({ page }) => {
+test('a station on the rail opens its stage, and only that stage', async ({ page }) => {
   await page.goto('/');
   await page.locator('[data-stage="codegen"]').click();
   await expect(page.locator('#card-codegen')).toBeInViewport();
+  await expect(page.locator('[data-stage="codegen"]')).toHaveAttribute('aria-current', 'step');
+  await expect(page.locator('.stage:visible')).toHaveCount(1);
+  await page.getByTestId('pager-next').click();
+  await expect(page.locator('#card-simulation')).toBeVisible();
 });
 
 test('the primer opens, and the Home Assistant tab says it is approximate', async ({ page }) => {
@@ -89,6 +97,7 @@ test('the primer opens, and the Home Assistant tab says it is approximate', asyn
   await expect(page.locator('#card-domain')).toContainText('Ten ways automations go wrong');
   await page.addStyleTag({ content: FLAT_PAGE });
   await page.locator('#card-domain').screenshot({ path: 'test-results/cards/domain-open.png' });
+  await page.locator('[data-stage="codegen"]').click();
   await page.getByTestId('tab-yaml').click();
   await expect(page.getByTestId('yaml-note')).toContainText('Approximate');
   await expect(page.getByTestId('ha-yaml')).toContainText('climate.turn_on');

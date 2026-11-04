@@ -13,10 +13,12 @@ export interface FocusState {
   run: number;
   /** Tells the walkthrough that the animation has ended. */
   finish: () => void;
+  /** The stage on screen. The others stay mounted, so they keep their state. */
+  view: string;
 }
 
 export const FocusContext = createContext<FocusState>({
-  focused: null, setFocused: () => {}, current: null, run: 0, finish: () => {},
+  focused: null, setFocused: () => {}, current: null, run: 0, finish: () => {}, view: 'lexer',
 });
 
 /**
@@ -58,9 +60,10 @@ interface CardProps {
 
 /** One stage of the walkthrough: heading, plain-language intro, then its content. */
 export function Card({ stage, intro, children }: CardProps) {
-  const { focused, setFocused, current } = useContext(FocusContext);
+  const { focused, setFocused, current, view } = useContext(FocusContext);
   const id = stage.stage;
   const isFocused = focused === id;
+  const shown = view === id || isFocused;
 
   useEffect(() => {
     if (!isFocused) return undefined;
@@ -73,12 +76,17 @@ export function Card({ stage, intro, children }: CardProps) {
 
   const classes = ['stage', `is-${stage.status}`, isFocused && 'is-focused', current === id && 'is-current'];
   return (
-    <section class={classes.filter(Boolean).join(' ')} id={`card-${id}`} data-card={id}>
+    <section class={classes.filter(Boolean).join(' ')} id={`card-${id}`} data-card={id} hidden={!shown}
+      aria-labelledby={`title-${id}`}>
       <header class="stage-head">
-        <h2>Stage {stage.number} · {stage.title}</h2>
+        <div class="stage-heading">
+          <h2 id={`title-${id}`}><span class="stage-number">Stage {stage.number} ·</span> {stage.title}</h2>
+          <p class="stage-intro">{intro}</p>
+        </div>
         <div class="stage-actions">
           <span class={`stage-status is-${stage.status}`} data-testid={`status-${id}`}>
             <StatusIcon status={stage.status} /> {STATUS_WORD[stage.status]}
+            {stage.status !== 'skipped' && <span class="stage-time">{formatTime(stage.timeMs)}</span>}
           </span>
           <button class="button" data-testid={`focus-${id}`} aria-pressed={isFocused}
             onClick={() => setFocused(isFocused ? null : id)}>
@@ -86,7 +94,6 @@ export function Card({ stage, intro, children }: CardProps) {
           </button>
         </div>
       </header>
-      <p class="stage-intro">{intro}</p>
       <div class="stage-body">{children}</div>
     </section>
   );
