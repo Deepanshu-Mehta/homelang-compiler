@@ -42,7 +42,7 @@ export const UNIT_TABLE: Readonly<Record<string, UnitInfo>> = {
   HR: HOUR,
 };
 
-export const KNOWN_UNITS_TEXT = 'C, F, %, K, LUX, S, MIN, H';
+export const KNOWN_UNITS_TEXT = 'C, F, %, K, LUX, S, SEC, MIN, H, HR';
 
 /** Canonical storage units: °C, seconds, and the unit itself for the rest. */
 export function toCanonical(value: number, unit: UnitName): number {

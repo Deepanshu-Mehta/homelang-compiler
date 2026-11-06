@@ -292,6 +292,10 @@ describe('one test per S code', () => {
     expect(errors(`IF TEMPERATURE > ${Array(8).fill('999999999').join(' * ')} THEN TURN_ON AC`)[0]!.code).toBe('S324');
   });
 
+  it('S324 reports an oversized constant once, though it is folded again when it adopts a unit', () => {
+    expect(errors('IF TEMPERATURE > 1000000000 * 1000000000 THEN TURN_ON AC').map((d) => d.code)).toEqual(['S324']);
+  });
+
   it('S325 thresholds and scenario values must be constant', () => {
     expect(errors('WHEN TEMPERATURE RISES ABOVE HUMIDITY THEN TURN_ON AC')[0]!.code).toBe('S325');
     expect(errors('SIMULATE { AT 08:00: TEMPERATURE = HUMIDITY; }')[0]!.code).toBe('S325');

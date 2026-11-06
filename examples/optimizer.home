@@ -1,0 +1,38 @@
+// Optimizer demo: every one of the nine passes has something to do.
+// Uses the standard home, so no declarations are needed.
+
+// O4 range merging: of two lower bounds joined by AND, only the tighter is needed.
+// O1 constant folding: 20C + 4C is worked out once, at compile time.
+IF TEMPERATURE > 26C AND TEMPERATURE > 28C FOR 2MIN THEN
+    TURN_ON AC, SET AC TEMPERATURE TO 20C + 4C
+ELSE
+    TURN_OFF AC
+END;
+
+// O3 boolean simplification: NOT (HUMIDITY < 40%) becomes HUMIDITY >= 40%.
+// O6 common subexpressions: HUMIDITY is loaded once and reused for the second test.
+// O7 redundant actions: the first SET is overwritten at once, so it is dropped.
+IF NOT (HUMIDITY < 40%) AND HUMIDITY < 70% FOR 1MIN THEN
+    SET FAN SPEED TO 1, SET FAN SPEED TO 3
+ELSE
+    TURN_OFF FAN
+END;
+
+// O9 rule merging: the next two rules test the same condition, so they become one.
+IF TIME BETWEEN 22:00 AND 06:00 THEN CLOSE CURTAIN ELSE OPEN CURTAIN END;
+IF TIME BETWEEN 22:00 AND 06:00 THEN TURN_OFF LIGHT END;
+
+// O5 dead-rule elimination: no reading is both above 90% and below 10%.
+IF HUMIDITY > 90% AND HUMIDITY < 10% THEN NOTIFY "Impossible" END;
+
+// O2 unit normalization: 5MIN becomes 300 seconds at compile time.
+WHEN MOTION DETECTED THEN TURN_ON LIGHT, WAIT 5MIN, TURN_OFF LIGHT;
+
+// O8 jump optimization tidies the jumps in every rule.
+
+SIMULATE FROM 21:50 TO 22:30 {
+    AT 21:50: TEMPERATURE = 24C, HUMIDITY = 35%;
+    AT 21:55: TEMPERATURE = 29C, HUMIDITY = 55%;
+    AT 22:05: MOTION = DETECTED;
+    AT 22:20: TEMPERATURE = 23C;
+}

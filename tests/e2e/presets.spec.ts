@@ -30,6 +30,7 @@ const PRESETS: readonly [string, readonly string[], string?][] = [
   ['conflict', warns],
   ['hysteresis', warns],
   ['cascade', ['ok', 'ok', 'warn', 'ok', 'ok', 'ok', 'error'], 'Stopped at stage 7: Simulation'],
+  ['optimizer', warns],
   ['error-L107-bad-time', lexError, 'Stopped at stage 1: Lexer'],
   ['error-L108-unterminated-string', lexError, 'Stopped at stage 1: Lexer'],
   ['error-P201-missing-then', parseError, 'Stopped at stage 2: Parser'],

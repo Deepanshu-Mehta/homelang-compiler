@@ -1,5 +1,5 @@
 import { makeDiagnostic, type Diagnostic } from '../diagnostics';
-import type { Program, Rule } from '../parser/ast';
+import type { Cond, Expr, Program, Rule } from '../parser/ast';
 import type { EventName } from './catalog';
 import { ruleWrites, triggerReads, type Write } from './effects';
 import type { SymbolTable } from './symbols';
@@ -161,16 +161,77 @@ function cyclePath(component: readonly string[], edges: readonly DepEdge[]): str
   }
 }
 
-/** S317 when no edge of a cycle has a guard, W407 otherwise. */
-export function loopDiagnostics(graph: DepGraph, program: Program): Diagnostic[] {
+/**
+ * The device a condition tests, and which of its states make it true, when the
+ * condition is one state test on one device: `D IS s`, `D IS NOT s`, `D == s`
+ * or `D != s`, in either order.
+ */
+function singleStateTest(cond: Cond, table: SymbolTable): { device: string; holds: (state: string) => boolean } | undefined {
+  let ref: Expr;
+  let state: string;
+  let wanted: boolean;
+  if (cond.kind === 'StateTest') {
+    ref = cond.target;
+    state = cond.state;
+    wanted = !cond.negated;
+  } else if (cond.kind === 'Compare' && (cond.op === '==' || cond.op === '!=')) {
+    const literal = cond.left.kind === 'EnumLit' ? cond.left : cond.right;
+    ref = literal === cond.left ? cond.right : cond.left;
+    if (literal.kind !== 'EnumLit' || literal.category !== 'state') return undefined;
+    state = literal.value;
+    wanted = cond.op === '==';
+  } else {
+    return undefined;
+  }
+  if (ref.kind !== 'Ref' || table.get(ref.name)?.kind !== 'DEVICE') return undefined;
+  return { device: ref.name, holds: (s) => (s === state) === wanted };
+}
+
+/**
+ * The state a branch always leaves the device in, or undefined when that is not
+ * certain: no write, a TOGGLE, a value known only at run time, or a write that
+ * sits inside a nested IF or after a WAIT.
+ */
+function certainFinalState(writes: readonly Write[]): string | undefined {
+  if (writes.length === 0 || writes.some((w) => w.conditional || w.afterWait)) return undefined;
+  const last = writes[writes.length - 1]!.value;
+  return typeof last === 'string' && last !== 'TOGGLE' && last !== '?' ? last : undefined;
+}
+
+/**
+ * A state rule that tests one device and whose THEN and ELSE each undo that
+ * test, as in `IF LIGHT IS OFF THEN TURN_ON LIGHT ELSE TURN_OFF LIGHT`. Its own
+ * condition is no guard: every run flips it, so once started it never settles.
+ * FOR is left to W407, because the hold spaces the runs out in time.
+ */
+function undoesItself(rule: Rule, table: SymbolTable): string | undefined {
+  const { trigger } = rule;
+  if (trigger.kind !== 'State' || trigger.hold || !rule.elseActs) return undefined;
+  const test = singleStateTest(trigger.cond, table);
+  if (!test) return undefined;
+  const writes = ruleWrites(rule, table).filter((w) => w.affectsPower && w.device === test.device);
+  const thenState = certainFinalState(writes.filter((w) => w.branch === 'then'));
+  const elseState = certainFinalState(writes.filter((w) => w.branch === 'else'));
+  if (thenState === undefined || elseState === undefined) return undefined;
+  if (test.holds(thenState) || !test.holds(elseState)) return undefined;
+  return `Infinite loop: ${rule.id} sets ${test.device} to ${thenState} when its condition holds and to ${elseState} when it fails, so every run undoes the condition.`;
+}
+
+/** S317 when no edge of a cycle has a guard, or a rule undoes itself; W407 otherwise. */
+export function loopDiagnostics(graph: DepGraph, program: Program, table: SymbolTable): Diagnostic[] {
   const wiring = graph.edges.filter((e) => !e.physical);
   return graph.cycles.map((component) => {
     const inside = new Set(component);
     const internal = wiring.filter((e) => inside.has(e.from) && inside.has(e.to));
     const path = cyclePath(component, internal).join(' → ');
-    const { span } = program.rules.find((r) => r.id === component[0])!;
-    return internal.every((e) => !e.guarded)
-      ? makeDiagnostic('S317', span, `Infinite loop: ${path} with no guarding condition.`)
+    const rule = program.rules.find((r) => r.id === component[0])!;
+    const { span } = rule;
+    if (internal.every((e) => !e.guarded)) {
+      return makeDiagnostic('S317', span, `Infinite loop: ${path} with no guarding condition.`);
+    }
+    const selfFlip = component.length === 1 ? undoesItself(rule, table) : undefined;
+    return selfFlip
+      ? makeDiagnostic('S317', span, selfFlip, 'Add FOR, or use two thresholds, so the rule can settle.')
       : makeDiagnostic('W407', span, `Possible loop ${path}; the runtime stops at depth 16.`);
   });
 }

@@ -208,6 +208,37 @@ describe('loops: S317, W407 and the dependency graph', () => {
     expect(has(source, 'W407')).toBe(true);
   });
 
+  it('rejects a rule whose THEN and ELSE each undo its own condition', () => {
+    expect(diag('IF LIGHT IS OFF THEN TURN_ON LIGHT ELSE TURN_OFF LIGHT', 'S317')[0]!.message)
+      .toBe('Infinite loop: R1 sets LIGHT to ON when its condition holds and to OFF when it fails, so every run undoes the condition.');
+    expect(has('IF LIGHT IS NOT ON THEN TURN_ON LIGHT ELSE TURN_OFF LIGHT', 'S317')).toBe(true);
+    expect(has('IF ON == LIGHT THEN TURN_OFF LIGHT ELSE TURN_ON LIGHT', 'S317')).toBe(true);
+    expect(has('IF DOOR != LOCKED THEN LOCK DOOR ELSE UNLOCK DOOR', 'S317')).toBe(true);
+    expect(has('IF LIGHT IS OFF THEN SET LIGHT BRIGHTNESS TO 40% ELSE TURN_OFF LIGHT', 'S317')).toBe(true);
+  });
+
+  it('keeps a self-referring rule a warning when it can settle or the outcome is unsure', () => {
+    const settles = [
+      'IF LIGHT IS ON THEN TURN_OFF LIGHT', // no ELSE: it stops after one run
+      'IF LIGHT IS OFF THEN TURN_ON LIGHT ELSE TURN_ON LIGHT', // ELSE keeps the condition false
+      'IF LIGHT IS OFF FOR 1MIN THEN TURN_ON LIGHT ELSE TURN_OFF LIGHT', // FOR spaces the runs out
+      'IF LIGHT IS OFF THEN TOGGLE LIGHT ELSE TOGGLE LIGHT', // TOGGLE is left to the runtime
+      'IF LIGHT IS OFF THEN TURN_ON LIGHT ELSE WAIT 1MIN, TURN_OFF LIGHT', // WAIT breaks the cascade
+      'IF LIGHT IS OFF THEN TURN_ON LIGHT ELSE IF TEMPERATURE > 20 THEN TURN_OFF LIGHT END', // nested guard
+      'IF LIGHT IS OFF AND TEMPERATURE > 20 THEN TURN_ON LIGHT ELSE TURN_OFF LIGHT', // another input can stop it
+    ];
+    for (const source of settles) {
+      expect(has(source, 'S317'), source).toBe(false);
+      expect(has(source, 'W407'), source).toBe(true);
+    }
+  });
+
+  it('stops the self-undoing rule at compile time, before the runtime would hit R501', () => {
+    const result = compile('IF LIGHT IS OFF THEN TURN_ON LIGHT ELSE TURN_OFF LIGHT SIMULATE { }');
+    expect(stageResult(result, 'semantic').status).toBe('error');
+    expect(stageResult(result, 'simulation').status).toBe('skipped');
+  });
+
   it('skips loop and interval analysis on an ill-typed program', () => {
     expect(semantic('IF NOPE > 30 AND NOPE < 20 THEN TURN_ON AC').stage.diagnostics.map((d) => d.code)).toEqual(['S301', 'S301']);
   });

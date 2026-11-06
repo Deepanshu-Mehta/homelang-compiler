@@ -120,6 +120,7 @@ test('the optimizer card lists nine passes with a diff', async ({ page }) => {
   await open(page, 'optimizer');
   await expect(page.getByTestId('pass')).toHaveCount(9);
   await expect(page.getByTestId('opt-totals')).toContainText('instructions');
+  await expect(page.getByTestId('opt-run-order')).toHaveText('Numbered as in the course; they run as O3, O4, O5, O9 on the AST, then O2, O1, O6, O7, O8 on the quadruples.');
   await page.locator('[data-pass="O8"] summary').click();
   await expect(page.locator('[data-pass="O8"] [data-testid="diff"] .diff-removed').first()).toBeVisible();
 });

@@ -25,6 +25,7 @@ export const PRESETS: readonly Preset[] = [
   preset('conflict', 'Conflict demo (W404)', 'Valid programs'),
   preset('hysteresis', 'Hysteresis demo (FOR)', 'Valid programs'),
   preset('cascade', 'Cascade loop demo (W407 → R501)', 'Valid programs'),
+  preset('optimizer', 'Optimizer demo (all nine passes)', 'Valid programs'),
   preset('error-L107-bad-time', 'L107 bad time', 'Deliberate errors'),
   preset('error-L108-unterminated-string', 'L108 unterminated string', 'Deliberate errors'),
   preset('error-P201-missing-then', 'P201 missing THEN', 'Deliberate errors'),

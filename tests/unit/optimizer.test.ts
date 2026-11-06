@@ -282,3 +282,12 @@ describe('the pipeline', () => {
     }
   });
 });
+
+describe('the optimizer demo example', () => {
+  it('gives every one of the nine passes something to do', () => {
+    const { source } = loadExamples().find((e) => e.name === 'optimizer')!;
+    const idle = output(source).passes.filter((p) => p.changes.length === 0).map((p) => p.id);
+    expect(idle).toEqual([]);
+    expect(output(source).passes).toHaveLength(9);
+  });
+});

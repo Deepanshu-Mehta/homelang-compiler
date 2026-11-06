@@ -32,7 +32,7 @@ export function analyze(program: Program): { output: SemanticOutput; diagnostics
 
   // The analyses assume a well-typed program, so they only run on one.
   if (!hasErrors(diagnostics)) {
-    diagnostics.push(...loopDiagnostics(depGraph, annotated));
+    diagnostics.push(...loopDiagnostics(depGraph, annotated, table));
     const warnings = runWarnings(annotated, table, mode === 'explicit');
     const { conflicts, diagnostics: conflictDiagnostics } = findConflicts(annotated, table);
     diagnostics.push(...warnings.diagnostics, ...conflictDiagnostics);

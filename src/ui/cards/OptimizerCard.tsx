@@ -32,6 +32,13 @@ function PassPanel({ pass, open }: { pass: PassReport; open: boolean }) {
   );
 }
 
+/** "They run as O3, O4, O5, O9 on the AST, then O2, O1, … on the quadruples." */
+function runOrderText(passes: readonly PassReport[]): string {
+  const inOrder = [...passes].sort((a, b) => a.runOrder - b.runOrder);
+  const ids = (level: PassReport['level']) => inOrder.filter((p) => p.level === level).map((p) => p.id).join(', ');
+  return `Numbered as in the course; they run as ${ids('AST')} on the AST, then ${ids('IR')} on the quadruples.`;
+}
+
 function ordinal(n: number): string {
   return ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth'][n - 1] ?? String(n);
 }
@@ -70,6 +77,7 @@ export function OptimizerCard({ stage }: { stage: StageResult }) {
           <p class="stat-line" data-testid="opt-totals">
             {output.totals.quadsBefore} → {output.totals.quadsAfter} instructions, {output.totals.jumpsBefore - output.totals.jumpsAfter} jump{output.totals.jumpsBefore - output.totals.jumpsAfter === 1 ? '' : 's'} removed.
           </p>
+          <p class="muted small" data-testid="opt-run-order">{runOrderText(output.passes)}</p>
           <div class="passes">
             {[...output.passes].sort(byId).map((pass) => <PassPanel key={pass.id} pass={pass} open={walkingPass === pass.id} />)}
           </div>

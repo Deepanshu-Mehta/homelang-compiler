@@ -98,7 +98,7 @@ A value alone is not a condition unless it is TRUE or FALSE (P216).
 
 **Devices.** No automatic reversion: a device stays as set. SET on BRIGHTNESS, SPEED or POSITION also switches the device, and setting 0 switches it off. SET on a setpoint is stored without switching the device on. TURN_ON restores a level left at zero.
 
-**Time.** A time window `BETWEEN a AND b` includes `a` and excludes `b`, and wraps midnight when `b` is earlier than `a`. An equal start and end is always false. Numeric BETWEEN includes both ends and never wraps. `FROM == TO` means a full 24 hours. The default window is 00:00–23:59, the default STEP is 1MIN, and the start day is MON. STEP sets how far one press of Step moves; the engine always stops at every minute, WAIT end and hold end, so AT rules and FOR holds stay exact.
+**Time.** A time window `BETWEEN a AND b` includes `a` and excludes `b`, and wraps midnight when `b` is earlier than `a`. An equal start and end is always false. Numeric BETWEEN includes both ends and never wraps. `FROM == TO` means a full 24 hours. The default window is 00:00–23:59, the default STEP is 1MIN, and the start day is MON. A program with no SIMULATE block starts its live home at 12:00 on MON. STEP sets how far one press of Step moves; the engine always stops at every minute, WAIT end and hold end, so AT rules and FOR holds stay exact.
 
 **Live mode.** Each slider movement is one tick. Scrubbing time forward runs everything crossed on the way, including AT rules. Scrubbing backward re-evaluates rules but fires no AT rule, because the past is not replayed.
 
@@ -158,7 +158,7 @@ Every diagnostic has a code, a severity, a message, a hint and a position. Error
 | S314 | error | Event the source does not have | `WHEN TEMPERATURE DETECTED THEN TURN_ON AC` |  |
 | S315 | error | Comparing two devices, or sensors of different dimensions | `IF AC > FAN THEN TURN_ON LIGHT` |  |
 | S316 | error | Ordering on states | `IF DOOR > LOCKED THEN TURN_ON AC` |  |
-| S317 | error | Infinite loop with no guard | `WHEN LIGHT TURNS ON THEN TURN_OFF LIGHT; WHEN LIGHT TURNS OFF THEN TURN_ON LIGHT;` |  |
+| S317 | error | Infinite loop with no guard, or a rule whose THEN and ELSE each undo its own state test (`IF LIGHT IS OFF THEN TURN_ON LIGHT ELSE TURN_OFF LIGHT`) | `WHEN LIGHT TURNS ON THEN TURN_OFF LIGHT; WHEN LIGHT TURNS OFF THEN TURN_ON LIGHT;` |  |
 | S318 | error | IS after something that is not a name | `IF TEMPERATURE + 2 IS ON THEN TURN_ON AC` |  |
 | S319 | error | TIME with a non-time, or bad time arithmetic | `IF TIME > 30C THEN TURN_ON AC` |  |
 | S320 | error | PRIORITY is not a whole number of 1 or more | `RULE "A" PRIORITY 0: IF TRUE THEN TURN_ON AC` | new |

@@ -58,7 +58,7 @@ export const DIAGNOSTIC_CODES = {
   P213: error('Close the nested IF with END.'),
   P214: error('Choose a name that is not a reserved word.'),
   P215: error('Check the grammar card for what may appear here.'),
-  P216: error('use a comparison or IS <state>, e.g. MOTION IS DETECTED'),
+  P216: error('Use a comparison or IS <state>, such as MOTION IS DETECTED.'),
   P217: error('Move every ROOM, DEVICE and SENSOR declaration above the first rule.'),
   P218: error('Simplify the expression; it is nested too deeply.'),
 

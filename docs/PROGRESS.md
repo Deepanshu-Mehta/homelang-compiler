@@ -37,13 +37,30 @@ The first redesign still read as one long grey document. The audit is at the end
 - Status pills with times, a side-by-side automaton panel, and quieter optimizer rows.
 - Browser tests updated for the new navigation, plus new tests for the arrow keys, the broken wire and the rail. 55 tests pass.
 
+## Review fixes (6 November 2026)
+
+An end-to-end review compared each stage with a textbook compiler and ran about 140 edge-case programs through the pipeline. No program crashed or raised I001. Fixed:
+
+- S317 now catches a rule that undoes its own condition (see below and D54).
+- S324 reported an oversized constant twice; it now reports it once.
+- The L106 message listed 8 units while the lexer accepts 10. A test now ties the list to the unit table.
+- The P216 hint is a sentence, like every other hint.
+- The language reference now gives the 12:00 start time for a program with no SIMULATE block.
+- New preset `examples/optimizer.home`, in which all nine passes change something (60 → 31 instructions). A test keeps it that way. On the Advanced preset, six passes had nothing to do.
+- The Optimizer stage states the order the passes really run in.
+
+1103 unit tests and 56 browser tests pass.
+
 ## Fixed along the way
 
 - **Typing fast froze the tab (shipped in M1, fixed in M2).** The editor mirrored the app's `value` back into CodeMirror. Two keys inside one render made the old value overwrite the new text, each write re-fired the change listener, and the two states chased each other forever. The editor now owns its text, and the app writes to it only on an explicit preset load. `tests/e2e/smoke.spec.ts` covers it.
 
 - **The differential test was weaker than it looked (M8).** Sabotaging 13 passes on purpose showed it caught only 6. The test programs never hit a threshold exactly, and the oracle shared its time-window code with the VM. After strengthening both, all 13 sabotages fail the suite. Doing this also exposed a real logging difference (R503 was written per queued command), now fixed.
 
+- **A certain loop compiled as a warning (review, 6 November 2026).** `IF LIGHT IS OFF THEN TURN_ON LIGHT ELSE TURN_OFF LIGHT` passed the semantic stage with W407, then the simulation stopped with R501. Every state rule counted as guarded by its own condition, even when its actions flip that condition. Such a rule is now S317 (D54). Seven near-misses that can settle stay W407, and `tests/unit/analysis.test.ts` covers both.
+
 ## Known issues
 
 - In the CFG, a `false` edge label can sit close to a block, because dagre routes edges without regard for label size.
-- `npm run test:e2e` takes about 1 minute when a dev server is already running on port 5199, and about 6 minutes when it starts its own. The cause has not been investigated. Start `npx vite --port 5199 --strictPort` first for a faster run.
+- `npm run test:e2e` is slow: it took 16 minutes on 6 November 2026, even with a dev server already running on port 5199 (earlier runs took 1 to 6 minutes). The cause has not been investigated.
+- Cytoscape logs two warnings that `width: 'label'` and `height: 'label'` are deprecated (`src/ui/viz/GraphView.tsx`). They are harmless; replacing them changes how every graph node is sized, so it needs a visual check first.

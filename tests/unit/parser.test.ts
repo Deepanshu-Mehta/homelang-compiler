@@ -237,7 +237,7 @@ describe('syntax errors', () => {
 
   it('gives the P216 hint exactly as specified', () => {
     const [d] = parsed('IF MOTION THEN TURN_ON AC').stage.diagnostics;
-    expect(d!.hint).toBe('use a comparison or IS <state>, e.g. MOTION IS DETECTED');
+    expect(d!.hint).toBe('Use a comparison or IS <state>, such as MOTION IS DETECTED.');
   });
 
   it('explains that parentheses are for conditions', () => {

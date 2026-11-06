@@ -1,0 +1,361 @@
+{
+  "version": 1,
+  "rooms": [
+    "LIVING_ROOM",
+    "BEDROOM",
+    "KITCHEN",
+    "ENTRANCE"
+  ],
+  "devices": [
+    {
+      "name": "AC",
+      "type": "AIR_CONDITIONER",
+      "initialState": "OFF",
+      "states": [
+        "ON",
+        "OFF"
+      ],
+      "attributes": {
+        "TEMPERATURE": 26,
+        "MODE": "COOL"
+      },
+      "ranges": {
+        "TEMPERATURE": [
+          16,
+          30
+        ]
+      },
+      "room": "LIVING_ROOM"
+    },
+    {
+      "name": "LIGHT",
+      "type": "LIGHT",
+      "initialState": "OFF",
+      "states": [
+        "ON",
+        "OFF"
+      ],
+      "attributes": {
+        "BRIGHTNESS": 100,
+        "COLOR_TEMP": 4000
+      },
+      "ranges": {
+        "BRIGHTNESS": [
+          0,
+          100
+        ],
+        "COLOR_TEMP": [
+          2000,
+          6500
+        ]
+      },
+      "room": "LIVING_ROOM",
+      "levelAttribute": "BRIGHTNESS"
+    },
+    {
+      "name": "FAN",
+      "type": "FAN",
+      "initialState": "OFF",
+      "states": [
+        "ON",
+        "OFF"
+      ],
+      "attributes": {
+        "SPEED": 3
+      },
+      "ranges": {
+        "SPEED": [
+          0,
+          5
+        ]
+      },
+      "room": "BEDROOM",
+      "levelAttribute": "SPEED"
+    },
+    {
+      "name": "DOOR",
+      "type": "DOOR_LOCK",
+      "initialState": "UNLOCKED",
+      "states": [
+        "LOCKED",
+        "UNLOCKED"
+      ],
+      "attributes": {},
+      "ranges": {},
+      "room": "ENTRANCE"
+    },
+    {
+      "name": "CURTAIN",
+      "type": "CURTAIN",
+      "initialState": "CLOSED",
+      "states": [
+        "OPEN",
+        "CLOSED"
+      ],
+      "attributes": {
+        "POSITION": 0
+      },
+      "ranges": {
+        "POSITION": [
+          0,
+          100
+        ]
+      },
+      "room": "BEDROOM",
+      "levelAttribute": "POSITION"
+    }
+  ],
+  "sensors": [
+    {
+      "name": "TEMPERATURE",
+      "type": "TEMP_SENSOR",
+      "initial": 28,
+      "unit": "°C",
+      "room": "LIVING_ROOM",
+      "plausible": [
+        -40,
+        60
+      ]
+    },
+    {
+      "name": "HUMIDITY",
+      "type": "HUMIDITY_SENSOR",
+      "initial": 50,
+      "unit": "%",
+      "room": "LIVING_ROOM",
+      "plausible": [
+        0,
+        100
+      ]
+    },
+    {
+      "name": "MOTION",
+      "type": "MOTION_SENSOR",
+      "initial": "CLEAR",
+      "unit": "",
+      "room": "LIVING_ROOM",
+      "states": [
+        "DETECTED",
+        "CLEAR"
+      ]
+    },
+    {
+      "name": "CONTACT",
+      "type": "CONTACT_SENSOR",
+      "initial": "CLOSED",
+      "unit": "",
+      "room": "ENTRANCE",
+      "states": [
+        "OPEN",
+        "CLOSED"
+      ]
+    },
+    {
+      "name": "PRESENCE",
+      "type": "PRESENCE_SENSOR",
+      "initial": "HOME",
+      "unit": "",
+      "room": "ENTRANCE",
+      "states": [
+        "HOME",
+        "AWAY"
+      ]
+    }
+  ],
+  "strings": [],
+  "rules": [
+    {
+      "id": "R1",
+      "priority": 1,
+      "entry": 0,
+      "writes": [
+        "AC",
+        "AC.TEMPERATURE"
+      ],
+      "source": {
+        "line": 6,
+        "col": 1,
+        "start": 282,
+        "end": 410
+      },
+      "noElse": [],
+      "kind": "STATE",
+      "reads": [
+        "TEMPERATURE"
+      ]
+    },
+    {
+      "id": "R2",
+      "priority": 1,
+      "entry": 12,
+      "writes": [
+        "FAN.SPEED",
+        "FAN"
+      ],
+      "source": {
+        "line": 15,
+        "col": 1,
+        "start": 655,
+        "end": 780
+      },
+      "noElse": [],
+      "kind": "STATE",
+      "reads": [
+        "HUMIDITY"
+      ]
+    },
+    {
+      "id": "R3",
+      "priority": 1,
+      "entry": 29,
+      "writes": [
+        "CURTAIN",
+        "LIGHT"
+      ],
+      "source": {
+        "line": 22,
+        "col": 1,
+        "start": 867,
+        "end": 939
+      },
+      "noElse": [
+        "R4"
+      ],
+      "mergedFrom": [
+        "R3",
+        "R4"
+      ],
+      "aliases": {
+        "R3": {
+          "line": 22
+        },
+        "R4": {
+          "line": 23
+        }
+      },
+      "kind": "STATE",
+      "reads": [
+        "TIME"
+      ]
+    },
+    {
+      "id": "R6",
+      "priority": 1,
+      "entry": 39,
+      "writes": [
+        "LIGHT"
+      ],
+      "source": {
+        "line": 29,
+        "col": 1,
+        "start": 1208,
+        "end": 1274
+      },
+      "noElse": [
+        "R6"
+      ],
+      "kind": "EVENT",
+      "reads": [],
+      "event": {
+        "source": "MOTION",
+        "event": "DETECTED"
+      }
+    }
+  ],
+  "scenario": {
+    "from": 1310,
+    "to": 1350,
+    "stepSeconds": 60,
+    "events": [
+      {
+        "minutes": 1310,
+        "assigns": [
+          {
+            "name": "TEMPERATURE",
+            "value": 24
+          },
+          {
+            "name": "HUMIDITY",
+            "value": 35
+          }
+        ]
+      },
+      {
+        "minutes": 1315,
+        "assigns": [
+          {
+            "name": "TEMPERATURE",
+            "value": 29
+          },
+          {
+            "name": "HUMIDITY",
+            "value": 55
+          }
+        ]
+      },
+      {
+        "minutes": 1325,
+        "assigns": [
+          {
+            "name": "MOTION",
+            "value": "DETECTED"
+          }
+        ]
+      },
+      {
+        "minutes": 1340,
+        "assigns": [
+          {
+            "name": "TEMPERATURE",
+            "value": 23
+          }
+        ]
+      }
+    ]
+  },
+  "code": [
+    ["LOAD","TEMPERATURE"],
+    ["PUSH",28],
+    ["CMP_GT"],
+    ["JMP_IF_FALSE",9],
+    ["EDGE_TRUE","R1",120],
+    ["CMD","TURN_ON","AC","R1"],
+    ["PUSH",24],
+    ["SETA","AC","TEMPERATURE","R1"],
+    ["HALT"],
+    ["EDGE_FALSE","R1"],
+    ["CMD","TURN_OFF","AC","R1"],
+    ["HALT"],
+    ["LOAD","HUMIDITY"],
+    ["STORE",0],
+    ["LOCAL",0],
+    ["PUSH",40],
+    ["CMP_GE"],
+    ["JMP_IF_FALSE",26],
+    ["LOCAL",0],
+    ["PUSH",70],
+    ["CMP_LT"],
+    ["JMP_IF_FALSE",26],
+    ["EDGE_TRUE","R2",60],
+    ["PUSH",3],
+    ["SETA","FAN","SPEED","R2"],
+    ["HALT"],
+    ["EDGE_FALSE","R2"],
+    ["CMD","TURN_OFF","FAN","R2"],
+    ["HALT"],
+    ["LOAD","TIME"],
+    ["IN_WINDOW",1320,360],
+    ["JMP_IF_FALSE",36],
+    ["EDGE_TRUE","R3",0],
+    ["CMD","CLOSE","CURTAIN","R3"],
+    ["CMD","TURN_OFF","LIGHT","R4"],
+    ["HALT"],
+    ["EDGE_FALSE","R3"],
+    ["CMD","OPEN","CURTAIN","R3"],
+    ["HALT"],
+    ["CMD","TURN_ON","LIGHT","R6"],
+    ["WAIT",300],
+    ["CMD","TURN_OFF","LIGHT","R6"],
+    ["HALT"]
+  ]
+}

@@ -218,3 +218,14 @@ describe('lexical errors', () => {
     expect(d!.span).toMatchObject({ line: 2, col: 2 });
   });
 });
+
+describe('unit list', () => {
+  it('names every unit suffix the lexer accepts, in the L106 message and its hint', async () => {
+    const { KNOWN_UNITS_TEXT, UNIT_TABLE } = await import('../../src/compiler/lexer/units');
+    const { DIAGNOSTIC_CODES } = await import('../../src/compiler/diagnostics');
+    const listed = KNOWN_UNITS_TEXT.split(', ');
+    const accepted = Object.keys(UNIT_TABLE).filter((k) => !k.startsWith('°'));
+    expect([...listed].sort()).toEqual([...accepted].sort());
+    expect(DIAGNOSTIC_CODES.L106.hint).toContain(`Known units: ${KNOWN_UNITS_TEXT}.`);
+  });
+});

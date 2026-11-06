@@ -53,6 +53,8 @@ class Checker {
   private currentRule = '';
   /** How a read of a name inside a rule should be recorded; off for scenarios. */
   private recordReads = true;
+  /** Constant expressions already reported as too large. */
+  private readonly oversized = new WeakSet<Arith>();
 
   constructor(private readonly program: Program) {}
 
@@ -718,7 +720,9 @@ class Checker {
     if (typeof l !== 'number' || typeof r !== 'number') return;
     const value = round6(e.op === '+' ? l + r : e.op === '-' ? l - r : e.op === '*' ? l * r : l / r);
     if (!Number.isFinite(value) || Math.abs(value) > MAX_LITERAL) {
-      this.report('S324', e.span, 'This constant expression is too large.');
+      // A bare expression is folded again after it adopts a unit; report it once.
+      if (!this.oversized.has(e)) this.report('S324', e.span, 'This constant expression is too large.');
+      this.oversized.add(e);
       return;
     }
     e.constant = value;
